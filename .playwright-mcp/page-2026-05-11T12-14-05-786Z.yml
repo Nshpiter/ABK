@@ -1,0 +1,582 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner "Global Navigation Menu" [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - button "Open menu" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+          - link "Homepage (g then d)" [ref=e15] [cursor=pointer]:
+            - /url: /
+            - img [ref=e16]
+        - generic [ref=e18]:
+          - navigation "Breadcrumbs" [ref=e19]:
+            - list [ref=e20]:
+              - listitem [ref=e21]:
+                - link "Nshpiter" [ref=e22] [cursor=pointer]:
+                  - /url: /Nshpiter
+                  - generic [ref=e23]: Nshpiter
+              - listitem [ref=e24]:
+                - link "ABK" [ref=e25] [cursor=pointer]:
+                  - /url: /Nshpiter/ABK
+                  - generic [ref=e26]: ABK
+                  - img [ref=e27]
+          - button "Search or jump to… (forward slash)" [ref=e29] [cursor=pointer]:
+            - img [ref=e30]
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - generic [ref=e35]:
+              - generic [ref=e36]:
+                - link "Chat with Copilot" [ref=e38] [cursor=pointer]:
+                  - /url: /copilot
+                  - img [ref=e39]
+                - button "Open Copilot…" [ref=e43] [cursor=pointer]:
+                  - generic:
+                    - img
+              - button "Open agents panel" [ref=e44] [cursor=pointer]:
+                - generic [ref=e45]:
+                  - generic:
+                    - img
+                  - generic:
+                    - img
+            - button "Create new..." [ref=e47] [cursor=pointer]:
+              - generic [ref=e48]:
+                - generic:
+                  - img
+              - generic:
+                - img
+            - generic [ref=e49]:
+              - link "All issues (g then i)" [ref=e50] [cursor=pointer]:
+                - /url: /issues
+                - img [ref=e51]
+              - link "All pull requests" [ref=e54] [cursor=pointer]:
+                - /url: /pulls
+                - img [ref=e55]
+              - link "All repositories" [ref=e57] [cursor=pointer]:
+                - /url: /repos
+                - img [ref=e58]
+          - link "You have no unread notifications (g then n)" [ref=e60] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e61]
+          - button "Open user navigation menu" [ref=e64] [cursor=pointer]:
+            - img "piter" [ref=e65]
+      - heading "Repository navigation" [level=2] [ref=e66]
+      - navigation "Repository" [ref=e67]:
+        - list [ref=e68]:
+          - listitem [ref=e69]:
+            - link "Code" [ref=e70] [cursor=pointer]:
+              - /url: /Nshpiter/ABK
+              - generic [ref=e71]: Code
+          - listitem [ref=e72]:
+            - link "Pull requests" [ref=e73] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/pulls
+              - generic [ref=e74]: Pull requests
+          - listitem [ref=e75]:
+            - link "Agents" [ref=e76] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/agents?author=Nshpiter
+              - generic [ref=e77]: Agents
+          - listitem [ref=e78]:
+            - link "Actions" [ref=e79] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/actions
+              - generic [ref=e80]: Actions
+          - listitem [ref=e81]:
+            - link "Projects" [ref=e82] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/projects
+              - generic [ref=e83]: Projects
+          - listitem [ref=e84]:
+            - link "Wiki" [ref=e85] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/wiki
+              - generic [ref=e86]: Wiki
+          - listitem [ref=e87]:
+            - link "Security and quality" [ref=e88] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/security
+              - generic [ref=e89]: Security and quality
+          - listitem [ref=e90]:
+            - link "Insights" [ref=e91] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/pulse
+              - generic [ref=e92]: Insights
+          - listitem [ref=e93]:
+            - link "Settings" [ref=e94] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/settings
+              - generic [ref=e95]: Settings
+  - main [ref=e99]:
+    - generic [ref=e105]:
+      - generic [ref=e108]:
+        - link "Android 内核构建-自定义" [ref=e111] [cursor=pointer]:
+          - /url: /Nshpiter/ABK/actions/workflows/kernel-custom.yml
+          - img [ref=e112]
+          - generic [ref=e114]: Android 内核构建-自定义
+        - generic [ref=e115]:
+          - generic [ref=e116]:
+            - img "failed:" [ref=e120]
+            - 'heading "Android 内核构建-自定义 #2" [level=1] [ref=e122]':
+              - generic [ref=e123]: "Android 内核构建-自定义 #2"
+          - generic [ref=e125]:
+            - button "Re-run jobs" [ref=e129] [cursor=pointer]:
+              - generic [ref=e130]:
+                - generic:
+                  - img
+                - generic [ref=e131]: Re-run jobs
+              - generic:
+                - img
+            - button "Workflow run options" [ref=e135] [cursor=pointer]:
+              - img
+      - generic [ref=e136]:
+        - navigation "Workflow run" [ref=e142]:
+          - list [ref=e143]:
+            - listitem [ref=e144]:
+              - link "Summary" [ref=e145] [cursor=pointer]:
+                - /url: /Nshpiter/ABK/actions/runs/25667954263
+                - generic:
+                  - img
+                - generic [ref=e147]: Summary
+            - generic [ref=e148]:
+              - heading "All jobs" [level=4] [ref=e149]
+              - button "Filter by job status" [ref=e150] [cursor=pointer]:
+                - img [ref=e151]
+            - listitem [ref=e153]
+            - listitem [ref=e154]:
+              - list [ref=e155]:
+                - listitem [ref=e156]:
+                  - generic "Loading" [ref=e157]:
+                    - generic [ref=e161]:
+                      - img [ref=e162]
+                      - generic [ref=e165]: Loading
+            - listitem [ref=e166]
+            - listitem [ref=e167]:
+              - heading "Run details" [level=3] [ref=e169]
+              - list "Run details" [ref=e170]:
+                - listitem [ref=e171]:
+                  - link "Usage" [ref=e172] [cursor=pointer]:
+                    - /url: /Nshpiter/ABK/actions/runs/25667954263/usage
+                    - generic:
+                      - img
+                    - generic [ref=e174]: Usage
+                - listitem [ref=e175]:
+                  - link "Workflow file" [ref=e176] [cursor=pointer]:
+                    - /url: /Nshpiter/ABK/actions/runs/25667954263/workflow
+                    - generic:
+                      - img
+                    - generic [ref=e178]: Workflow file
+        - region "Check run summary" [ref=e180]:
+          - generic [ref=e181]:
+            - region "Annotations" [ref=e183]:
+              - generic [ref=e187]:
+                - button "Open job annotations" [ref=e189] [cursor=pointer]:
+                  - img [ref=e192]
+                - generic [ref=e194]:
+                  - heading "Annotations" [level=2] [ref=e195]
+                  - generic [ref=e196]: 1 error
+            - generic [ref=e198]:
+              - generic [ref=e199]:
+                - generic [ref=e200]:
+                  - link "5.15.178-android13-2025-03 / 5.15.178-android13-2025-03-Official" [ref=e203] [cursor=pointer]:
+                    - /url: "#logs"
+                    - generic [ref=e204]: 5.15.178-android13-2025-03 / 5.15.178-android13-2025-03-Official
+                  - generic [ref=e205]: failed May 11, 202618 minutes ago in 13m 20s
+                - generic [ref=e206]:
+                  - generic [ref=e207]:
+                    - img [ref=e208]
+                    - textbox "Search" [ref=e210]:
+                      - /placeholder: Search logs
+                  - button "Explain error" [ref=e215] [cursor=pointer]:
+                    - img [ref=e216]
+                  - button "Re-run this job" [ref=e220] [cursor=pointer]:
+                    - img
+                  - group [ref=e221]:
+                    - button "Show options" [ref=e222] [cursor=pointer]:
+                      - img "Show options" [ref=e223]
+              - generic [ref=e226]:
+                - group [ref=e228]:
+                  - generic "Set up job" [ref=e229] [cursor=pointer]:
+                    - generic [ref=e230]:
+                      - img [ref=e231]
+                      - img [ref=e233]
+                      - generic [ref=e236]: Set up job
+                - group [ref=e238]:
+                  - generic "构建信息摘要" [ref=e239] [cursor=pointer]:
+                    - generic [ref=e240]:
+                      - img [ref=e241]
+                      - img [ref=e243]
+                      - generic [ref=e246]: 构建信息摘要
+                - group [ref=e248]:
+                  - generic "校验自定义内核版本组合" [ref=e249] [cursor=pointer]:
+                    - generic [ref=e250]:
+                      - img [ref=e251]
+                      - img [ref=e253]
+                      - generic [ref=e256]: 校验自定义内核版本组合
+                - group [ref=e258]:
+                  - generic "清理磁盘空间" [ref=e259] [cursor=pointer]:
+                    - generic [ref=e260]:
+                      - img [ref=e261]
+                      - img [ref=e263]
+                      - generic [ref=e266]: 清理磁盘空间
+                - group [ref=e268]:
+                  - generic "检出代码仓库" [ref=e269] [cursor=pointer]:
+                    - generic [ref=e270]:
+                      - img [ref=e271]
+                      - img [ref=e273]
+                      - generic [ref=e276]: 检出代码仓库
+                - group [ref=e278]:
+                  - generic "初始化构建环境" [ref=e279] [cursor=pointer]:
+                    - generic [ref=e280]:
+                      - img [ref=e281]
+                      - img [ref=e283]
+                      - generic [ref=e286]: 初始化构建环境
+                - group [ref=e288]:
+                  - generic "显示配置信息" [ref=e289] [cursor=pointer]:
+                    - generic [ref=e290]:
+                      - img [ref=e291]
+                      - img [ref=e293]
+                      - generic [ref=e296]: 显示配置信息
+                - group [ref=e298]:
+                  - generic "安装编译依赖" [ref=e299] [cursor=pointer]:
+                    - generic [ref=e300]:
+                      - img [ref=e301]
+                      - img [ref=e303]
+                      - generic [ref=e306]: 安装编译依赖
+                - group [ref=e308]:
+                  - generic "配置 ccache" [ref=e309] [cursor=pointer]:
+                    - generic [ref=e310]:
+                      - img [ref=e311]
+                      - img [ref=e313]
+                      - generic [ref=e316]: 配置 ccache
+                - group [ref=e318]:
+                  - generic "恢复 ccache 缓存" [ref=e319] [cursor=pointer]:
+                    - generic [ref=e320]:
+                      - img [ref=e321]
+                      - img [ref=e323]
+                      - generic [ref=e326]: 恢复 ccache 缓存
+                - group [ref=e328]:
+                  - generic "缓存工具链" [ref=e329] [cursor=pointer]:
+                    - generic [ref=e330]:
+                      - img [ref=e331]
+                      - img [ref=e333]
+                      - generic [ref=e336]: 缓存工具链
+                - generic [ref=e337]:
+                  - group:
+                    - generic "下载工具链":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 下载工具链
+                - group [ref=e339]:
+                  - generic "生成签名密钥" [ref=e340] [cursor=pointer]:
+                    - generic [ref=e341]:
+                      - img [ref=e342]
+                      - img [ref=e344]
+                      - generic [ref=e347]: 生成签名密钥
+                - group [ref=e349]:
+                  - generic "配置 Git" [ref=e350] [cursor=pointer]:
+                    - generic [ref=e351]:
+                      - img [ref=e352]
+                      - img [ref=e354]
+                      - generic [ref=e357]: 配置 Git
+                - group [ref=e359]:
+                  - generic "克隆依赖仓库" [ref=e360] [cursor=pointer]:
+                    - generic [ref=e361]:
+                      - img [ref=e362]
+                      - img [ref=e364]
+                      - generic [ref=e367]: 克隆依赖仓库
+                - generic [ref=e368]:
+                  - group:
+                    - generic "克隆自定义外部模块":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 克隆自定义外部模块
+                - group [ref=e370]:
+                  - generic "初始化并同步内核源码" [ref=e371] [cursor=pointer]:
+                    - generic [ref=e372]:
+                      - img [ref=e373]
+                      - img [ref=e375]
+                      - generic [ref=e378]: 初始化并同步内核源码
+                - group [ref=e380]:
+                  - generic "应用 Stock Config 伪装" [ref=e381] [cursor=pointer]:
+                    - generic [ref=e382]:
+                      - img [ref=e383]
+                      - img [ref=e385]
+                      - generic [ref=e388]: 应用 Stock Config 伪装
+                - group [ref=e390]:
+                  - generic "提取实际子版本号" [ref=e391] [cursor=pointer]:
+                    - generic [ref=e392]:
+                      - img [ref=e393]
+                      - img [ref=e395]
+                      - generic [ref=e398]: 提取实际子版本号
+                - group [ref=e400]:
+                  - generic "修复 glibc 2.38 兼容性" [ref=e401] [cursor=pointer]:
+                    - generic [ref=e402]:
+                      - img [ref=e403]
+                      - img [ref=e405]
+                      - generic [ref=e408]: 修复 glibc 2.38 兼容性
+                - generic [ref=e409]:
+                  - group:
+                    - generic "添加一加 8E 处理器支持":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 添加一加 8E 处理器支持
+                - group [ref=e411]:
+                  - generic "确定 KernelSU 分支" [ref=e412] [cursor=pointer]:
+                    - generic [ref=e413]:
+                      - img [ref=e414]
+                      - img [ref=e416]
+                      - generic [ref=e419]: 确定 KernelSU 分支
+                - group [ref=e421]:
+                  - generic "添加 KernelSU" [ref=e422] [cursor=pointer]:
+                    - generic [ref=e423]:
+                      - img [ref=e424]
+                      - img [ref=e426]
+                      - generic [ref=e429]: 添加 KernelSU
+                - generic [ref=e430]:
+                  - group:
+                    - generic "修复 SukiSU SUSFS 源码兼容":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 修复 SukiSU SUSFS 源码兼容
+                - generic [ref=e431]:
+                  - group:
+                    - generic "配置 SukiSU 管理器信息":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 配置 SukiSU 管理器信息
+                - group [ref=e433]:
+                  - generic "应用 SUSFS 补丁" [ref=e434] [cursor=pointer]:
+                    - generic [ref=e435]:
+                      - img [ref=e436]
+                      - img [ref=e438]
+                      - generic [ref=e441]: 应用 SUSFS 补丁
+                - group [ref=e443]:
+                  - generic "备份基准 defconfig" [ref=e444] [cursor=pointer]:
+                    - generic [ref=e445]:
+                      - img [ref=e446]
+                      - img [ref=e448]
+                      - generic [ref=e451]: 备份基准 defconfig
+                - generic [ref=e452]:
+                  - group:
+                    - generic "应用 NTsync 补丁":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 应用 NTsync 补丁
+                - generic [ref=e453]:
+                  - group:
+                    - generic "应用 Networking 增强 (IPSet + BBR)":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 应用 Networking 增强 (IPSet + BBR)
+                - generic [ref=e454]:
+                  - group:
+                    - generic "克隆虚拟化支持补丁仓库":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 克隆虚拟化支持补丁仓库
+                - generic [ref=e455]:
+                  - group:
+                    - generic "集成虚拟化支持":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 集成虚拟化支持
+                - group [ref=e457]:
+                  - generic "应用 Unicode 绕过修复" [ref=e458] [cursor=pointer]:
+                    - generic [ref=e459]:
+                      - img [ref=e460]
+                      - img [ref=e462]
+                      - generic [ref=e465]: 应用 Unicode 绕过修复
+                - group [ref=e467]:
+                  - generic "配置 ZRAM LZ4 补丁栈" [ref=e468] [cursor=pointer]:
+                    - generic [ref=e469]:
+                      - img [ref=e470]
+                      - img [ref=e472]
+                      - generic [ref=e475]: 配置 ZRAM LZ4 补丁栈
+                - generic [ref=e476]:
+                  - group:
+                    - generic "修复 6.6 WiFi/蓝牙兼容性（三星 + 小米）":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 修复 6.6 WiFi/蓝牙兼容性（三星 + 小米）
+                - group [ref=e478]:
+                  - generic "配置 ZRAM 选项" [ref=e479] [cursor=pointer]:
+                    - generic [ref=e480]:
+                      - img [ref=e481]
+                      - img [ref=e483]
+                      - generic [ref=e486]: 配置 ZRAM 选项
+                - group [ref=e488]:
+                  - generic "添加 BBG 防格机补丁" [ref=e489] [cursor=pointer]:
+                    - generic [ref=e490]:
+                      - img [ref=e491]
+                      - img [ref=e493]
+                      - generic [ref=e496]: 添加 BBG 防格机补丁
+                - generic [ref=e497]:
+                  - group:
+                    - generic "添加 DDK 防格机 LSM":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 添加 DDK 防格机 LSM
+                - generic [ref=e498]:
+                  - group:
+                    - generic "应用 Re-Kernel":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 应用 Re-Kernel
+                - generic [ref=e499]:
+                  - group:
+                    - generic "执行自定义外部模块 (after_patch)":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 执行自定义外部模块 (after_patch)
+                - group [ref=e501]:
+                  - generic "配置内核选项" [ref=e502] [cursor=pointer]:
+                    - generic [ref=e503]:
+                      - img [ref=e504]
+                      - img [ref=e506]
+                      - generic [ref=e509]: 配置内核选项
+                - generic [ref=e510]:
+                  - group:
+                    - generic "配置 KPM 超级密码":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 配置 KPM 超级密码
+                - group [ref=e512]:
+                  - generic "添加 SUSFS 配置" [ref=e513] [cursor=pointer]:
+                    - generic [ref=e514]:
+                      - img [ref=e515]
+                      - img [ref=e517]
+                      - generic [ref=e520]: 添加 SUSFS 配置
+                - group [ref=e522]:
+                  - generic "配置内核名称" [ref=e523] [cursor=pointer]:
+                    - generic [ref=e524]:
+                      - img [ref=e525]
+                      - img [ref=e527]
+                      - generic [ref=e530]: 配置内核名称
+                - group [ref=e532]:
+                  - generic "设置自定义构建时间" [ref=e533] [cursor=pointer]:
+                    - generic [ref=e534]:
+                      - img [ref=e535]
+                      - img [ref=e537]
+                      - generic [ref=e540]: 设置自定义构建时间
+                - generic [ref=e541]:
+                  - group:
+                    - generic "执行自定义外部模块 (before_build)":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 执行自定义外部模块 (before_build)
+                - generic [ref=e542]:
+                  - group:
+                    - generic "最终修复 SukiSU/ReSukiSU 源码兼容":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 最终修复 SukiSU/ReSukiSU 源码兼容
+                - generic [ref=e543]:
+                  - group:
+                    - generic "修复 SukiSU android16-6.12 源码兼容":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 修复 SukiSU android16-6.12 源码兼容
+                - group [ref=e545]:
+                  - generic "编译内核" [ref=e546] [cursor=pointer]:
+                    - generic [ref=e547]:
+                      - img [ref=e548]
+                      - img [ref=e552]
+                      - generic [ref=e555]: 编译内核
+                - generic [ref=e558]:
+                  - group:
+                    - generic "应用 KPM 补丁 (SukiSU/ReSukiSU/Next)":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 应用 KPM 补丁 (SukiSU/ReSukiSU/Next)
+                - generic [ref=e559]:
+                  - group:
+                    - generic "准备 Boot 镜像":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 准备 Boot 镜像
+                - generic [ref=e560]:
+                  - group:
+                    - generic "创建 AnyKernel3 压缩包":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 创建 AnyKernel3 压缩包
+                - generic [ref=e561]:
+                  - group:
+                    - generic "构建 Boot 镜像 (Android 12)":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 构建 Boot 镜像 (Android 12)
+                - generic [ref=e562]:
+                  - group:
+                    - generic "构建 Boot 镜像 (Android 13+)":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 构建 Boot 镜像 (Android 13+)
+                - group [ref=e564]:
+                  - generic "收集补丁冲突文件" [ref=e565] [cursor=pointer]:
+                    - generic [ref=e566]:
+                      - img [ref=e567]
+                      - img [ref=e569]
+                      - generic [ref=e572]: 收集补丁冲突文件
+                - generic [ref=e573]:
+                  - group:
+                    - generic "上传构建产物":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 上传构建产物
+                - generic [ref=e574]:
+                  - group:
+                    - generic "上传 NTsync 权限修复和 IPSet 启用模块":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: 上传 NTsync 权限修复和 IPSet 启用模块
+                - group [ref=e576]:
+                  - generic "上传补丁冲突文件" [ref=e577] [cursor=pointer]:
+                    - generic [ref=e578]:
+                      - img [ref=e579]
+                      - img [ref=e581]
+                      - generic [ref=e584]: 上传补丁冲突文件
+                - generic [ref=e585]:
+                  - group:
+                    - generic "Post 缓存工具链":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: Post 缓存工具链
+                - generic [ref=e586]:
+                  - group:
+                    - generic "Post 恢复 ccache 缓存":
+                      - generic:
+                        - img
+                        - generic:
+                          - generic: Post 恢复 ccache 缓存
+                - group [ref=e588]:
+                  - generic "Post 检出代码仓库" [ref=e589] [cursor=pointer]:
+                    - generic [ref=e590]:
+                      - img [ref=e591]
+                      - img [ref=e593]
+                      - generic [ref=e596]: Post 检出代码仓库
+                - group [ref=e598]:
+                  - generic "Complete job" [ref=e599] [cursor=pointer]:
+                    - generic [ref=e600]:
+                      - img [ref=e601]
+                      - img [ref=e603]
+                      - generic [ref=e606]: Complete job

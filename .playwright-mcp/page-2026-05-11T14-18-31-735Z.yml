@@ -1,0 +1,2510 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner "Global Navigation Menu" [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - button "Open menu" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+          - link "Homepage (g then d)" [ref=e15] [cursor=pointer]:
+            - /url: /
+            - img [ref=e16]
+        - generic [ref=e18]:
+          - navigation "Breadcrumbs" [ref=e19]:
+            - list [ref=e20]:
+              - listitem [ref=e21]:
+                - link "SukiSU-Ultra" [ref=e22] [cursor=pointer]:
+                  - /url: /SukiSU-Ultra
+                  - generic [ref=e23]: SukiSU-Ultra
+              - listitem [ref=e24]:
+                - link "SukiSU-Ultra" [ref=e25] [cursor=pointer]:
+                  - /url: /SukiSU-Ultra/SukiSU-Ultra
+                  - generic [ref=e26]: SukiSU-Ultra
+          - button "Search or jump to… (forward slash)" [ref=e27] [cursor=pointer]:
+            - img [ref=e28]
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - generic [ref=e33]:
+              - generic [ref=e34]:
+                - link "Chat with Copilot" [ref=e36] [cursor=pointer]:
+                  - /url: /copilot
+                  - img [ref=e37]
+                - button "Open Copilot…" [ref=e41] [cursor=pointer]:
+                  - generic:
+                    - img
+              - button "Open agents panel" [ref=e42] [cursor=pointer]:
+                - generic [ref=e43]:
+                  - generic:
+                    - img
+                  - generic:
+                    - img
+            - button "Create new..." [ref=e45] [cursor=pointer]:
+              - generic [ref=e46]:
+                - generic:
+                  - img
+              - generic:
+                - img
+            - generic [ref=e47]:
+              - link "All issues" [ref=e48] [cursor=pointer]:
+                - /url: /issues
+                - img [ref=e49]
+              - link "All pull requests" [ref=e52] [cursor=pointer]:
+                - /url: /pulls
+                - img [ref=e53]
+              - link "All repositories" [ref=e55] [cursor=pointer]:
+                - /url: /repos
+                - img [ref=e56]
+          - link "You have no unread notifications (g then n)" [ref=e58] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e59]
+          - button "Open user navigation menu" [ref=e62] [cursor=pointer]:
+            - img "piter" [ref=e63]
+      - heading "Repository navigation" [level=2] [ref=e64]
+      - navigation "Repository" [ref=e65]:
+        - list [ref=e66]:
+          - listitem [ref=e67]:
+            - link "Code" [ref=e68] [cursor=pointer]:
+              - /url: /SukiSU-Ultra/SukiSU-Ultra
+              - generic [ref=e69]: Code
+          - listitem [ref=e70]:
+            - link "Issues (16)" [ref=e71] [cursor=pointer]:
+              - /url: /SukiSU-Ultra/SukiSU-Ultra/issues
+              - generic [ref=e72]: Issues
+              - generic [ref=e73]:
+                - generic [ref=e74]: "16"
+                - generic [ref=e75]: (16)
+          - listitem [ref=e76]:
+            - link "Pull requests (2)" [ref=e77] [cursor=pointer]:
+              - /url: /SukiSU-Ultra/SukiSU-Ultra/pulls
+              - generic [ref=e78]: Pull requests
+              - generic [ref=e79]:
+                - generic [ref=e80]: "2"
+                - generic [ref=e81]: (2)
+          - listitem [ref=e82]:
+            - link "Agents" [ref=e83] [cursor=pointer]:
+              - /url: /SukiSU-Ultra/SukiSU-Ultra/agents?author=Nshpiter
+              - generic [ref=e84]: Agents
+          - listitem [ref=e85]:
+            - link "Discussions" [ref=e86] [cursor=pointer]:
+              - /url: /SukiSU-Ultra/SukiSU-Ultra/discussions
+              - generic [ref=e87]: Discussions
+          - listitem [ref=e88]:
+            - link "Actions" [ref=e89] [cursor=pointer]:
+              - /url: /SukiSU-Ultra/SukiSU-Ultra/actions
+              - generic [ref=e90]: Actions
+          - listitem [ref=e91]:
+            - link "Projects" [ref=e92] [cursor=pointer]:
+              - /url: /SukiSU-Ultra/SukiSU-Ultra/projects
+              - generic [ref=e93]: Projects
+          - listitem [ref=e94]:
+            - button "More Repository items" [ref=e96] [cursor=pointer]:
+              - generic [ref=e99]:
+                - text: More
+                - generic [ref=e100]: Repository items
+              - generic:
+                - img
+  - main [ref=e104]:
+    - generic [ref=e106]:
+      - 'heading "Releases: SukiSU-Ultra/SukiSU-Ultra" [level=1] [ref=e107]'
+      - generic [ref=e108]:
+        - generic [ref=e110]:
+          - navigation "Releases and Tags" [ref=e111]:
+            - link "Releases" [ref=e112] [cursor=pointer]:
+              - /url: /SukiSU-Ultra/SukiSU-Ultra/releases
+            - link "Tags" [ref=e113] [cursor=pointer]:
+              - /url: /SukiSU-Ultra/SukiSU-Ultra/tags
+          - generic [ref=e116]:
+            - searchbox "Find a release" [ref=e117]
+            - img
+        - generic [ref=e118]:
+          - region "4.1.2" [ref=e119]:
+            - heading "4.1.2" [level=2] [ref=e120]
+            - generic [ref=e121]:
+              - generic [ref=e122]:
+                - generic [ref=e123]: 09 Mar 10:11 Mar 9
+                - generic [ref=e124]:
+                  - img "@ShirkNeko" [ref=e125]
+                  - link "ShirkNeko" [ref=e126] [cursor=pointer]:
+                    - /url: /ShirkNeko
+                - link "Tag v4.1.2" [ref=e128] [cursor=pointer]:
+                  - /url: /SukiSU-Ultra/SukiSU-Ultra/tree/v4.1.2
+                  - generic [ref=e129]:
+                    - img "Tag" [ref=e130]
+                    - text: v4.1.2
+                - generic [ref=e132]:
+                  - link "Commit ede8a21" [ref=e133] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/commit/ede8a21fb215eccca099db26214308e7f8685a47
+                    - img "Commit" [ref=e134]
+                    - code [ref=e136]: ede8a21
+                  - group [ref=e137]:
+                    - generic "Verified commit signature" [ref=e138] [cursor=pointer]:
+                      - img "Verified commit signature" [ref=e139]
+                - button "Compare" [ref=e144] [cursor=pointer]:
+                  - generic [ref=e145]:
+                    - generic [ref=e146]: Compare
+                    - generic:
+                      - img
+              - generic [ref=e148]:
+                - generic [ref=e149]:
+                  - generic [ref=e152]:
+                    - link "4.1.2" [ref=e154] [cursor=pointer]:
+                      - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.2
+                    - link "Latest" [ref=e156] [cursor=pointer]:
+                      - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/latest
+                      - generic [ref=e157]: Latest
+                  - generic [ref=e158]:
+                    - heading "What's Changed" [level=2] [ref=e159]
+                    - list [ref=e160]:
+                      - listitem [ref=e161]: Support for dual themes MIUI X and MD3 (Susfs not yet compatible)
+                      - listitem [ref=e162]: Fixed some page compatibility issues
+                      - listitem [ref=e163]:
+                        - text: Revert "[skip ci]CI:No need spoofed build for miuix (
+                        - link "#653" [ref=e164] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/653
+                        - text: )" by
+                        - link "@luyanci" [ref=e165] [cursor=pointer]:
+                          - /url: https://github.com/luyanci
+                        - text: in
+                        - link "#786" [ref=e166] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/786
+                      - listitem [ref=e167]:
+                        - text: kernel:Bump APl version to 4.1.1 by
+                        - link "@Numbersf" [ref=e168] [cursor=pointer]:
+                          - /url: https://github.com/Numbersf
+                        - text: in
+                        - link "#785" [ref=e169] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/785
+                      - listitem [ref=e170]:
+                        - text: Remove outdated feature declarations in
+                        - link "#800" [ref=e171] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/800
+                      - listitem [ref=e172]:
+                        - text: Fix the incorrect Built-in branch name. by
+                        - link "@xixiaobei-bei" [ref=e173] [cursor=pointer]:
+                          - /url: https://github.com/xixiaobei-bei
+                        - text: in
+                        - link "#817" [ref=e174] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/817
+                      - listitem [ref=e175]:
+                        - text: "fix: string translations by"
+                        - link "@Veutexus" [ref=e176] [cursor=pointer]:
+                          - /url: https://github.com/Veutexus
+                        - text: in
+                        - link "#820" [ref=e177] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/820
+                    - heading "New Contributors" [level=2] [ref=e178]
+                    - list [ref=e179]:
+                      - listitem [ref=e180]:
+                        - link "@Numbersf" [ref=e181] [cursor=pointer]:
+                          - /url: https://github.com/Numbersf
+                        - text: made their first contribution in
+                        - link "#785" [ref=e182] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/785
+                      - listitem [ref=e183]:
+                        - link "@xixiaobei-bei" [ref=e184] [cursor=pointer]:
+                          - /url: https://github.com/xixiaobei-bei
+                        - text: made their first contribution in
+                        - link "#817" [ref=e185] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/817
+                      - listitem [ref=e186]:
+                        - link "@Veutexus" [ref=e187] [cursor=pointer]:
+                          - /url: https://github.com/Veutexus
+                        - text: made their first contribution in
+                        - link "#820" [ref=e188] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/820
+                    - paragraph [ref=e189]:
+                      - strong [ref=e190]: Full Changelog
+                      - text: ":"
+                      - link "v4.1.1...v4.1.2" [ref=e191] [cursor=pointer]:
+                        - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/compare/v4.1.1...v4.1.2
+                - generic [ref=e192]:
+                  - generic [ref=e193]:
+                    - heading "Contributors" [level=3] [ref=e194]
+                    - list [ref=e195]:
+                      - listitem [ref=e196]:
+                        - link "@luyanci" [ref=e197] [cursor=pointer]:
+                          - /url: https://github.com/luyanci
+                          - img "@luyanci" [ref=e198]
+                      - listitem [ref=e199]:
+                        - link "@Veutexus" [ref=e200] [cursor=pointer]:
+                          - /url: https://github.com/Veutexus
+                          - img "@Veutexus" [ref=e201]
+                      - listitem [ref=e202]:
+                        - link "@Numbersf" [ref=e203] [cursor=pointer]:
+                          - /url: https://github.com/Numbersf
+                          - img "@Numbersf" [ref=e204]
+                      - listitem [ref=e205]:
+                        - link "@xixiaobei-bei" [ref=e206] [cursor=pointer]:
+                          - /url: https://github.com/xixiaobei-bei
+                          - img "@xixiaobei-bei" [ref=e207]
+                    - generic [ref=e208]: luyanci, Veutexus, and 2 other contributors
+                  - group [ref=e211]:
+                    - button "Assets 13" [expanded] [ref=e212] [cursor=pointer]:
+                      - generic [ref=e213]:
+                        - generic [ref=e214]: Assets
+                        - generic "13" [ref=e215]
+                    - list [ref=e219]:
+                      - listitem [ref=e220]:
+                        - generic [ref=e221]:
+                          - img [ref=e222]
+                          - link "android12-5.10_kernelsu.ko" [ref=e224] [cursor=pointer]:
+                            - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/download/v4.1.2/android12-5.10_kernelsu.ko
+                            - generic [ref=e225]: android12-5.10_kernelsu.ko
+                        - generic [ref=e227]:
+                          - generic [ref=e228]: 292 KB
+                          - generic [ref=e229]: 2026-03-09T10:22:44ZMar 9
+                      - listitem [ref=e230]:
+                        - generic [ref=e231]:
+                          - img [ref=e232]
+                          - link "android13-5.10_kernelsu.ko" [ref=e234] [cursor=pointer]:
+                            - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/download/v4.1.2/android13-5.10_kernelsu.ko
+                            - generic [ref=e235]: android13-5.10_kernelsu.ko
+                        - generic [ref=e237]:
+                          - generic [ref=e238]: 288 KB
+                          - generic [ref=e239]: 2026-03-09T10:22:44ZMar 9
+                      - listitem [ref=e240]:
+                        - generic [ref=e241]:
+                          - img [ref=e242]
+                          - link "android13-5.15_kernelsu.ko" [ref=e244] [cursor=pointer]:
+                            - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/download/v4.1.2/android13-5.15_kernelsu.ko
+                            - generic [ref=e245]: android13-5.15_kernelsu.ko
+                        - generic [ref=e247]:
+                          - generic [ref=e248]: 311 KB
+                          - generic [ref=e249]: 2026-03-09T10:22:44ZMar 9
+                      - listitem [ref=e250]:
+                        - generic [ref=e251]:
+                          - img [ref=e252]
+                          - link "android14-5.15_kernelsu.ko" [ref=e254] [cursor=pointer]:
+                            - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/download/v4.1.2/android14-5.15_kernelsu.ko
+                            - generic [ref=e255]: android14-5.15_kernelsu.ko
+                        - generic [ref=e257]:
+                          - generic [ref=e258]: 407 KB
+                          - generic [ref=e259]: 2026-03-09T10:22:44ZMar 9
+                      - listitem [ref=e260]:
+                        - generic [ref=e261]:
+                          - img [ref=e262]
+                          - link "android14-6.1_kernelsu.ko" [ref=e264] [cursor=pointer]:
+                            - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/download/v4.1.2/android14-6.1_kernelsu.ko
+                            - generic [ref=e265]: android14-6.1_kernelsu.ko
+                        - generic [ref=e267]:
+                          - generic [ref=e268]: 361 KB
+                          - generic [ref=e269]: 2026-03-09T10:22:44ZMar 9
+                      - listitem [ref=e270]:
+                        - generic [ref=e271]:
+                          - img [ref=e272]
+                          - link "android15-6.6_kernelsu.ko" [ref=e274] [cursor=pointer]:
+                            - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/download/v4.1.2/android15-6.6_kernelsu.ko
+                            - generic [ref=e275]: android15-6.6_kernelsu.ko
+                        - generic [ref=e277]:
+                          - generic [ref=e278]: 280 KB
+                          - generic [ref=e279]: 2026-03-09T10:22:44ZMar 9
+                      - listitem [ref=e280]:
+                        - generic [ref=e281]:
+                          - img [ref=e282]
+                          - link "android16-6.12_kernelsu.ko" [ref=e284] [cursor=pointer]:
+                            - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/download/v4.1.2/android16-6.12_kernelsu.ko
+                            - generic [ref=e285]: android16-6.12_kernelsu.ko
+                        - generic [ref=e287]:
+                          - generic [ref=e288]: 350 KB
+                          - generic [ref=e289]: 2026-03-09T10:22:44ZMar 9
+                      - listitem [ref=e290]:
+                        - generic [ref=e291]:
+                          - img [ref=e292]
+                          - link "ksud-aarch64-linux-android" [ref=e294] [cursor=pointer]:
+                            - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/download/v4.1.2/ksud-aarch64-linux-android
+                            - generic [ref=e295]: ksud-aarch64-linux-android
+                        - generic [ref=e297]:
+                          - generic [ref=e298]: 4.13 MB
+                          - generic [ref=e299]: 2026-03-09T10:22:44ZMar 9
+                      - listitem [ref=e300]:
+                        - generic [ref=e301]:
+                          - img [ref=e302]
+                          - link "ksud-armv7-linux-androideabi" [ref=e304] [cursor=pointer]:
+                            - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/download/v4.1.2/ksud-armv7-linux-androideabi
+                            - generic [ref=e305]: ksud-armv7-linux-androideabi
+                        - generic [ref=e307]:
+                          - generic [ref=e308]: 3.37 MB
+                          - generic [ref=e309]: 2026-03-09T10:22:44ZMar 9
+                      - listitem [ref=e310]:
+                        - generic [ref=e311]:
+                          - img [ref=e312]
+                          - link "ksud-x86_64-linux-android" [ref=e314] [cursor=pointer]:
+                            - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/download/v4.1.2/ksud-x86_64-linux-android
+                            - generic [ref=e315]: ksud-x86_64-linux-android
+                        - generic [ref=e317]:
+                          - generic [ref=e318]: 3.12 MB
+                          - generic [ref=e319]: 2026-03-09T10:22:44ZMar 9
+                      - listitem [ref=e320]:
+                        - generic [ref=e321]:
+                          - img [ref=e322]
+                          - link "Source code (zip)" [ref=e324] [cursor=pointer]:
+                            - /url: /SukiSU-Ultra/SukiSU-Ultra/archive/refs/tags/v4.1.2.zip
+                            - generic [ref=e325]: Source code
+                            - generic [ref=e326]: (zip)
+                        - generic [ref=e328]: 2026-03-09T10:02:04ZMar 9
+                      - listitem [ref=e329]:
+                        - generic [ref=e330]:
+                          - img [ref=e331]
+                          - link "Source code (tar.gz)" [ref=e333] [cursor=pointer]:
+                            - /url: /SukiSU-Ultra/SukiSU-Ultra/archive/refs/tags/v4.1.2.tar.gz
+                            - generic [ref=e334]: Source code
+                            - generic [ref=e335]: (tar.gz)
+                        - generic [ref=e337]: 2026-03-09T10:02:04ZMar 9
+                      - listitem [ref=e338]:
+                        - button "Show all 13 assets" [ref=e340] [cursor=pointer]
+                  - generic [ref=e342]:
+                    - group [ref=e344]:
+                      - generic "Add or remove reactions" [ref=e345] [cursor=pointer]:
+                        - img [ref=e346]
+                    - generic [ref=e349]:
+                      - 'button "thumbs up (21): ShirkNeko, 06:02PM on March 09" [ref=e350] [cursor=pointer]':
+                        - generic [ref=e351]: 👍
+                        - generic [ref=e352]: "21"
+                      - 'button "laugh (3): ShirkNeko, 06:02PM on March 09" [ref=e353] [cursor=pointer]':
+                        - generic [ref=e354]: 😄
+                        - generic [ref=e355]: "3"
+                      - 'button "hooray (5): ShirkNeko, 06:02PM on March 09" [ref=e356] [cursor=pointer]':
+                        - generic [ref=e357]: 🎉
+                        - generic [ref=e358]: "5"
+                      - 'button "heart (4): ShirkNeko, 06:02PM on March 09" [ref=e359] [cursor=pointer]':
+                        - generic [ref=e360]: ❤️
+                        - generic [ref=e361]: "4"
+                      - 'button "rocket (2): ShirkNeko, 06:02PM on March 09" [ref=e362] [cursor=pointer]':
+                        - generic [ref=e363]: 🚀
+                        - generic [ref=e364]: "2"
+                      - 'button "eyes (1): ShirkNeko, 06:02PM on March 09" [ref=e365] [cursor=pointer]':
+                        - generic [ref=e366]: 👀
+                        - generic [ref=e367]: "1"
+                    - generic [ref=e368]: 26 people reacted
+          - region "4.1.1" [ref=e369]:
+            - heading "4.1.1" [level=2] [ref=e370]
+            - generic [ref=e371]:
+              - generic [ref=e372]:
+                - generic [ref=e373]: 30 Jan 07:47 Jan 30
+                - generic [ref=e374]:
+                  - img "@ShirkNeko" [ref=e375]
+                  - link "ShirkNeko" [ref=e376] [cursor=pointer]:
+                    - /url: /ShirkNeko
+                - link "Tag v4.1.1" [ref=e378] [cursor=pointer]:
+                  - /url: /SukiSU-Ultra/SukiSU-Ultra/tree/v4.1.1
+                  - generic [ref=e379]:
+                    - img "Tag" [ref=e380]
+                    - text: v4.1.1
+                - generic [ref=e382]:
+                  - link "Commit 256c955" [ref=e383] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/commit/256c955cef8994cf4fbc71eef37006502e3941aa
+                    - img "Commit" [ref=e384]
+                    - code [ref=e386]: 256c955
+                  - group [ref=e387]:
+                    - generic "Verified commit signature" [ref=e388] [cursor=pointer]:
+                      - img "Verified commit signature" [ref=e389]
+                - button "Compare" [ref=e394] [cursor=pointer]:
+                  - generic [ref=e395]:
+                    - generic [ref=e396]: Compare
+                    - generic:
+                      - img
+              - generic [ref=e398]:
+                - generic [ref=e399]:
+                  - link "4.1.1" [ref=e404] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.1
+                  - generic [ref=e406]:
+                    - heading "What's Changed" [level=2] [ref=e407]
+                    - list [ref=e408]:
+                      - listitem [ref=e409]: Switching from MD3 to MIUI X
+                      - listitem [ref=e410]:
+                        - text: CI:No need spoofed build for miuix by
+                        - link "@luyanci" [ref=e411] [cursor=pointer]:
+                          - /url: https://github.com/luyanci
+                        - text: in
+                        - link "#653" [ref=e412] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/653
+                      - listitem [ref=e413]:
+                        - text: Revert changes in ADD_TRY_UMOUNT cmd by
+                        - link "@AlexLiuDev233" [ref=e414] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#672" [ref=e415] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/672
+                      - listitem [ref=e416]:
+                        - text: "manager: go to HomeScreen first by"
+                        - link "@AlexLiuDev233" [ref=e417] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#681" [ref=e418] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/681
+                      - listitem [ref=e419]:
+                        - text: "manager (translation): Delete some dot for more sync and Update Vietnamese translation by"
+                        - link "@SaleOff" [ref=e420] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                        - text: in
+                        - link "#685" [ref=e421] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/685
+                      - listitem [ref=e422]:
+                        - text: README.md & guide/ translation into Russian by @emore-xpxx in
+                        - link "#675" [ref=e423] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/675
+                      - listitem [ref=e424]:
+                        - text: Refactor ksud kpm by
+                        - link "@Tools-cx-app" [ref=e425] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                        - text: in
+                        - link "#702" [ref=e426] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/702
+                      - listitem [ref=e427]:
+                        - text: "ksud: fix kpm parsing by"
+                        - link "@AlexLiuDev233" [ref=e428] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#705" [ref=e429] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/705
+                      - listitem [ref=e430]:
+                        - text: "ksud: fix build by"
+                        - link "@AlexLiuDev233" [ref=e431] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#706" [ref=e432] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/706
+                      - listitem [ref=e433]:
+                        - text: "ksud: clippy by"
+                        - link "@AlexLiuDev233" [ref=e434] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#707" [ref=e435] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/707
+                      - listitem [ref=e436]:
+                        - text: "ci: allow manually trigger manager build by"
+                        - link "@AlexLiuDev233" [ref=e437] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#708" [ref=e438] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/708
+                      - listitem [ref=e439]:
+                        - text: "ksud: readd KSU_SUKISU env flag by"
+                        - link "@AlexLiuDev233" [ref=e440] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#709" [ref=e441] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/709
+                      - listitem [ref=e442]:
+                        - text: "kernel: Refactor file_wrapper (#3070) by"
+                        - link "@AlexLiuDev233" [ref=e443] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#717" [ref=e444] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/717
+                      - listitem [ref=e445]:
+                        - text: Update some English strings by
+                        - link "@F640" [ref=e446] [cursor=pointer]:
+                          - /url: https://github.com/F640
+                        - text: in
+                        - link "#719" [ref=e447] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/719
+                      - listitem [ref=e448]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e449] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#710" [ref=e450] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/710
+                      - listitem [ref=e451]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e452] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#729" [ref=e453] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/729
+                      - listitem [ref=e454]:
+                        - text: Rework sulog by
+                        - link "@ShirkNeko" [ref=e455] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#744" [ref=e456] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/744
+                    - heading "New Contributors" [level=2] [ref=e457]
+                    - list [ref=e458]:
+                      - listitem [ref=e459]:
+                        - text: "@emore-xpxx made their first contribution in"
+                        - link "#675" [ref=e460] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/675
+                    - paragraph [ref=e461]:
+                      - strong [ref=e462]: Full Changelog
+                      - text: ":"
+                      - link "v4.1.0...v4.1.1" [ref=e463] [cursor=pointer]:
+                        - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/compare/v4.1.0...v4.1.1
+                - generic [ref=e464]:
+                  - generic [ref=e465]:
+                    - heading "Contributors" [level=3] [ref=e466]
+                    - list [ref=e467]:
+                      - listitem [ref=e468]:
+                        - link "@luyanci" [ref=e469] [cursor=pointer]:
+                          - /url: https://github.com/luyanci
+                          - img "@luyanci" [ref=e470]
+                      - listitem [ref=e471]:
+                        - link "@F640" [ref=e472] [cursor=pointer]:
+                          - /url: https://github.com/F640
+                          - img "@F640" [ref=e473]
+                      - listitem [ref=e474]:
+                        - link "@AlexLiuDev233" [ref=e475] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                          - img "@AlexLiuDev233" [ref=e476]
+                      - listitem [ref=e477]:
+                        - link "@ShirkNeko" [ref=e478] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                          - img "@ShirkNeko" [ref=e479]
+                      - listitem [ref=e480]:
+                        - link "@Tools-cx-app" [ref=e481] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                          - img "@Tools-cx-app" [ref=e482]
+                      - listitem [ref=e483]:
+                        - link "@SaleOff" [ref=e484] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                          - img "@SaleOff" [ref=e485]
+                    - generic [ref=e486]: luyanci, F640, and 4 other contributors
+                  - group [ref=e489]:
+                    - button "Assets 3" [ref=e490] [cursor=pointer]:
+                      - generic [ref=e491]:
+                        - generic [ref=e492]: Assets
+                        - generic "3" [ref=e493]
+                  - generic [ref=e495]:
+                    - group [ref=e497]:
+                      - generic "Add or remove reactions" [ref=e498] [cursor=pointer]:
+                        - img [ref=e499]
+                    - generic [ref=e502]:
+                      - 'button "thumbs up (24): ShirkNeko, 03:45PM on January 30" [ref=e503] [cursor=pointer]':
+                        - generic [ref=e504]: 👍
+                        - generic [ref=e505]: "24"
+                      - 'button "laugh (4): ShirkNeko, 03:45PM on January 30" [ref=e506] [cursor=pointer]':
+                        - generic [ref=e507]: 😄
+                        - generic [ref=e508]: "4"
+                      - 'button "hooray (5): ShirkNeko, 03:45PM on January 30" [ref=e509] [cursor=pointer]':
+                        - generic [ref=e510]: 🎉
+                        - generic [ref=e511]: "5"
+                      - 'button "heart (7): ShirkNeko, 03:45PM on January 30" [ref=e512] [cursor=pointer]':
+                        - generic [ref=e513]: ❤️
+                        - generic [ref=e514]: "7"
+                      - 'button "rocket (5): ShirkNeko, 03:45PM on January 30" [ref=e515] [cursor=pointer]':
+                        - generic [ref=e516]: 🚀
+                        - generic [ref=e517]: "5"
+                      - 'button "eyes (4): ShirkNeko, 03:45PM on January 30" [ref=e518] [cursor=pointer]':
+                        - generic [ref=e519]: 👀
+                        - generic [ref=e520]: "4"
+                    - generic [ref=e521]: 30 people reacted
+          - region "4.1.0" [ref=e522]:
+            - heading "4.1.0" [level=2] [ref=e523]
+            - generic [ref=e524]:
+              - generic [ref=e525]:
+                - generic [ref=e526]: 05 Dec 06:22 Dec 5, 2025
+                - generic [ref=e527]:
+                  - img "@ShirkNeko" [ref=e528]
+                  - link "ShirkNeko" [ref=e529] [cursor=pointer]:
+                    - /url: /ShirkNeko
+                - link "Tag v4.1.0" [ref=e531] [cursor=pointer]:
+                  - /url: /SukiSU-Ultra/SukiSU-Ultra/tree/v4.1.0
+                  - generic [ref=e532]:
+                    - img "Tag" [ref=e533]
+                    - text: v4.1.0
+                - generic [ref=e535]:
+                  - link "Commit 0d27e68" [ref=e536] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/commit/0d27e685cb9f1b873cd334371c0d8b6ea4c3aea9
+                    - img "Commit" [ref=e537]
+                    - code [ref=e539]: 0d27e68
+                  - group [ref=e540]:
+                    - generic "Verified commit signature" [ref=e541] [cursor=pointer]:
+                      - img "Verified commit signature" [ref=e542]
+                - button "Compare" [ref=e547] [cursor=pointer]:
+                  - generic [ref=e548]:
+                    - generic [ref=e549]: Compare
+                    - generic:
+                      - img
+              - generic [ref=e551]:
+                - generic [ref=e552]:
+                  - link "4.1.0" [ref=e557] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.1.0
+                  - generic [ref=e559]:
+                    - heading "What's Changed" [level=2] [ref=e560]
+                    - list [ref=e561]:
+                      - listitem [ref=e562]:
+                        - text: "chore(ksud): bump ksud's deps by"
+                        - link "@Tools-cx-app" [ref=e563] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                        - text: in
+                        - link "#585" [ref=e564] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/585
+                      - listitem [ref=e565]:
+                        - text: "refactor: use SuFile get Zygisk Implement by"
+                        - link "@AlexLiuDev233" [ref=e566] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#615" [ref=e567] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/615
+                      - listitem [ref=e568]:
+                        - text: "manager: support meta module by"
+                        - link "@AlexLiuDev233" [ref=e569] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#616" [ref=e570] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/616
+                      - listitem [ref=e571]:
+                        - text: "chore(ksud): enable clippy::all, clippy::pedantic && make clippy happy by"
+                        - link "@Tools-cx-app" [ref=e572] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                        - text: in
+                        - link "#617" [ref=e573] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/617
+                      - listitem [ref=e574]:
+                        - text: Fix compile on x86_64 by
+                        - link "@Tools-cx-app" [ref=e575] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                        - text: in
+                        - link "#619" [ref=e576] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/619
+                      - listitem [ref=e577]:
+                        - text: Update README with SukiSU module mounting note by
+                        - link "@UzakiMorStar" [ref=e578] [cursor=pointer]:
+                          - /url: https://github.com/UzakiMorStar
+                        - text: in
+                        - link "#638" [ref=e579] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/638
+                      - listitem [ref=e580]:
+                        - text: clarify compatibility status in readme by
+                        - link "@F640" [ref=e581] [cursor=pointer]:
+                          - /url: https://github.com/F640
+                        - text: in
+                        - link "#646" [ref=e582] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/646
+                      - listitem [ref=e583]:
+                        - text: "manager: enforce use bundle busybox du, close"
+                        - link "#612" [ref=e584] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/issues/612
+                        - text: by
+                        - link "@AlexLiuDev233" [ref=e585] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#649" [ref=e586] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/649
+                      - listitem [ref=e587]:
+                        - text: "manager: always pin metamodule in modules page's top by"
+                        - link "@AlexLiuDev233" [ref=e588] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#650" [ref=e589] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/650
+                      - listitem [ref=e590]:
+                        - text: sync with upstream by
+                        - link "@AlexLiuDev233" [ref=e591] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#648" [ref=e592] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/648
+                      - listitem [ref=e593]:
+                        - text: "manager: drop susfs zygote_umount_iso_service by"
+                        - link "@AlexLiuDev233" [ref=e594] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#652" [ref=e595] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/652
+                      - listitem [ref=e596]:
+                        - text: "feat: add susfs for ksud by"
+                        - link "@Tools-cx-app" [ref=e597] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                        - text: in
+                        - link "#642" [ref=e598] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/642
+                      - listitem [ref=e599]:
+                        - text: "manager: change avc spoof description to be more realistic. by"
+                        - link "@AlexLiuDev233" [ref=e600] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#651" [ref=e601] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/651
+                      - listitem [ref=e602]:
+                        - text: kernel:Bump API version to 4.1.0 by
+                        - link "@luyanci" [ref=e603] [cursor=pointer]:
+                          - /url: https://github.com/luyanci
+                        - text: in
+                        - link "#654" [ref=e604] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/654
+                    - paragraph [ref=e605]:
+                      - strong [ref=e606]: Full Changelog
+                      - text: ":"
+                      - link "v4.0.0...v4.1.0" [ref=e607] [cursor=pointer]:
+                        - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/compare/v4.0.0...v4.1.0
+                - generic [ref=e608]:
+                  - generic [ref=e609]:
+                    - heading "Contributors" [level=3] [ref=e610]
+                    - list [ref=e611]:
+                      - listitem [ref=e612]:
+                        - link "@luyanci" [ref=e613] [cursor=pointer]:
+                          - /url: https://github.com/luyanci
+                          - img "@luyanci" [ref=e614]
+                      - listitem [ref=e615]:
+                        - link "@F640" [ref=e616] [cursor=pointer]:
+                          - /url: https://github.com/F640
+                          - img "@F640" [ref=e617]
+                      - listitem [ref=e618]:
+                        - link "@UzakiMorStar" [ref=e619] [cursor=pointer]:
+                          - /url: https://github.com/UzakiMorStar
+                          - img "@UzakiMorStar" [ref=e620]
+                      - listitem [ref=e621]:
+                        - link "@AlexLiuDev233" [ref=e622] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                          - img "@AlexLiuDev233" [ref=e623]
+                      - listitem [ref=e624]:
+                        - link "@Tools-cx-app" [ref=e625] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                          - img "@Tools-cx-app" [ref=e626]
+                    - generic [ref=e627]: luyanci, F640, and 3 other contributors
+                  - group [ref=e630]:
+                    - button "Assets 3" [ref=e631] [cursor=pointer]:
+                      - generic [ref=e632]:
+                        - generic [ref=e633]: Assets
+                        - generic "3" [ref=e634]
+                  - generic [ref=e636]:
+                    - group [ref=e638]:
+                      - generic "Add or remove reactions" [ref=e639] [cursor=pointer]:
+                        - img [ref=e640]
+                    - generic [ref=e643]:
+                      - 'button "thumbs up (43): ShirkNeko, 02:21PM on December 05, 2025" [ref=e644] [cursor=pointer]':
+                        - generic [ref=e645]: 👍
+                        - generic [ref=e646]: "43"
+                      - 'button "laugh (6): ShirkNeko, 02:21PM on December 05, 2025" [ref=e647] [cursor=pointer]':
+                        - generic [ref=e648]: 😄
+                        - generic [ref=e649]: "6"
+                      - 'button "hooray (8): ShirkNeko, 02:21PM on December 05, 2025" [ref=e650] [cursor=pointer]':
+                        - generic [ref=e651]: 🎉
+                        - generic [ref=e652]: "8"
+                      - 'button "heart (8): ShirkNeko, 02:21PM on December 05, 2025" [ref=e653] [cursor=pointer]':
+                        - generic [ref=e654]: ❤️
+                        - generic [ref=e655]: "8"
+                      - 'button "rocket (5): ShirkNeko, 02:21PM on December 05, 2025" [ref=e656] [cursor=pointer]':
+                        - generic [ref=e657]: 🚀
+                        - generic [ref=e658]: "5"
+                      - 'button "eyes (3): ShirkNeko, 02:21PM on December 05, 2025" [ref=e659] [cursor=pointer]':
+                        - generic [ref=e660]: 👀
+                        - generic [ref=e661]: "3"
+                    - generic [ref=e662]: 47 people reacted
+          - region "4.0.0" [ref=e663]:
+            - heading "4.0.0" [level=2] [ref=e664]
+            - generic [ref=e665]:
+              - generic [ref=e666]:
+                - generic [ref=e667]: 16 Nov 06:27 Nov 16, 2025
+                - generic [ref=e668]:
+                  - img "@ShirkNeko" [ref=e669]
+                  - link "ShirkNeko" [ref=e670] [cursor=pointer]:
+                    - /url: /ShirkNeko
+                - link "Tag v4.0.0" [ref=e672] [cursor=pointer]:
+                  - /url: /SukiSU-Ultra/SukiSU-Ultra/tree/v4.0.0
+                  - generic [ref=e673]:
+                    - img "Tag" [ref=e674]
+                    - text: v4.0.0
+                - generic [ref=e676]:
+                  - link "Commit 19a67fb" [ref=e677] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/commit/19a67fb76c9f93beb448373f57f23eb02bf0e83d
+                    - img "Commit" [ref=e678]
+                    - code [ref=e680]: 19a67fb
+                  - group [ref=e681]:
+                    - generic "Verified commit signature" [ref=e682] [cursor=pointer]:
+                      - img "Verified commit signature" [ref=e683]
+                - button "Compare" [ref=e688] [cursor=pointer]:
+                  - generic [ref=e689]:
+                    - generic [ref=e690]: Compare
+                    - generic:
+                      - img
+              - generic [ref=e692]:
+                - generic [ref=e693]:
+                  - link "4.0.0" [ref=e698] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/tag/v4.0.0
+                  - generic [ref=e700]:
+                    - heading "Highlights" [level=2] [ref=e701]
+                    - list [ref=e702]:
+                      - listitem [ref=e703]: "New supercall implementation: remove the tricky LSM hook with seccomp and ioctl, avoiding numerous side-channel attacks."
+                      - listitem [ref=e704]: Support for kernel 6.12 and above.
+                    - heading "What's Changed" [level=2] [ref=e705]
+                    - list [ref=e706]:
+                      - listitem [ref=e707]:
+                        - text: "manager: add susfs 1.5.11 binary by"
+                        - link "@luyanci" [ref=e708] [cursor=pointer]:
+                          - /url: https://github.com/luyanci
+                        - text: in
+                        - link "#444" [ref=e709] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/444
+                      - listitem [ref=e710]:
+                        - text: "manager: Update zh-rTW strings by"
+                        - link "@HSSkyBoy" [ref=e711] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                        - text: in
+                        - link "#439" [ref=e712] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/439
+                      - listitem [ref=e713]:
+                        - text: Fix wrong function by
+                        - link "@unknow-tech" [ref=e714] [cursor=pointer]:
+                          - /url: https://github.com/unknow-tech
+                        - text: in
+                        - link "#445" [ref=e715] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/445
+                      - listitem [ref=e716]:
+                        - text: Disable Samsung Activation Verify to solve -45(2000) error during act… by
+                        - link "@YuzakiKokuban" [ref=e717] [cursor=pointer]:
+                          - /url: https://github.com/YuzakiKokuban
+                        - text: in
+                        - link "#446" [ref=e718] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/446
+                      - listitem [ref=e719]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e720] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#449" [ref=e721] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/449
+                      - listitem [ref=e722]:
+                        - text: "kernel: core_hook: add config guard for manual SU escalation by"
+                        - link "@saitama-droid" [ref=e723] [cursor=pointer]:
+                          - /url: https://github.com/saitama-droid
+                        - text: in
+                        - link "#453" [ref=e724] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/453
+                      - listitem [ref=e725]:
+                        - text: "docs: Sync TRACEPOINT HOOK v1.1 by"
+                        - link "@Prslc" [ref=e726] [cursor=pointer]:
+                          - /url: https://github.com/Prslc
+                        - text: in
+                        - link "#456" [ref=e727] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/456
+                      - listitem [ref=e728]:
+                        - text: "feat: Optimize some codes (ksud) by"
+                        - link "@Tools-cx-app" [ref=e729] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                        - text: in
+                        - link "#465" [ref=e730] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/465
+                      - listitem [ref=e731]:
+                        - text: Update Vietnamese Translation by
+                        - link "@SaleOff" [ref=e732] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                        - text: in
+                        - link "#462" [ref=e733] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/462
+                      - listitem [ref=e734]:
+                        - text: "add : full Indonesian translation (manager/app/src/main/res/values-ind/strings.xml) by"
+                        - link "@Cynthia-cnn" [ref=e735] [cursor=pointer]:
+                          - /url: https://github.com/Cynthia-cnn
+                        - text: in
+                        - link "#464" [ref=e736] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/464
+                      - listitem [ref=e737]:
+                        - text: 移除不必要的翻译 by
+                        - link "@PKQandBaaad" [ref=e738] [cursor=pointer]:
+                          - /url: https://github.com/PKQandBaaad
+                        - text: in
+                        - link "#478" [ref=e739] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/478
+                      - listitem [ref=e740]:
+                        - text: "docs: Fix little typo on tracepoint hook guide by"
+                        - link "@frostg-012" [ref=e741] [cursor=pointer]:
+                          - /url: https://github.com/frostg-012
+                        - text: in
+                        - link "#482" [ref=e742] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/482
+                      - listitem [ref=e743]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e744] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#484" [ref=e745] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/484
+                      - listitem [ref=e746]:
+                        - text: Revert "Disable Samsung Activation Verify to solve -45(2000) error du… by
+                        - link "@YuzakiKokuban" [ref=e747] [cursor=pointer]:
+                          - /url: https://github.com/YuzakiKokuban
+                        - text: in
+                        - link "#492" [ref=e748] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/492
+                      - listitem [ref=e749]:
+                        - text: "strings: Update zh-rTW by"
+                        - link "@HSSkyBoy" [ref=e750] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                        - text: in
+                        - link "#501" [ref=e751] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/501
+                      - listitem [ref=e752]:
+                        - text: "enjoy: 專門為MiUI桌面卸載添加了提示，提升使用者體驗 by"
+                        - link "@HSSkyBoy" [ref=e753] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                        - text: in
+                        - link "#502" [ref=e754] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/502
+                      - listitem [ref=e755]:
+                        - text: new supercall impl by
+                        - link "@ShirkNeko" [ref=e756] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - link "@tiann" [ref=e757] [cursor=pointer]:
+                          - /url: https://github.com/tiann
+                        - link "@aviraxp" [ref=e758] [cursor=pointer]:
+                          - /url: https://github.com/aviraxp
+                        - link "@Ylarod" [ref=e759] [cursor=pointer]:
+                          - /url: https://github.com/Ylarod
+                        - text: in
+                        - link "#511" [ref=e760] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/511
+                      - listitem [ref=e761]:
+                        - text: Update Vietnamese Translation by
+                        - link "@SaleOff" [ref=e762] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                        - text: in
+                        - link "#515" [ref=e763] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/515
+                      - listitem [ref=e764]:
+                        - text: Dev by
+                        - link "@ShirkNeko" [ref=e765] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#518" [ref=e766] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/518
+                      - listitem [ref=e767]:
+                        - text: "feat: try manual reboot hook by"
+                        - link "@AlexLiuDev233" [ref=e768] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#521" [ref=e769] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/521
+                      - listitem [ref=e770]:
+                        - text: "kernel: core_hook: provide a better reboot handler by"
+                        - link "@backslashxx" [ref=e771] [cursor=pointer]:
+                          - /url: https://github.com/backslashxx
+                        - text: in
+                        - link "#523" [ref=e772] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/523
+                      - listitem [ref=e773]:
+                        - text: "kernel: use sys_enter tracepoint for sucompat by"
+                        - link "@ShirkNeko" [ref=e774] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#533" [ref=e775] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/533
+                      - listitem [ref=e776]:
+                        - text: "fix: fix self exe path error && opt: Optimize ensure_dir_exists processing by"
+                        - link "@Tools-cx-app" [ref=e777] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                        - text: in
+                        - link "#541" [ref=e778] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/541
+                      - listitem [ref=e779]:
+                        - text: "kernel: core_hook: disable seccomp in 5.10.2- for allowed uids by"
+                        - link "@AlexLiuDev233" [ref=e780] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                        - text: in
+                        - link "#545" [ref=e781] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/545
+                      - listitem [ref=e782]:
+                        - text: "opt: Optimize the kpm && uid_scanner by"
+                        - link "@Tools-cx-app" [ref=e783] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                        - text: in
+                        - link "#549" [ref=e784] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/549
+                      - listitem [ref=e785]:
+                        - text: add include of crc32.h to sulog.h (for dedup_calc_hash) by
+                        - link "@micfogas" [ref=e786] [cursor=pointer]:
+                          - /url: https://github.com/micfogas
+                        - text: in
+                        - link "#548" [ref=e787] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/548
+                      - listitem [ref=e788]:
+                        - text: "fix: fix ksud install error by"
+                        - link "@Tools-cx-app" [ref=e789] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                        - text: in
+                        - link "#550" [ref=e790] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/550
+                      - listitem [ref=e791]:
+                        - text: "kernel: Rewrite the kernel source code by"
+                        - link "@ShirkNeko" [ref=e792] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#554" [ref=e793] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/554
+                      - listitem [ref=e794]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e795] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#568" [ref=e796] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/568
+                      - listitem [ref=e797]:
+                        - text: "Manager/CI: Add spoofed manager build by"
+                        - link "@luyanci" [ref=e798] [cursor=pointer]:
+                          - /url: https://github.com/luyanci
+                        - text: in
+                        - link "#570" [ref=e799] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/570
+                      - listitem [ref=e800]:
+                        - text: Merge dev into main by
+                        - link "@Tools-cx-app" [ref=e801] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                        - text: in
+                        - link "#576" [ref=e802] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/576
+                      - listitem [ref=e803]:
+                        - text: "ci: fix shared-key not find (ksud) by"
+                        - link "@Tools-cx-app" [ref=e804] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                        - text: in
+                        - link "#577" [ref=e805] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/577
+                      - listitem [ref=e806]:
+                        - text: "ci: remove cache for ksud by"
+                        - link "@Tools-cx-app" [ref=e807] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                        - text: in
+                        - link "#578" [ref=e808] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/578
+                      - listitem [ref=e809]:
+                        - text: Merge dev into main by
+                        - link "@Tools-cx-app" [ref=e810] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                        - text: in
+                        - link "#581" [ref=e811] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/581
+                    - heading "New Contributors" [level=2] [ref=e812]
+                    - list [ref=e813]:
+                      - listitem [ref=e814]:
+                        - link "@saitama-droid" [ref=e815] [cursor=pointer]:
+                          - /url: https://github.com/saitama-droid
+                        - text: made their first contribution in
+                        - link "#453" [ref=e816] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/453
+                      - listitem [ref=e817]:
+                        - link "@Cynthia-cnn" [ref=e818] [cursor=pointer]:
+                          - /url: https://github.com/Cynthia-cnn
+                        - text: made their first contribution in
+                        - link "#464" [ref=e819] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/464
+                      - listitem [ref=e820]:
+                        - link "@PKQandBaaad" [ref=e821] [cursor=pointer]:
+                          - /url: https://github.com/PKQandBaaad
+                        - text: made their first contribution in
+                        - link "#478" [ref=e822] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/478
+                      - listitem [ref=e823]:
+                        - link "@frostg-012" [ref=e824] [cursor=pointer]:
+                          - /url: https://github.com/frostg-012
+                        - text: made their first contribution in
+                        - link "#482" [ref=e825] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/482
+                      - listitem [ref=e826]:
+                        - link "@micfogas" [ref=e827] [cursor=pointer]:
+                          - /url: https://github.com/micfogas
+                        - text: made their first contribution in
+                        - link "#548" [ref=e828] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/548
+                    - paragraph [ref=e829]:
+                      - strong [ref=e830]: Full Changelog
+                      - text: ":"
+                      - link "v3.2.0...v4.0.0" [ref=e831] [cursor=pointer]:
+                        - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/compare/v3.2.0...v4.0.0
+                - generic [ref=e832]:
+                  - generic [ref=e833]:
+                    - heading "Contributors" [level=3] [ref=e834]
+                    - list [ref=e835]:
+                      - listitem [ref=e836]:
+                        - link "@tiann" [ref=e837] [cursor=pointer]:
+                          - /url: https://github.com/tiann
+                          - img "@tiann" [ref=e838]
+                      - listitem [ref=e839]:
+                        - link "@micfogas" [ref=e840] [cursor=pointer]:
+                          - /url: https://github.com/micfogas
+                          - img "@micfogas" [ref=e841]
+                      - listitem [ref=e842]:
+                        - link "@aviraxp" [ref=e843] [cursor=pointer]:
+                          - /url: https://github.com/aviraxp
+                          - img "@aviraxp" [ref=e844]
+                      - listitem [ref=e845]:
+                        - link "@Ylarod" [ref=e846] [cursor=pointer]:
+                          - /url: https://github.com/Ylarod
+                          - img "@Ylarod" [ref=e847]
+                      - listitem [ref=e848]:
+                        - link "@frostg-012" [ref=e849] [cursor=pointer]:
+                          - /url: https://github.com/frostg-012
+                          - img "@frostg-012" [ref=e850]
+                      - listitem [ref=e851]:
+                        - link "@luyanci" [ref=e852] [cursor=pointer]:
+                          - /url: https://github.com/luyanci
+                          - img "@luyanci" [ref=e853]
+                      - listitem [ref=e854]:
+                        - link "@Cynthia-cnn" [ref=e855] [cursor=pointer]:
+                          - /url: https://github.com/Cynthia-cnn
+                          - img "@Cynthia-cnn" [ref=e856]
+                      - listitem [ref=e857]:
+                        - link "@YuzakiKokuban" [ref=e858] [cursor=pointer]:
+                          - /url: https://github.com/YuzakiKokuban
+                          - img "@YuzakiKokuban" [ref=e859]
+                      - listitem [ref=e860]:
+                        - link "@AlexLiuDev233" [ref=e861] [cursor=pointer]:
+                          - /url: https://github.com/AlexLiuDev233
+                          - img "@AlexLiuDev233" [ref=e862]
+                      - listitem [ref=e863]:
+                        - link "@Prslc" [ref=e864] [cursor=pointer]:
+                          - /url: https://github.com/Prslc
+                          - img "@Prslc" [ref=e865]
+                      - listitem [ref=e866]:
+                        - link "@ShirkNeko" [ref=e867] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                          - img "@ShirkNeko" [ref=e868]
+                      - listitem [ref=e869]:
+                        - link "@backslashxx" [ref=e870] [cursor=pointer]:
+                          - /url: https://github.com/backslashxx
+                          - img "@backslashxx" [ref=e871]
+                      - listitem [ref=e872]:
+                        - link "@HSSkyBoy" [ref=e873] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                          - img "@HSSkyBoy" [ref=e874]
+                      - listitem [ref=e875]:
+                        - link "@Tools-cx-app" [ref=e876] [cursor=pointer]:
+                          - /url: https://github.com/Tools-cx-app
+                          - img "@Tools-cx-app" [ref=e877]
+                      - listitem [ref=e878]:
+                        - link "@SaleOff" [ref=e879] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                          - img "@SaleOff" [ref=e880]
+                      - listitem [ref=e881]:
+                        - link "@PKQandBaaad" [ref=e882] [cursor=pointer]:
+                          - /url: https://github.com/PKQandBaaad
+                          - img "@PKQandBaaad" [ref=e883]
+                      - listitem [ref=e884]:
+                        - link "@saitama-droid" [ref=e885] [cursor=pointer]:
+                          - /url: https://github.com/saitama-droid
+                          - img "@saitama-droid" [ref=e886]
+                      - listitem [ref=e887]:
+                        - link "@unknow-tech" [ref=e888] [cursor=pointer]:
+                          - /url: https://github.com/unknow-tech
+                          - img "@unknow-tech" [ref=e889]
+                    - generic [ref=e890]: tiann, micfogas, and 16 other contributors
+                  - group [ref=e893]:
+                    - button "Assets 3" [ref=e894] [cursor=pointer]:
+                      - generic [ref=e895]:
+                        - generic [ref=e896]: Assets
+                        - generic "3" [ref=e897]
+                  - generic [ref=e899]:
+                    - group [ref=e901]:
+                      - generic "Add or remove reactions" [ref=e902] [cursor=pointer]:
+                        - img [ref=e903]
+                    - generic [ref=e906]:
+                      - 'button "thumbs up (6): ShirkNeko, 02:03PM on November 16, 2025" [ref=e907] [cursor=pointer]':
+                        - generic [ref=e908]: 👍
+                        - generic [ref=e909]: "6"
+                      - 'button "hooray (10): ShirkNeko, 02:03PM on November 16, 2025" [ref=e910] [cursor=pointer]':
+                        - generic [ref=e911]: 🎉
+                        - generic [ref=e912]: "10"
+                      - 'button "rocket (6): ShirkNeko, 02:03PM on November 16, 2025" [ref=e913] [cursor=pointer]':
+                        - generic [ref=e914]: 🚀
+                        - generic [ref=e915]: "6"
+                    - generic [ref=e916]: 17 people reacted
+          - region "3.2.0" [ref=e917]:
+            - heading "3.2.0" [level=2] [ref=e918]
+            - generic [ref=e919]:
+              - generic [ref=e920]:
+                - generic [ref=e921]: 24 Sep 14:45 Sep 24, 2025
+                - generic [ref=e922]:
+                  - img "@ShirkNeko" [ref=e923]
+                  - link "ShirkNeko" [ref=e924] [cursor=pointer]:
+                    - /url: /ShirkNeko
+                - link "Tag v3.2.0" [ref=e926] [cursor=pointer]:
+                  - /url: /SukiSU-Ultra/SukiSU-Ultra/tree/v3.2.0
+                  - generic [ref=e927]:
+                    - img "Tag" [ref=e928]
+                    - text: v3.2.0
+                - generic [ref=e930]:
+                  - link "Commit 0af1ab2" [ref=e931] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/commit/0af1ab28450a1df548850b4a05ba82a5cbef478e
+                    - img "Commit" [ref=e932]
+                    - code [ref=e934]: 0af1ab2
+                  - group [ref=e935]:
+                    - generic "Verified commit signature" [ref=e936] [cursor=pointer]:
+                      - img "Verified commit signature" [ref=e937]
+                - button "Compare" [ref=e942] [cursor=pointer]:
+                  - generic [ref=e943]:
+                    - generic [ref=e944]: Compare
+                    - generic:
+                      - img
+              - generic [ref=e946]:
+                - generic [ref=e947]:
+                  - link "3.2.0" [ref=e952] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/tag/v3.2.0
+                  - generic [ref=e954]:
+                    - heading "What's Changed" [level=2] [ref=e955]
+                    - list [ref=e956]:
+                      - listitem [ref=e957]:
+                        - text: "kernel: Removs extra strip for hook choice by"
+                        - link "@dabao1955" [ref=e958] [cursor=pointer]:
+                          - /url: https://github.com/dabao1955
+                        - text: in
+                        - link "#361" [ref=e959] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/361
+                      - listitem [ref=e960]:
+                        - text: "manager: Optimized import, optimized all libsu shell calls, and fixed WebUI memory leaks by"
+                        - link "@YumeYuka" [ref=e961] [cursor=pointer]:
+                          - /url: https://github.com/YumeYuka
+                        - text: in
+                        - link "#369" [ref=e962] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/369
+                      - listitem [ref=e963]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e964] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#370" [ref=e965] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/370
+                      - listitem [ref=e966]:
+                        - text: fix 'for' loop problem by
+                        - link "@aaaaaaaa-815" [ref=e967] [cursor=pointer]:
+                          - /url: https://github.com/aaaaaaaa-815
+                        - text: in
+                        - link "#376" [ref=e968] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/376
+                      - listitem [ref=e969]:
+                        - text: "docs: add SukiSU logo/icon files by"
+                        - link "@OukaroMF" [ref=e970] [cursor=pointer]:
+                          - /url: https://github.com/OukaroMF
+                        - text: in
+                        - link "#377" [ref=e971] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/377
+                      - listitem [ref=e972]:
+                        - text: Fix Japanese by
+                        - link "@reindex-ot" [ref=e973] [cursor=pointer]:
+                          - /url: https://github.com/reindex-ot
+                        - text: in
+                        - link "#378" [ref=e974] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/378
+                      - listitem [ref=e975]:
+                        - text: "docs: Update SukiSU logo by"
+                        - link "@HSSkyBoy" [ref=e976] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                        - text: in
+                        - link "#381" [ref=e977] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/381
+                      - listitem [ref=e978]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e979] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#379" [ref=e980] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/379
+                      - listitem [ref=e981]:
+                        - text: "docs(zh): relocate SukiSU.svg to correct directory by"
+                        - link "@OukaroMF" [ref=e982] [cursor=pointer]:
+                          - /url: https://github.com/OukaroMF
+                        - text: in
+                        - link "#382" [ref=e983] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/382
+                      - listitem [ref=e984]:
+                        - text: "manager: 更标准的工作模式显示 by"
+                        - link "@yspbwx2010" [ref=e985] [cursor=pointer]:
+                          - /url: https://github.com/yspbwx2010
+                        - text: in
+                        - link "#384" [ref=e986] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/384
+                      - listitem [ref=e987]:
+                        - text: Add support for more kernel image name in KPM patcher by
+                        - link "@YuzakiKokuban" [ref=e988] [cursor=pointer]:
+                          - /url: https://github.com/YuzakiKokuban
+                        - text: in
+                        - link "#386" [ref=e989] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/386
+                      - listitem [ref=e990]:
+                        - text: "manager: Update zh-rTW strings by"
+                        - link "@HSSkyBoy" [ref=e991] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                        - text: in
+                        - link "#388" [ref=e992] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/388
+                      - listitem [ref=e993]:
+                        - text: "ksud: migrate ksud execution to security_bprm_check by"
+                        - link "@backslashxx" [ref=e994] [cursor=pointer]:
+                          - /url: https://github.com/backslashxx
+                        - text: in
+                        - link "#414" [ref=e995] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/414
+                      - listitem [ref=e996]:
+                        - text: "kpm: remove incorrect \"<\" to fix compilation error by"
+                        - link "@yspbwx2010" [ref=e997] [cursor=pointer]:
+                          - /url: https://github.com/yspbwx2010
+                        - text: in
+                        - link "#418" [ref=e998] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/418
+                    - heading "New Contributors" [level=2] [ref=e999]
+                    - list [ref=e1000]:
+                      - listitem [ref=e1001]:
+                        - link "@YumeYuka" [ref=e1002] [cursor=pointer]:
+                          - /url: https://github.com/YumeYuka
+                        - text: made their first contribution in
+                        - link "#369" [ref=e1003] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/369
+                      - listitem [ref=e1004]:
+                        - link "@aaaaaaaa-815" [ref=e1005] [cursor=pointer]:
+                          - /url: https://github.com/aaaaaaaa-815
+                        - text: made their first contribution in
+                        - link "#376" [ref=e1006] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/376
+                    - paragraph [ref=e1007]:
+                      - strong [ref=e1008]: Full Changelog
+                      - text: ":"
+                      - link "v3.1.9...v3.2.0" [ref=e1009] [cursor=pointer]:
+                        - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/compare/v3.1.9...v3.2.0
+                - generic [ref=e1010]:
+                  - generic [ref=e1011]:
+                    - heading "Contributors" [level=3] [ref=e1012]
+                    - list [ref=e1013]:
+                      - listitem [ref=e1014]:
+                        - link "@reindex-ot" [ref=e1015] [cursor=pointer]:
+                          - /url: https://github.com/reindex-ot
+                          - img "@reindex-ot" [ref=e1016]
+                      - listitem [ref=e1017]:
+                        - link "@dabao1955" [ref=e1018] [cursor=pointer]:
+                          - /url: https://github.com/dabao1955
+                          - img "@dabao1955" [ref=e1019]
+                      - listitem [ref=e1020]:
+                        - link "@aaaaaaaa-815" [ref=e1021] [cursor=pointer]:
+                          - /url: https://github.com/aaaaaaaa-815
+                          - img "@aaaaaaaa-815" [ref=e1022]
+                      - listitem [ref=e1023]:
+                        - link "@YuzakiKokuban" [ref=e1024] [cursor=pointer]:
+                          - /url: https://github.com/YuzakiKokuban
+                          - img "@YuzakiKokuban" [ref=e1025]
+                      - listitem [ref=e1026]:
+                        - link "@OukaroMF" [ref=e1027] [cursor=pointer]:
+                          - /url: https://github.com/OukaroMF
+                          - img "@OukaroMF" [ref=e1028]
+                      - listitem [ref=e1029]:
+                        - link "@ShirkNeko" [ref=e1030] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                          - img "@ShirkNeko" [ref=e1031]
+                      - listitem [ref=e1032]:
+                        - link "@backslashxx" [ref=e1033] [cursor=pointer]:
+                          - /url: https://github.com/backslashxx
+                          - img "@backslashxx" [ref=e1034]
+                      - listitem [ref=e1035]:
+                        - link "@yspbwx2010" [ref=e1036] [cursor=pointer]:
+                          - /url: https://github.com/yspbwx2010
+                          - img "@yspbwx2010" [ref=e1037]
+                      - listitem [ref=e1038]:
+                        - link "@HSSkyBoy" [ref=e1039] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                          - img "@HSSkyBoy" [ref=e1040]
+                      - listitem [ref=e1041]:
+                        - link "@YumeYuka" [ref=e1042] [cursor=pointer]:
+                          - /url: https://github.com/YumeYuka
+                          - img "@YumeYuka" [ref=e1043]
+                    - generic [ref=e1044]: reindex-ot, dabao1955, and 8 other contributors
+                  - group [ref=e1047]:
+                    - button "Assets 3" [ref=e1048] [cursor=pointer]:
+                      - generic [ref=e1049]:
+                        - generic [ref=e1050]: Assets
+                        - generic "3" [ref=e1051]
+                  - generic [ref=e1053]:
+                    - group [ref=e1055]:
+                      - generic "Add or remove reactions" [ref=e1056] [cursor=pointer]:
+                        - img [ref=e1057]
+                    - generic [ref=e1060]:
+                      - 'button "thumbs up (24): ShirkNeko, 10:45PM on September 24, 2025" [ref=e1061] [cursor=pointer]':
+                        - generic [ref=e1062]: 👍
+                        - generic [ref=e1063]: "24"
+                      - 'button "laugh (8): ShirkNeko, 10:45PM on September 24, 2025" [ref=e1064] [cursor=pointer]':
+                        - generic [ref=e1065]: 😄
+                        - generic [ref=e1066]: "8"
+                      - 'button "hooray (21): ShirkNeko, 10:45PM on September 24, 2025" [ref=e1067] [cursor=pointer]':
+                        - generic [ref=e1068]: 🎉
+                        - generic [ref=e1069]: "21"
+                      - 'button "heart (6): ShirkNeko, 10:45PM on September 24, 2025" [ref=e1070] [cursor=pointer]':
+                        - generic [ref=e1071]: ❤️
+                        - generic [ref=e1072]: "6"
+                      - 'button "rocket (5): ShirkNeko, 10:45PM on September 24, 2025" [ref=e1073] [cursor=pointer]':
+                        - generic [ref=e1074]: 🚀
+                        - generic [ref=e1075]: "5"
+                      - 'button "eyes (6): ShirkNeko, 10:45PM on September 24, 2025" [ref=e1076] [cursor=pointer]':
+                        - generic [ref=e1077]: 👀
+                        - generic [ref=e1078]: "6"
+                    - generic [ref=e1079]: 50 people reacted
+          - region "v3.1.9" [ref=e1080]:
+            - heading "v3.1.9" [level=2] [ref=e1081]
+            - generic [ref=e1082]:
+              - generic [ref=e1083]:
+                - generic [ref=e1084]: 24 Aug 03:45 Aug 24, 2025
+                - generic [ref=e1085]:
+                  - img "@ShirkNeko" [ref=e1086]
+                  - link "ShirkNeko" [ref=e1087] [cursor=pointer]:
+                    - /url: /ShirkNeko
+                - link "Tag v3.1.9" [ref=e1089] [cursor=pointer]:
+                  - /url: /SukiSU-Ultra/SukiSU-Ultra/tree/v3.1.9
+                  - generic [ref=e1090]:
+                    - img "Tag" [ref=e1091]
+                    - text: v3.1.9
+                - generic [ref=e1093]:
+                  - link "Commit b8b7534" [ref=e1094] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/commit/b8b75349e01d2cfa00496b72795bb185b9c2ae4b
+                    - img "Commit" [ref=e1095]
+                    - code [ref=e1097]: b8b7534
+                  - group [ref=e1098]:
+                    - generic "Verified commit signature" [ref=e1099] [cursor=pointer]:
+                      - img "Verified commit signature" [ref=e1100]
+                - button "Compare" [ref=e1105] [cursor=pointer]:
+                  - generic [ref=e1106]:
+                    - generic [ref=e1107]: Compare
+                    - generic:
+                      - img
+              - generic [ref=e1109]:
+                - generic [ref=e1110]:
+                  - link "v3.1.9" [ref=e1115] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/tag/v3.1.9
+                  - generic [ref=e1117]:
+                    - heading "What's Changed" [level=2] [ref=e1118]
+                    - list [ref=e1119]:
+                      - listitem [ref=e1120]:
+                        - text: "manager: Remove Loading Dialog when enable/disable the module by"
+                        - link "@WenHao2130" [ref=e1121] [cursor=pointer]:
+                          - /url: https://github.com/WenHao2130
+                        - text: in
+                        - link "#291" [ref=e1122] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/291
+                      - listitem [ref=e1123]:
+                        - text: Improve file existence check and copying methods, optimize command execution logic, and fix KPM version display issue by
+                        - link "@Seyud" [ref=e1124] [cursor=pointer]:
+                          - /url: https://github.com/Seyud
+                        - text: in
+                        - link "#298" [ref=e1125] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/298
+                      - listitem [ref=e1126]:
+                        - text: "revert: fix: Remove the incorrect display of the KPM version and simp… by"
+                        - link "@Seyud" [ref=e1127] [cursor=pointer]:
+                          - /url: https://github.com/Seyud
+                        - text: in
+                        - link "#299" [ref=e1128] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/299
+                      - listitem [ref=e1129]:
+                        - text: Update Vietnamese Translation by
+                        - link "@SaleOff" [ref=e1130] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                        - text: in
+                        - link "#302" [ref=e1131] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/302
+                      - listitem [ref=e1132]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e1133] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#300" [ref=e1134] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/300
+                      - listitem [ref=e1135]:
+                        - text: "string: Change description by"
+                        - link "@MiRinChan" [ref=e1136] [cursor=pointer]:
+                          - /url: https://github.com/MiRinChan
+                        - text: in
+                        - link "#306" [ref=e1137] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/306
+                      - listitem [ref=e1138]:
+                        - text: Update Vietnamese Translation by
+                        - link "@SaleOff" [ref=e1139] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                        - text: in
+                        - link "#305" [ref=e1140] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/305
+                      - listitem [ref=e1141]:
+                        - text: "kernel(kpm): fix typo in printk logs by"
+                        - link "@Prslc" [ref=e1142] [cursor=pointer]:
+                          - /url: https://github.com/Prslc
+                        - text: in
+                        - link "#311" [ref=e1143] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/311
+                      - listitem [ref=e1144]:
+                        - text: "manger: update Traditional Chinese translation by"
+                        - link "@HSSkyBoy" [ref=e1145] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                        - text: in
+                        - link "#314" [ref=e1146] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/314
+                      - listitem [ref=e1147]:
+                        - text: Updated Chinese Traditional by
+                        - link "@HSSkyBoy" [ref=e1148] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                        - text: in
+                        - link "#325" [ref=e1149] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/325
+                      - listitem [ref=e1150]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e1151] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#329" [ref=e1152] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/329
+                      - listitem [ref=e1153]:
+                        - text: "manger: Fix translate module signature verification string by"
+                        - link "@HSSkyBoy" [ref=e1154] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                        - text: in
+                        - link "#332" [ref=e1155] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/332
+                      - listitem [ref=e1156]:
+                        - text: "setup.sh: cleanup symlink & config logic by @noctyra1006627 in"
+                        - link "#338" [ref=e1157] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/338
+                      - listitem [ref=e1158]:
+                        - text: Fix typo strings by
+                        - link "@SaleOff" [ref=e1159] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                        - text: in
+                        - link "#339" [ref=e1160] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/339
+                      - listitem [ref=e1161]:
+                        - text: 修改翻譯 by
+                        - link "@mihoy3rd" [ref=e1162] [cursor=pointer]:
+                          - /url: https://github.com/mihoy3rd
+                        - text: in
+                        - link "#343" [ref=e1163] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/343
+                      - listitem [ref=e1164]:
+                        - text: "docs: zh: Introduce tracepoint hook documents by"
+                        - link "@luyanci" [ref=e1165] [cursor=pointer]:
+                          - /url: https://github.com/luyanci
+                        - text: in
+                        - link "#350" [ref=e1166] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/350
+                      - listitem [ref=e1167]:
+                        - text: "docs: EN: add simple translation for tracepoint-hook docs by"
+                        - link "@OukaroMF" [ref=e1168] [cursor=pointer]:
+                          - /url: https://github.com/OukaroMF
+                        - text: in
+                        - link "#352" [ref=e1169] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/352
+                      - listitem [ref=e1170]:
+                        - text: "kernel: Remove unnecessary strip in CONFIG_KSU_TRACEPOINT_HOOK check by"
+                        - link "@dabao1955" [ref=e1171] [cursor=pointer]:
+                          - /url: https://github.com/dabao1955
+                        - text: in
+                        - link "#353" [ref=e1172] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/353
+                    - heading "New Contributors" [level=2] [ref=e1173]
+                    - list [ref=e1174]:
+                      - listitem [ref=e1175]:
+                        - link "@Seyud" [ref=e1176] [cursor=pointer]:
+                          - /url: https://github.com/Seyud
+                        - text: made their first contribution in
+                        - link "#298" [ref=e1177] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/298
+                      - listitem [ref=e1178]:
+                        - text: "@noctyra1006627 made their first contribution in"
+                        - link "#338" [ref=e1179] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/338
+                      - listitem [ref=e1180]:
+                        - link "@OukaroMF" [ref=e1181] [cursor=pointer]:
+                          - /url: https://github.com/OukaroMF
+                        - text: made their first contribution in
+                        - link "#352" [ref=e1182] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/352
+                      - listitem [ref=e1183]:
+                        - link "@dabao1955" [ref=e1184] [cursor=pointer]:
+                          - /url: https://github.com/dabao1955
+                        - text: made their first contribution in
+                        - link "#353" [ref=e1185] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/353
+                    - paragraph [ref=e1186]:
+                      - strong [ref=e1187]: Full Changelog
+                      - text: ":"
+                      - link "v3.1.8...v3.1.9" [ref=e1188] [cursor=pointer]:
+                        - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/compare/v3.1.8...v3.1.9
+                - generic [ref=e1189]:
+                  - generic [ref=e1190]:
+                    - heading "Contributors" [level=3] [ref=e1191]
+                    - list [ref=e1192]:
+                      - listitem [ref=e1193]:
+                        - link "@luyanci" [ref=e1194] [cursor=pointer]:
+                          - /url: https://github.com/luyanci
+                          - img "@luyanci" [ref=e1195]
+                      - listitem [ref=e1196]:
+                        - link "@dabao1955" [ref=e1197] [cursor=pointer]:
+                          - /url: https://github.com/dabao1955
+                          - img "@dabao1955" [ref=e1198]
+                      - listitem [ref=e1199]:
+                        - link "@Seyud" [ref=e1200] [cursor=pointer]:
+                          - /url: https://github.com/Seyud
+                          - img "@Seyud" [ref=e1201]
+                      - listitem [ref=e1202]:
+                        - link "@WenHao2130" [ref=e1203] [cursor=pointer]:
+                          - /url: https://github.com/WenHao2130
+                          - img "@WenHao2130" [ref=e1204]
+                      - listitem [ref=e1205]:
+                        - link "@Prslc" [ref=e1206] [cursor=pointer]:
+                          - /url: https://github.com/Prslc
+                          - img "@Prslc" [ref=e1207]
+                      - listitem [ref=e1208]:
+                        - link "@OukaroMF" [ref=e1209] [cursor=pointer]:
+                          - /url: https://github.com/OukaroMF
+                          - img "@OukaroMF" [ref=e1210]
+                      - listitem [ref=e1211]:
+                        - link "@ShirkNeko" [ref=e1212] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                          - img "@ShirkNeko" [ref=e1213]
+                      - listitem [ref=e1214]:
+                        - link "@HSSkyBoy" [ref=e1215] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                          - img "@HSSkyBoy" [ref=e1216]
+                      - listitem [ref=e1217]:
+                        - link "@SaleOff" [ref=e1218] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                          - img "@SaleOff" [ref=e1219]
+                      - listitem [ref=e1220]:
+                        - link "@MiRinChan" [ref=e1221] [cursor=pointer]:
+                          - /url: https://github.com/MiRinChan
+                          - img "@MiRinChan" [ref=e1222]
+                      - listitem [ref=e1223]:
+                        - link "@mihoy3rd" [ref=e1224] [cursor=pointer]:
+                          - /url: https://github.com/mihoy3rd
+                          - img "@mihoy3rd" [ref=e1225]
+                      - listitem [ref=e1226]:
+                        - link "@oscyre1006627" [ref=e1227] [cursor=pointer]:
+                          - /url: https://github.com/oscyre1006627
+                          - img "@oscyre1006627" [ref=e1228]
+                    - generic [ref=e1229]: luyanci, dabao1955, and 10 other contributors
+                  - group [ref=e1232]:
+                    - button "Assets 3" [ref=e1233] [cursor=pointer]:
+                      - generic [ref=e1234]:
+                        - generic [ref=e1235]: Assets
+                        - generic "3" [ref=e1236]
+                  - generic [ref=e1238]:
+                    - group [ref=e1240]:
+                      - generic "Add or remove reactions" [ref=e1241] [cursor=pointer]:
+                        - img [ref=e1242]
+                    - generic [ref=e1245]:
+                      - 'button "laugh (8): ShirkNeko, 11:45AM on August 24, 2025" [ref=e1246] [cursor=pointer]':
+                        - generic [ref=e1247]: 😄
+                        - generic [ref=e1248]: "8"
+                      - 'button "hooray (3): ShirkNeko, 11:45AM on August 24, 2025" [ref=e1249] [cursor=pointer]':
+                        - generic [ref=e1250]: 🎉
+                        - generic [ref=e1251]: "3"
+                      - 'button "heart (14): ShirkNeko, 11:45AM on August 24, 2025" [ref=e1252] [cursor=pointer]':
+                        - generic [ref=e1253]: ❤️
+                        - generic [ref=e1254]: "14"
+                      - 'button "rocket (4): ShirkNeko, 11:45AM on August 24, 2025" [ref=e1255] [cursor=pointer]':
+                        - generic [ref=e1256]: 🚀
+                        - generic [ref=e1257]: "4"
+                      - 'button "eyes (2): ShirkNeko, 11:45AM on August 24, 2025" [ref=e1258] [cursor=pointer]':
+                        - generic [ref=e1259]: 👀
+                        - generic [ref=e1260]: "2"
+                    - generic [ref=e1261]: 23 people reacted
+          - region "v3.1.8" [ref=e1262]:
+            - heading "v3.1.8" [level=2] [ref=e1263]
+            - generic [ref=e1264]:
+              - generic [ref=e1265]:
+                - generic [ref=e1266]: 21 Jul 13:22 Jul 21, 2025
+                - generic [ref=e1267]:
+                  - img "@ShirkNeko" [ref=e1268]
+                  - link "ShirkNeko" [ref=e1269] [cursor=pointer]:
+                    - /url: /ShirkNeko
+                - link "Tag v3.1.8" [ref=e1271] [cursor=pointer]:
+                  - /url: /SukiSU-Ultra/SukiSU-Ultra/tree/v3.1.8
+                  - generic [ref=e1272]:
+                    - img "Tag" [ref=e1273]
+                    - text: v3.1.8
+                - generic [ref=e1275]:
+                  - link "Commit 5ba4f73" [ref=e1276] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/commit/5ba4f73eeb6882a83c2aa41f9fd76e64ed5feb82
+                    - img "Commit" [ref=e1277]
+                    - code [ref=e1279]: 5ba4f73
+                  - group [ref=e1280]:
+                    - generic "Verified commit signature" [ref=e1281] [cursor=pointer]:
+                      - img "Verified commit signature" [ref=e1282]
+                - button "Compare" [ref=e1287] [cursor=pointer]:
+                  - generic [ref=e1288]:
+                    - generic [ref=e1289]: Compare
+                    - generic:
+                      - img
+              - generic [ref=e1291]:
+                - generic [ref=e1292]:
+                  - link "v3.1.8" [ref=e1297] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/tag/v3.1.8
+                  - generic [ref=e1299]:
+                    - heading "What's Changed" [level=2] [ref=e1300]
+                    - list [ref=e1301]:
+                      - listitem [ref=e1302]:
+                        - text: 修复由于不当的协程异常捕获导致的manager升级崩溃 by
+                        - link "@f401" [ref=e1303] [cursor=pointer]:
+                          - /url: https://github.com/f401
+                        - text: in
+                        - link "#249" [ref=e1304] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/249
+                      - listitem [ref=e1305]:
+                        - text: Update Vietnamese Translation by
+                        - link "@SaleOff" [ref=e1306] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                        - text: in
+                        - link "#248" [ref=e1307] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/248
+                      - listitem [ref=e1308]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e1309] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#247" [ref=e1310] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/247
+                      - listitem [ref=e1311]:
+                        - text: Update Vietnamese Translation by
+                        - link "@SaleOff" [ref=e1312] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                        - text: in
+                        - link "#257" [ref=e1313] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/257
+                      - listitem [ref=e1314]:
+                        - text: "manager: 显示 Zygisk 实现方式 by"
+                        - link "@YangQi0408" [ref=e1315] [cursor=pointer]:
+                          - /url: https://github.com/YangQi0408
+                        - text: in
+                        - link "#264" [ref=e1316] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/264
+                      - listitem [ref=e1317]:
+                        - text: "fix(manager): add extraspace after \"UID:\" for Home screen by"
+                        - link "@marat2509" [ref=e1318] [cursor=pointer]:
+                          - /url: https://github.com/marat2509
+                        - text: in
+                        - link "#268" [ref=e1319] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/268
+                      - listitem [ref=e1320]:
+                        - text: "copyright: Correct copyright owner information by"
+                        - link "@MiRinChan" [ref=e1321] [cursor=pointer]:
+                          - /url: https://github.com/MiRinChan
+                        - text: in
+                        - link "#273" [ref=e1322] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/273
+                      - listitem [ref=e1323]:
+                        - text: "string: add copyright infomation by"
+                        - link "@MiRinChan" [ref=e1324] [cursor=pointer]:
+                          - /url: https://github.com/MiRinChan
+                        - text: in
+                        - link "#275" [ref=e1325] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/275
+                      - listitem [ref=e1326]:
+                        - text: "kernel: core_hook: add support for KernelNoSU by"
+                        - link "@YangQi0408" [ref=e1327] [cursor=pointer]:
+                          - /url: https://github.com/YangQi0408
+                        - text: in
+                        - link "#270" [ref=e1328] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/270
+                      - listitem [ref=e1329]:
+                        - text: "UPSTREAM: manager: improve predictive back animations by"
+                        - link "@WenHao2130" [ref=e1330] [cursor=pointer]:
+                          - /url: https://github.com/WenHao2130
+                        - text: in
+                        - link "#276" [ref=e1331] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/276
+                      - listitem [ref=e1332]:
+                        - text: "manager: Add switch to hide Zygisk implementation status information by"
+                        - link "@Prslc" [ref=e1333] [cursor=pointer]:
+                          - /url: https://github.com/Prslc
+                        - text: in
+                        - link "#277" [ref=e1334] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/277
+                      - listitem [ref=e1335]:
+                        - text: "manager: Display Zygisk implementation method with rezygisk support by"
+                        - link "@Prslc" [ref=e1336] [cursor=pointer]:
+                          - /url: https://github.com/Prslc
+                        - text: in
+                        - link "#278" [ref=e1337] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/278
+                      - listitem [ref=e1338]:
+                        - text: "manager: fix typo in hide_zygisk_implement string and summary by"
+                        - link "@Prslc" [ref=e1339] [cursor=pointer]:
+                          - /url: https://github.com/Prslc
+                        - text: in
+                        - link "#279" [ref=e1340] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/279
+                      - listitem [ref=e1341]:
+                        - text: "docs: Revamped README and documentation by"
+                        - link "@MiRinChan" [ref=e1342] [cursor=pointer]:
+                          - /url: https://github.com/MiRinChan
+                        - text: in
+                        - link "#281" [ref=e1343] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/281
+                      - listitem [ref=e1344]:
+                        - text: "docs: fix wrong infomation by"
+                        - link "@MiRinChan" [ref=e1345] [cursor=pointer]:
+                          - /url: https://github.com/MiRinChan
+                        - text: in
+                        - link "#282" [ref=e1346] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/282
+                      - listitem [ref=e1347]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e1348] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#280" [ref=e1349] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/280
+                      - listitem [ref=e1350]:
+                        - text: "script: Simplify repository cloning logic by"
+                        - link "@yspbwx2010" [ref=e1351] [cursor=pointer]:
+                          - /url: https://github.com/yspbwx2010
+                        - text: in
+                        - link "#283" [ref=e1352] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/283
+                      - listitem [ref=e1353]:
+                        - text: Update Vietnamese Translation by
+                        - link "@SaleOff" [ref=e1354] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                        - text: in
+                        - link "#284" [ref=e1355] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/284
+                      - listitem [ref=e1356]:
+                        - text: "readme: add chinese translation by"
+                        - link "@MiRinChan" [ref=e1357] [cursor=pointer]:
+                          - /url: https://github.com/MiRinChan
+                        - text: in
+                        - link "#290" [ref=e1358] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/290
+                      - listitem [ref=e1359]:
+                        - text: 优化setup.sh by
+                        - link "@awkoo" [ref=e1360] [cursor=pointer]:
+                          - /url: https://github.com/awkoo
+                        - text: in
+                        - link "#288" [ref=e1361] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/288
+                    - heading "New Contributors" [level=2] [ref=e1362]
+                    - list [ref=e1363]:
+                      - listitem [ref=e1364]:
+                        - link "@f401" [ref=e1365] [cursor=pointer]:
+                          - /url: https://github.com/f401
+                        - text: made their first contribution in
+                        - link "#249" [ref=e1366] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/249
+                      - listitem [ref=e1367]:
+                        - link "@YangQi0408" [ref=e1368] [cursor=pointer]:
+                          - /url: https://github.com/YangQi0408
+                        - text: made their first contribution in
+                        - link "#264" [ref=e1369] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/264
+                      - listitem [ref=e1370]:
+                        - link "@marat2509" [ref=e1371] [cursor=pointer]:
+                          - /url: https://github.com/marat2509
+                        - text: made their first contribution in
+                        - link "#268" [ref=e1372] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/268
+                      - listitem [ref=e1373]:
+                        - link "@yspbwx2010" [ref=e1374] [cursor=pointer]:
+                          - /url: https://github.com/yspbwx2010
+                        - text: made their first contribution in
+                        - link "#283" [ref=e1375] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/283
+                      - listitem [ref=e1376]:
+                        - link "@awkoo" [ref=e1377] [cursor=pointer]:
+                          - /url: https://github.com/awkoo
+                        - text: made their first contribution in
+                        - link "#288" [ref=e1378] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/288
+                    - paragraph [ref=e1379]:
+                      - strong [ref=e1380]: Full Changelog
+                      - text: ":"
+                      - link "v3.1.7...v3.1.8" [ref=e1381] [cursor=pointer]:
+                        - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/compare/v3.1.7...v3.1.8
+                - generic [ref=e1382]:
+                  - generic [ref=e1383]:
+                    - heading "Contributors" [level=3] [ref=e1384]
+                    - list [ref=e1385]:
+                      - listitem [ref=e1386]:
+                        - link "@f401" [ref=e1387] [cursor=pointer]:
+                          - /url: https://github.com/f401
+                          - img "@f401" [ref=e1388]
+                      - listitem [ref=e1389]:
+                        - link "@marat2509" [ref=e1390] [cursor=pointer]:
+                          - /url: https://github.com/marat2509
+                          - img "@marat2509" [ref=e1391]
+                      - listitem [ref=e1392]:
+                        - link "@WenHao2130" [ref=e1393] [cursor=pointer]:
+                          - /url: https://github.com/WenHao2130
+                          - img "@WenHao2130" [ref=e1394]
+                      - listitem [ref=e1395]:
+                        - link "@YangQi0408" [ref=e1396] [cursor=pointer]:
+                          - /url: https://github.com/YangQi0408
+                          - img "@YangQi0408" [ref=e1397]
+                      - listitem [ref=e1398]:
+                        - link "@Prslc" [ref=e1399] [cursor=pointer]:
+                          - /url: https://github.com/Prslc
+                          - img "@Prslc" [ref=e1400]
+                      - listitem [ref=e1401]:
+                        - link "@ShirkNeko" [ref=e1402] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                          - img "@ShirkNeko" [ref=e1403]
+                      - listitem [ref=e1404]:
+                        - link "@yspbwx2010" [ref=e1405] [cursor=pointer]:
+                          - /url: https://github.com/yspbwx2010
+                          - img "@yspbwx2010" [ref=e1406]
+                      - listitem [ref=e1407]:
+                        - link "@SaleOff" [ref=e1408] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                          - img "@SaleOff" [ref=e1409]
+                      - listitem [ref=e1410]:
+                        - link "@MiRinChan" [ref=e1411] [cursor=pointer]:
+                          - /url: https://github.com/MiRinChan
+                          - img "@MiRinChan" [ref=e1412]
+                      - listitem [ref=e1413]:
+                        - link "@awkoo" [ref=e1414] [cursor=pointer]:
+                          - /url: https://github.com/awkoo
+                          - img "@awkoo" [ref=e1415]
+                    - generic [ref=e1416]: f401, marat2509, and 8 other contributors
+                  - group [ref=e1419]:
+                    - button "Assets 3" [ref=e1420] [cursor=pointer]:
+                      - generic [ref=e1421]:
+                        - generic [ref=e1422]: Assets
+                        - generic "3" [ref=e1423]
+                  - generic [ref=e1425]:
+                    - group [ref=e1427]:
+                      - generic "Add or remove reactions" [ref=e1428] [cursor=pointer]:
+                        - img [ref=e1429]
+                    - generic [ref=e1432]:
+                      - 'button "thumbs up (13): ShirkNeko, 09:22PM on July 21, 2025" [ref=e1433] [cursor=pointer]':
+                        - generic [ref=e1434]: 👍
+                        - generic [ref=e1435]: "13"
+                      - 'button "rocket (2): ShirkNeko, 09:22PM on July 21, 2025" [ref=e1436] [cursor=pointer]':
+                        - generic [ref=e1437]: 🚀
+                        - generic [ref=e1438]: "2"
+                      - 'button "eyes (1): ShirkNeko, 09:22PM on July 21, 2025" [ref=e1439] [cursor=pointer]':
+                        - generic [ref=e1440]: 👀
+                        - generic [ref=e1441]: "1"
+                    - generic [ref=e1442]: 15 people reacted
+          - region "v3.1.7" [ref=e1443]:
+            - heading "v3.1.7" [level=2] [ref=e1444]
+            - generic [ref=e1445]:
+              - generic [ref=e1446]:
+                - generic [ref=e1447]: 30 Jun 08:58 Jun 30, 2025
+                - generic [ref=e1448]:
+                  - img "@ShirkNeko" [ref=e1449]
+                  - link "ShirkNeko" [ref=e1450] [cursor=pointer]:
+                    - /url: /ShirkNeko
+                - link "Tag v3.1.7" [ref=e1452] [cursor=pointer]:
+                  - /url: /SukiSU-Ultra/SukiSU-Ultra/tree/v3.1.7
+                  - generic [ref=e1453]:
+                    - img "Tag" [ref=e1454]
+                    - text: v3.1.7
+                - generic [ref=e1456]:
+                  - link "Commit 1fd13d9" [ref=e1457] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/commit/1fd13d9d8d6c5b478e5e9afedfb5ad94a7bbcc23
+                    - img "Commit" [ref=e1458]
+                    - code [ref=e1460]: 1fd13d9
+                  - group [ref=e1461]:
+                    - generic "Verified commit signature" [ref=e1462] [cursor=pointer]:
+                      - img "Verified commit signature" [ref=e1463]
+                - button "Compare" [ref=e1468] [cursor=pointer]:
+                  - generic [ref=e1469]:
+                    - generic [ref=e1470]: Compare
+                    - generic:
+                      - img
+              - generic [ref=e1472]:
+                - generic [ref=e1473]:
+                  - link "v3.1.7" [ref=e1478] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/tag/v3.1.7
+                  - generic [ref=e1480]:
+                    - heading "What's Changed" [level=2] [ref=e1481]
+                    - list [ref=e1482]:
+                      - listitem [ref=e1483]: Adding SuSFS Configuration Features
+                      - listitem [ref=e1484]:
+                        - text: "manager: Fix unintended LKM dialog when selecting AnyKernel3 install method ("
+                        - link "#234" [ref=e1485] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/234
+                        - text: )
+                        - link "@Prslc" [ref=e1486] [cursor=pointer]:
+                          - /url: https://github.com/Prslc
+                      - listitem [ref=e1487]:
+                        - text: "manager: Only display slotinformation on AB devices ("
+                        - link "#233" [ref=e1488] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/233
+                        - text: )
+                        - link "@KNKJ55" [ref=e1489] [cursor=pointer]:
+                          - /url: https://github.com/KNKJ55
+                      - listitem [ref=e1490]:
+                        - text: "kernel: refactor CMD_GET_FULL_VERSION to safely initialize version string ("
+                        - link "#220" [ref=e1491] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/220
+                        - text: )
+                        - link "@schqiushui" [ref=e1492] [cursor=pointer]:
+                          - /url: https://github.com/schqiushui
+                      - listitem [ref=e1493]:
+                        - text: "manger: fix lkm detection ("
+                        - link "#217" [ref=e1494] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/217
+                        - text: )
+                        - link "@HSSkyBoy" [ref=e1495] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                      - listitem [ref=e1496]:
+                        - text: Bump agp and Gradle to latest (
+                        - link "#216" [ref=e1497] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/216
+                        - text: ) @TypeFlu
+                      - listitem [ref=e1498]: Refactoring version number display logic
+                      - listitem [ref=e1499]: Updated translations
+                      - listitem [ref=e1500]: For more changes check out commit
+                    - heading "New Contributors" [level=2] [ref=e1501]
+                    - list [ref=e1502]:
+                      - listitem [ref=e1503]:
+                        - text: "@TypeFlu made their first contribution in"
+                        - link "#216" [ref=e1504] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/216
+                      - listitem [ref=e1505]:
+                        - link "@SaleOff" [ref=e1506] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                        - text: made their first contribution in
+                        - link "#223" [ref=e1507] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/223
+                      - listitem [ref=e1508]:
+                        - link "@KNKJ55" [ref=e1509] [cursor=pointer]:
+                          - /url: https://github.com/KNKJ55
+                        - text: made their first contribution in
+                        - link "#233" [ref=e1510] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/233
+                      - listitem [ref=e1511]:
+                        - link "@Kittyskj" [ref=e1512] [cursor=pointer]:
+                          - /url: https://github.com/Kittyskj
+                        - text: made their first contribution in
+                        - link "#236" [ref=e1513] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/236
+                    - paragraph [ref=e1514]:
+                      - strong [ref=e1515]: Full Changelog
+                      - text: ":"
+                      - link "v3.1.6...v3.1.7" [ref=e1516] [cursor=pointer]:
+                        - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/compare/v3.1.6...v3.1.7
+                - generic [ref=e1517]:
+                  - generic [ref=e1518]:
+                    - heading "Contributors" [level=3] [ref=e1519]
+                    - list [ref=e1520]:
+                      - listitem [ref=e1521]:
+                        - link "@schqiushui" [ref=e1522] [cursor=pointer]:
+                          - /url: https://github.com/schqiushui
+                          - img "@schqiushui" [ref=e1523]
+                      - listitem [ref=e1524]:
+                        - link "@Kittyskj" [ref=e1525] [cursor=pointer]:
+                          - /url: https://github.com/Kittyskj
+                          - img "@Kittyskj" [ref=e1526]
+                      - listitem [ref=e1527]:
+                        - link "@KNKJ55" [ref=e1528] [cursor=pointer]:
+                          - /url: https://github.com/KNKJ55
+                          - img "@KNKJ55" [ref=e1529]
+                      - listitem [ref=e1530]:
+                        - link "@Prslc" [ref=e1531] [cursor=pointer]:
+                          - /url: https://github.com/Prslc
+                          - img "@Prslc" [ref=e1532]
+                      - listitem [ref=e1533]:
+                        - link "@HSSkyBoy" [ref=e1534] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                          - img "@HSSkyBoy" [ref=e1535]
+                      - listitem [ref=e1536]:
+                        - link "@SaleOff" [ref=e1537] [cursor=pointer]:
+                          - /url: https://github.com/SaleOff
+                          - img "@SaleOff" [ref=e1538]
+                    - generic [ref=e1539]: schqiushui, Kittyskj, and 4 other contributors
+                  - group [ref=e1542]:
+                    - button "Assets 3" [ref=e1543] [cursor=pointer]:
+                      - generic [ref=e1544]:
+                        - generic [ref=e1545]: Assets
+                        - generic "3" [ref=e1546]
+                  - generic [ref=e1548]:
+                    - group [ref=e1550]:
+                      - generic "Add or remove reactions" [ref=e1551] [cursor=pointer]:
+                        - img [ref=e1552]
+                    - generic [ref=e1555]:
+                      - 'button "thumbs up (9): ShirkNeko, 04:57PM on June 30, 2025" [ref=e1556] [cursor=pointer]':
+                        - generic [ref=e1557]: 👍
+                        - generic [ref=e1558]: "9"
+                      - 'button "hooray (1): ShirkNeko, 04:57PM on June 30, 2025" [ref=e1559] [cursor=pointer]':
+                        - generic [ref=e1560]: 🎉
+                        - generic [ref=e1561]: "1"
+                      - 'button "heart (2): ShirkNeko, 04:57PM on June 30, 2025" [ref=e1562] [cursor=pointer]':
+                        - generic [ref=e1563]: ❤️
+                        - generic [ref=e1564]: "2"
+                      - 'button "rocket (2): ShirkNeko, 04:57PM on June 30, 2025" [ref=e1565] [cursor=pointer]':
+                        - generic [ref=e1566]: 🚀
+                        - generic [ref=e1567]: "2"
+                      - 'button "eyes (1): ShirkNeko, 04:57PM on June 30, 2025" [ref=e1568] [cursor=pointer]':
+                        - generic [ref=e1569]: 👀
+                        - generic [ref=e1570]: "1"
+                    - generic [ref=e1571]: 12 people reacted
+          - region "3.1.6" [ref=e1572]:
+            - heading "3.1.6" [level=2] [ref=e1573]
+            - generic [ref=e1574]:
+              - generic [ref=e1575]:
+                - generic [ref=e1576]: 22 Jun 10:53 Jun 22, 2025
+                - generic [ref=e1577]:
+                  - img "@ShirkNeko" [ref=e1578]
+                  - link "ShirkNeko" [ref=e1579] [cursor=pointer]:
+                    - /url: /ShirkNeko
+                - link "Tag v3.1.6" [ref=e1581] [cursor=pointer]:
+                  - /url: /SukiSU-Ultra/SukiSU-Ultra/tree/v3.1.6
+                  - generic [ref=e1582]:
+                    - img "Tag" [ref=e1583]
+                    - text: v3.1.6
+                - generic [ref=e1585]:
+                  - link "Commit 4bec5ae" [ref=e1586] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/commit/4bec5ae7b1a06dcdfa14fda273100a3d0c9f61a9
+                    - img "Commit" [ref=e1587]
+                    - code [ref=e1589]: 4bec5ae
+                  - group [ref=e1590]:
+                    - generic "Verified commit signature" [ref=e1591] [cursor=pointer]:
+                      - img "Verified commit signature" [ref=e1592]
+                - button "Compare" [ref=e1597] [cursor=pointer]:
+                  - generic [ref=e1598]:
+                    - generic [ref=e1599]: Compare
+                    - generic:
+                      - img
+              - generic [ref=e1601]:
+                - generic [ref=e1602]:
+                  - link "3.1.6" [ref=e1607] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/tag/v3.1.6
+                  - generic [ref=e1609]:
+                    - heading "What's Changed" [level=2] [ref=e1610]
+                    - list [ref=e1611]:
+                      - listitem [ref=e1612]: dec++-ify jni part
+                      - listitem [ref=e1613]: "manager: Add visibility state management for floating action buttons"
+                      - listitem [ref=e1614]: "manager: add folder size labels for module items to optimize the display of module information"
+                      - listitem [ref=e1615]: Add the ability to display more module information, support copying the update configuration address to the clipboard
+                      - listitem [ref=e1616]: "manager: Add configure susfs"
+                      - listitem [ref=e1617]: "manager: Modifying the getHookType function to return a string type"
+                      - listitem [ref=e1618]: "manager: Add the ability to get the hook type"
+                    - list [ref=e1619]:
+                      - listitem [ref=e1620]:
+                        - text: "manager: Fix get Google device model issues by"
+                        - link "@WenHao2130" [ref=e1621] [cursor=pointer]:
+                          - /url: https://github.com/WenHao2130
+                        - text: in
+                        - link "#153" [ref=e1622] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/153
+                      - listitem [ref=e1623]:
+                        - text: "manager: fix color by"
+                        - link "@MiRinChan" [ref=e1624] [cursor=pointer]:
+                          - /url: https://github.com/MiRinChan
+                        - text: in
+                        - link "#154" [ref=e1625] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/154
+                      - listitem [ref=e1626]:
+                        - text: "manager: Drop QQ group invitation link by"
+                        - link "@WenHao2130" [ref=e1627] [cursor=pointer]:
+                          - /url: https://github.com/WenHao2130
+                        - text: in
+                        - link "#158" [ref=e1628] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/158
+                      - listitem [ref=e1629]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e1630] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#156" [ref=e1631] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/156
+                      - listitem [ref=e1632]:
+                        - text: Add myself GKI build in README for Pixel users by
+                        - link "@MiRinChan" [ref=e1633] [cursor=pointer]:
+                          - /url: https://github.com/MiRinChan
+                        - text: in
+                        - link "#170" [ref=e1634] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/170
+                      - listitem [ref=e1635]:
+                        - text: "manger: 更新正體中文 by"
+                        - link "@HSSkyBoy" [ref=e1636] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                        - text: in
+                        - link "#169" [ref=e1637] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/169
+                      - listitem [ref=e1638]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e1639] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#181" [ref=e1640] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/181
+                      - listitem [ref=e1641]:
+                        - text: "manger: 更新正體中文 by"
+                        - link "@HSSkyBoy" [ref=e1642] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                        - text: in
+                        - link "#183" [ref=e1643] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/183
+                      - listitem [ref=e1644]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e1645] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#184" [ref=e1646] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/184
+                      - listitem [ref=e1647]:
+                        - text: Revising translations and fixing punctuation by
+                        - link "@reindex-ot" [ref=e1648] [cursor=pointer]:
+                          - /url: https://github.com/reindex-ot
+                        - text: in
+                        - link "#186" [ref=e1649] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/186
+                      - listitem [ref=e1650]:
+                        - text: "README: Sync README_EN with README by"
+                        - link "@Prslc" [ref=e1651] [cursor=pointer]:
+                          - /url: https://github.com/Prslc
+                        - text: in
+                        - link "#190" [ref=e1652] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/190
+                      - listitem [ref=e1653]:
+                        - text: "manger: 完善補充正體中文 by"
+                        - link "@HSSkyBoy" [ref=e1654] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                        - text: in
+                        - link "#189" [ref=e1655] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/189
+                      - listitem [ref=e1656]:
+                        - text: 完善補充正體中文-香港
+                        - link "#2" [ref=e1657] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/2
+                        - text: by
+                        - link "@mihoy3rd" [ref=e1658] [cursor=pointer]:
+                          - /url: https://github.com/mihoy3rd
+                        - text: in
+                        - link "#191" [ref=e1659] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/191
+                      - listitem [ref=e1660]:
+                        - text: 完善補充正體中文-香港 (
+                        - link "#3" [ref=e1661] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/3
+                        - text: ) by
+                        - link "@mihoy3rd" [ref=e1662] [cursor=pointer]:
+                          - /url: https://github.com/mihoy3rd
+                        - text: in
+                        - link "#194" [ref=e1663] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/194
+                      - listitem [ref=e1664]:
+                        - text: New Crowdin updates by
+                        - link "@ShirkNeko" [ref=e1665] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                        - text: in
+                        - link "#200" [ref=e1666] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/200
+                    - heading "New Contributors" [level=2] [ref=e1667]
+                    - list [ref=e1668]:
+                      - listitem [ref=e1669]:
+                        - link "@Prslc" [ref=e1670] [cursor=pointer]:
+                          - /url: https://github.com/Prslc
+                        - text: made their first contribution in
+                        - link "#190" [ref=e1671] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/190
+                      - listitem [ref=e1672]:
+                        - link "@mihoy3rd" [ref=e1673] [cursor=pointer]:
+                          - /url: https://github.com/mihoy3rd
+                        - text: made their first contribution in
+                        - link "#191" [ref=e1674] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/191
+                    - paragraph [ref=e1675]:
+                      - strong [ref=e1676]: Full Changelog
+                      - text: ":"
+                      - link "v3.1.5...v3.1.6" [ref=e1677] [cursor=pointer]:
+                        - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/compare/v3.1.5...v3.1.6
+                - generic [ref=e1678]:
+                  - generic [ref=e1679]:
+                    - heading "Contributors" [level=3] [ref=e1680]
+                    - list [ref=e1681]:
+                      - listitem [ref=e1682]:
+                        - link "@reindex-ot" [ref=e1683] [cursor=pointer]:
+                          - /url: https://github.com/reindex-ot
+                          - img "@reindex-ot" [ref=e1684]
+                      - listitem [ref=e1685]:
+                        - link "@WenHao2130" [ref=e1686] [cursor=pointer]:
+                          - /url: https://github.com/WenHao2130
+                          - img "@WenHao2130" [ref=e1687]
+                      - listitem [ref=e1688]:
+                        - link "@Prslc" [ref=e1689] [cursor=pointer]:
+                          - /url: https://github.com/Prslc
+                          - img "@Prslc" [ref=e1690]
+                      - listitem [ref=e1691]:
+                        - link "@ShirkNeko" [ref=e1692] [cursor=pointer]:
+                          - /url: https://github.com/ShirkNeko
+                          - img "@ShirkNeko" [ref=e1693]
+                      - listitem [ref=e1694]:
+                        - link "@HSSkyBoy" [ref=e1695] [cursor=pointer]:
+                          - /url: https://github.com/HSSkyBoy
+                          - img "@HSSkyBoy" [ref=e1696]
+                      - listitem [ref=e1697]:
+                        - link "@MiRinChan" [ref=e1698] [cursor=pointer]:
+                          - /url: https://github.com/MiRinChan
+                          - img "@MiRinChan" [ref=e1699]
+                      - listitem [ref=e1700]:
+                        - link "@mihoy3rd" [ref=e1701] [cursor=pointer]:
+                          - /url: https://github.com/mihoy3rd
+                          - img "@mihoy3rd" [ref=e1702]
+                    - generic [ref=e1703]: reindex-ot, WenHao2130, and 5 other contributors
+                  - group [ref=e1706]:
+                    - button "Assets 3" [ref=e1707] [cursor=pointer]:
+                      - generic [ref=e1708]:
+                        - generic [ref=e1709]: Assets
+                        - generic "3" [ref=e1710]
+                  - generic [ref=e1712]:
+                    - group [ref=e1714]:
+                      - generic "Add or remove reactions" [ref=e1715] [cursor=pointer]:
+                        - img [ref=e1716]
+                    - generic [ref=e1719]:
+                      - 'button "thumbs up (6): ShirkNeko, 06:45PM on June 22, 2025" [ref=e1720] [cursor=pointer]':
+                        - generic [ref=e1721]: 👍
+                        - generic [ref=e1722]: "6"
+                      - 'button "rocket (1): ShirkNeko, 06:45PM on June 22, 2025" [ref=e1723] [cursor=pointer]':
+                        - generic [ref=e1724]: 🚀
+                        - generic [ref=e1725]: "1"
+                      - 'button "eyes (1): ShirkNeko, 06:45PM on June 22, 2025" [ref=e1726] [cursor=pointer]':
+                        - generic [ref=e1727]: 👀
+                        - generic [ref=e1728]: "1"
+                    - generic [ref=e1729]: 7 people reacted
+          - region "v3.1.5" [ref=e1730]:
+            - heading "v3.1.5" [level=2] [ref=e1731]
+            - generic [ref=e1732]:
+              - generic [ref=e1733]:
+                - generic [ref=e1734]: 08 Jun 08:00 Jun 8, 2025
+                - generic [ref=e1735]:
+                  - img "@ShirkNeko" [ref=e1736]
+                  - link "ShirkNeko" [ref=e1737] [cursor=pointer]:
+                    - /url: /ShirkNeko
+                - link "Tag v3.1.5" [ref=e1739] [cursor=pointer]:
+                  - /url: /SukiSU-Ultra/SukiSU-Ultra/tree/v3.1.5
+                  - generic [ref=e1740]:
+                    - img "Tag" [ref=e1741]
+                    - text: v3.1.5
+                - generic [ref=e1743]:
+                  - link "Commit fa060dc" [ref=e1744] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/commit/fa060dca587b6395ac6f80173a121da395676f15
+                    - img "Commit" [ref=e1745]
+                    - code [ref=e1747]: fa060dc
+                  - group [ref=e1748]:
+                    - generic "Verified commit signature" [ref=e1749] [cursor=pointer]:
+                      - img "Verified commit signature" [ref=e1750]
+                - button "Compare" [ref=e1755] [cursor=pointer]:
+                  - generic [ref=e1756]:
+                    - generic [ref=e1757]: Compare
+                    - generic:
+                      - img
+              - generic [ref=e1759]:
+                - generic [ref=e1760]:
+                  - link "v3.1.5" [ref=e1765] [cursor=pointer]:
+                    - /url: /SukiSU-Ultra/SukiSU-Ultra/releases/tag/v3.1.5
+                  - generic [ref=e1767]:
+                    - heading "What's Changed" [level=2] [ref=e1768]
+                    - list [ref=e1769]:
+                      - listitem [ref=e1770]:
+                        - text: "kernel: throne_tracker: avoid cross fs access"
+                        - link "@5ec1cff" [ref=e1771] [cursor=pointer]:
+                          - /url: https://github.com/5ec1cff
+                      - listitem [ref=e1772]:
+                        - text: "manager: persist show system app settings"
+                        - link "@5ec1cff" [ref=e1773] [cursor=pointer]:
+                          - /url: https://github.com/5ec1cff
+                      - listitem [ref=e1774]:
+                        - text: "manager: accessibility optimization ("
+                        - link "#131" [ref=e1775] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/131
+                        - text: )
+                        - link "@MiRinChan" [ref=e1776] [cursor=pointer]:
+                          - /url: https://github.com/MiRinChan
+                      - listitem [ref=e1777]:
+                        - text: "manager: Add alternate app icon toggle ("
+                        - link "#129" [ref=e1778] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/129
+                        - text: )
+                        - link "@yycgit1" [ref=e1779] [cursor=pointer]:
+                          - /url: https://github.com/yycgit1
+                      - listitem [ref=e1780]: "manager: Refactoring to modify MainActivity to re-support hot refresh after switching app icons"
+                      - listitem [ref=e1781]: "manager: Interface improvements"
+                      - listitem [ref=e1782]: "manager: Simplify some of the useless or repetitive logic"
+                      - listitem [ref=e1783]: "strings: Updated translations"
+                    - heading "New Contributors" [level=2] [ref=e1784]
+                    - list [ref=e1785]:
+                      - listitem [ref=e1786]:
+                        - link "@yycgit1" [ref=e1787] [cursor=pointer]:
+                          - /url: https://github.com/yycgit1
+                        - text: made their first contribution in
+                        - link "#129" [ref=e1788] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/129
+                      - listitem [ref=e1789]:
+                        - link "@lshwjgpt25" [ref=e1790] [cursor=pointer]:
+                          - /url: https://github.com/lshwjgpt25
+                        - text: made their first contribution in
+                        - link "#132" [ref=e1791] [cursor=pointer]:
+                          - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/pull/132
+                    - paragraph [ref=e1792]:
+                      - strong [ref=e1793]: Full Changelog
+                      - text: ":"
+                      - link "v3.1.4...v3.1.5" [ref=e1794] [cursor=pointer]:
+                        - /url: https://github.com/SukiSU-Ultra/SukiSU-Ultra/compare/v3.1.4...v3.1.5
+                - generic [ref=e1795]:
+                  - generic [ref=e1796]:
+                    - heading "Contributors" [level=3] [ref=e1797]
+                    - list [ref=e1798]:
+                      - listitem [ref=e1799]:
+                        - link "@5ec1cff" [ref=e1800] [cursor=pointer]:
+                          - /url: https://github.com/5ec1cff
+                          - img "@5ec1cff" [ref=e1801]
+                      - listitem [ref=e1802]:
+                        - link "@MiRinChan" [ref=e1803] [cursor=pointer]:
+                          - /url: https://github.com/MiRinChan
+                          - img "@MiRinChan" [ref=e1804]
+                      - listitem [ref=e1805]:
+                        - link "@lshwjgpt25" [ref=e1806] [cursor=pointer]:
+                          - /url: https://github.com/lshwjgpt25
+                          - img "@lshwjgpt25" [ref=e1807]
+                      - listitem [ref=e1808]:
+                        - link "@yycgit1" [ref=e1809] [cursor=pointer]:
+                          - /url: https://github.com/yycgit1
+                          - img "@yycgit1" [ref=e1810]
+                    - generic [ref=e1811]: 5ec1cff, MiRinChan, and 2 other contributors
+                  - group [ref=e1814]:
+                    - button "Assets 3" [ref=e1815] [cursor=pointer]:
+                      - generic [ref=e1816]:
+                        - generic [ref=e1817]: Assets
+                        - generic "3" [ref=e1818]
+                  - generic [ref=e1820]:
+                    - group [ref=e1822]:
+                      - generic "Add or remove reactions" [ref=e1823] [cursor=pointer]:
+                        - img [ref=e1824]
+                    - generic [ref=e1827]:
+                      - 'button "rocket (3): ShirkNeko, 03:47PM on June 08, 2025" [ref=e1828] [cursor=pointer]':
+                        - generic [ref=e1829]: 🚀
+                        - generic [ref=e1830]: "3"
+                      - 'button "eyes (2): ShirkNeko, 03:47PM on June 08, 2025" [ref=e1831] [cursor=pointer]':
+                        - generic [ref=e1832]: 👀
+                        - generic [ref=e1833]: "2"
+                    - generic [ref=e1834]: 3 people reacted
+          - navigation "Pagination" [ref=e1836]:
+            - link "Previous page" [disabled] [ref=e1837]: Previous
+            - emphasis [ref=e1838] [cursor=pointer]: "1"
+            - link "Page 2" [ref=e1839] [cursor=pointer]:
+              - /url: /SukiSU-Ultra/SukiSU-Ultra/releases?page=2
+              - text: "2"
+            - link "Next page" [ref=e1840] [cursor=pointer]:
+              - /url: /SukiSU-Ultra/SukiSU-Ultra/releases?page=2
+              - text: Next
+  - contentinfo [ref=e1841]:
+    - heading "Footer" [level=2] [ref=e1842]
+    - generic [ref=e1843]:
+      - generic [ref=e1844]:
+        - link "GitHub Homepage" [ref=e1845] [cursor=pointer]:
+          - /url: https://github.com
+          - img [ref=e1846]
+        - generic [ref=e1848]: © 2026 GitHub, Inc.
+      - navigation "Footer" [ref=e1849]:
+        - heading "Footer navigation" [level=3] [ref=e1850]
+        - list "Footer navigation" [ref=e1851]:
+          - listitem [ref=e1852]:
+            - link "Terms" [ref=e1853] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/github-terms/github-terms-of-service
+          - listitem [ref=e1854]:
+            - link "Privacy" [ref=e1855] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/privacy-policies/github-privacy-statement
+          - listitem [ref=e1856]:
+            - link "Security" [ref=e1857] [cursor=pointer]:
+              - /url: https://github.com/security
+          - listitem [ref=e1858]:
+            - link "Status" [ref=e1859] [cursor=pointer]:
+              - /url: https://www.githubstatus.com/
+          - listitem [ref=e1860]:
+            - link "Community" [ref=e1861] [cursor=pointer]:
+              - /url: https://github.community/
+          - listitem [ref=e1862]:
+            - link "Docs" [ref=e1863] [cursor=pointer]:
+              - /url: https://docs.github.com/
+          - listitem [ref=e1864]:
+            - link "Contact" [ref=e1865] [cursor=pointer]:
+              - /url: https://support.github.com?tags=dotcom-footer
+          - listitem [ref=e1866]:
+            - button "Manage cookies" [ref=e1868] [cursor=pointer]
+          - listitem [ref=e1869]:
+            - button "Do not share my personal information" [ref=e1871] [cursor=pointer]

@@ -1,0 +1,331 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner "Global Navigation Menu" [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - button "Open menu" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+          - link "Homepage (g then d)" [ref=e15] [cursor=pointer]:
+            - /url: /
+            - img [ref=e16]
+        - generic [ref=e18]:
+          - navigation "Breadcrumbs" [ref=e19]:
+            - list [ref=e20]:
+              - listitem [ref=e21]:
+                - link "Nshpiter" [ref=e22] [cursor=pointer]:
+                  - /url: /Nshpiter
+                  - generic [ref=e23]: Nshpiter
+              - listitem [ref=e24]:
+                - link "ABK" [ref=e25] [cursor=pointer]:
+                  - /url: /Nshpiter/ABK
+                  - generic [ref=e26]: ABK
+                  - img [ref=e27]
+          - button "Search or jump to… (forward slash)" [ref=e29] [cursor=pointer]:
+            - img [ref=e30]
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - generic [ref=e35]:
+              - generic [ref=e36]:
+                - link "Chat with Copilot" [ref=e38] [cursor=pointer]:
+                  - /url: /copilot
+                  - img [ref=e39]
+                - button "Open Copilot…" [ref=e43] [cursor=pointer]:
+                  - generic:
+                    - img
+              - button "Open agents panel" [ref=e44] [cursor=pointer]:
+                - generic [ref=e45]:
+                  - generic:
+                    - img
+                  - generic:
+                    - img
+            - button "Create new..." [ref=e47] [cursor=pointer]:
+              - generic [ref=e48]:
+                - generic:
+                  - img
+              - generic:
+                - img
+            - generic [ref=e49]:
+              - link "All issues (g then i)" [ref=e50] [cursor=pointer]:
+                - /url: /issues
+                - img [ref=e51]
+              - link "All pull requests" [ref=e54] [cursor=pointer]:
+                - /url: /pulls
+                - img [ref=e55]
+              - link "All repositories" [ref=e57] [cursor=pointer]:
+                - /url: /repos
+                - img [ref=e58]
+          - link "You have no unread notifications (g then n)" [ref=e60] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e61]
+          - button "Open user navigation menu" [ref=e64] [cursor=pointer]:
+            - img "piter" [ref=e65]
+      - heading "Repository navigation" [level=2] [ref=e66]
+      - navigation "Repository" [ref=e67]:
+        - list [ref=e68]:
+          - listitem [ref=e69]:
+            - link "Code" [ref=e70] [cursor=pointer]:
+              - /url: /Nshpiter/ABK
+              - generic [ref=e71]: Code
+          - listitem [ref=e72]:
+            - link "Pull requests" [ref=e73] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/pulls
+              - generic [ref=e74]: Pull requests
+          - listitem [ref=e75]:
+            - link "Agents" [ref=e76] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/agents?author=Nshpiter
+              - generic [ref=e77]: Agents
+          - listitem [ref=e78]:
+            - link "Actions" [ref=e79] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/actions
+              - generic [ref=e80]: Actions
+          - listitem [ref=e81]:
+            - link "Projects" [ref=e82] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/projects
+              - generic [ref=e83]: Projects
+          - listitem [ref=e84]:
+            - link "Wiki" [ref=e85] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/wiki
+              - generic [ref=e86]: Wiki
+          - listitem [ref=e87]:
+            - link "Security and quality" [ref=e88] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/security
+              - generic [ref=e89]: Security and quality
+          - listitem [ref=e90]:
+            - link "Insights" [ref=e91] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/pulse
+              - generic [ref=e92]: Insights
+          - listitem [ref=e93]:
+            - link "Settings" [ref=e94] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/settings
+              - generic [ref=e95]: Settings
+  - main [ref=e99]:
+    - generic [ref=e105]:
+      - generic [ref=e108]:
+        - link "Android 内核构建-自定义" [ref=e111] [cursor=pointer]:
+          - /url: /Nshpiter/ABK/actions/workflows/kernel-custom.yml
+          - img [ref=e112]
+          - generic [ref=e114]: Android 内核构建-自定义
+        - generic [ref=e115]:
+          - generic [ref=e116]:
+            - img "failed:" [ref=e120]
+            - 'heading "Android 内核构建-自定义 #4" [level=1] [ref=e122]':
+              - generic [ref=e123]: "Android 内核构建-自定义 #4"
+          - generic [ref=e125]:
+            - button "Re-run jobs" [ref=e129] [cursor=pointer]:
+              - generic [ref=e130]:
+                - generic:
+                  - img
+                - generic [ref=e131]: Re-run jobs
+              - generic:
+                - img
+            - button "Workflow run options" [ref=e135] [cursor=pointer]:
+              - img
+      - generic [ref=e136]:
+        - navigation "Workflow run" [ref=e142]:
+          - list [ref=e143]:
+            - listitem [ref=e144]:
+              - link "Summary" [ref=e145] [cursor=pointer]:
+                - /url: /Nshpiter/ABK/actions/runs/25674588820
+                - generic:
+                  - img
+                - generic [ref=e147]: Summary
+            - generic [ref=e148]:
+              - heading "All jobs" [level=4] [ref=e149]
+              - button "Filter by job status" [ref=e150] [cursor=pointer]:
+                - img [ref=e151]
+            - listitem [ref=e153]
+            - listitem [ref=e154]:
+              - list [ref=e155]:
+                - listitem [ref=e156]:
+                  - generic "Loading" [ref=e157]:
+                    - generic [ref=e161]:
+                      - img [ref=e162]
+                      - generic [ref=e165]: Loading
+            - listitem [ref=e166]
+            - listitem [ref=e167]:
+              - heading "Run details" [level=3] [ref=e169]
+              - list "Run details" [ref=e170]:
+                - listitem [ref=e171]:
+                  - link "Usage" [ref=e172] [cursor=pointer]:
+                    - /url: /Nshpiter/ABK/actions/runs/25674588820/usage
+                    - generic:
+                      - img
+                    - generic [ref=e174]: Usage
+                - listitem [ref=e175]:
+                  - link "Workflow file" [ref=e176] [cursor=pointer]:
+                    - /url: /Nshpiter/ABK/actions/runs/25674588820/workflow
+                    - generic:
+                      - img
+                    - generic [ref=e178]: Workflow file
+        - generic [ref=e180]:
+          - region "Workflow run summary" [ref=e181]:
+            - generic [ref=e182]:
+              - generic [ref=e183]:
+                - generic [ref=e184]: Manually triggered May 11, 2026 21:5519 minutes ago
+                - generic [ref=e185]:
+                  - link "@Nshpiter Nshpiter" [ref=e186] [cursor=pointer]:
+                    - /url: /Nshpiter
+                    - img "@Nshpiter" [ref=e187]
+                    - text: Nshpiter
+                  - generic [ref=e188]:
+                    - text: ⁠
+                    - link "e024f1c" [ref=e189] [cursor=pointer]:
+                      - /url: /Nshpiter/ABK/commit/e024f1cc451c39dbe89e8a2f923d2cc5c472563a
+                      - img [ref=e190]
+                      - text: e024f1c
+                  - link "dev" [ref=e192] [cursor=pointer]:
+                    - /url: /Nshpiter/ABK/tree/refs/heads/dev
+              - generic [ref=e193]:
+                - generic [ref=e194]: Status
+                - text: Failure
+              - generic [ref=e195]:
+                - generic [ref=e196]: Total duration
+                - link "13m 42s" [ref=e197] [cursor=pointer]:
+                  - /url: /Nshpiter/ABK/actions/runs/25674588820/usage
+              - generic [ref=e198]:
+                - generic [ref=e199]: Artifacts
+                - link "3" [ref=e200] [cursor=pointer]:
+                  - /url: "#artifacts"
+          - region "Workflow run graph" [ref=e201]:
+            - generic [ref=e203]:
+              - generic [ref=e205]:
+                - heading "kernel-custom.yml" [level=2] [ref=e206]:
+                  - link "kernel-custom.yml" [ref=e207] [cursor=pointer]:
+                    - /url: /Nshpiter/ABK/actions/runs/25674588820/workflow
+                - generic [ref=e208]: "on: workflow_dispatch"
+              - generic [ref=e210]:
+                - generic [ref=e211]:
+                  - img
+                  - img
+                  - generic [ref=e213]:
+                    - 'link "failed: 5.15.178-android13-2025-03 / 5.15.178-android13-2025-03-Official 13m 35s" [ref=e215] [cursor=pointer]':
+                      - /url: /Nshpiter/ABK/actions/runs/25674588820/job/75368796416
+                      - generic [ref=e217]:
+                        - img "failed:" [ref=e219]
+                        - generic [ref=e221]:
+                          - generic [ref=e222]: 5.15.178-android13-2025-03
+                          - generic [ref=e223]: /
+                          - generic [ref=e224]: 5.15.178-android13-2025-03-Official
+                        - generic [ref=e225]: 13m 35s
+                    - 'link "completed successfully: get-ksu-manager / get_ksu_manager 29s" [ref=e227] [cursor=pointer]':
+                      - /url: /Nshpiter/ABK/actions/runs/25674588820/job/75368796481
+                      - generic [ref=e229]:
+                        - img "completed successfully:" [ref=e231]
+                        - generic [ref=e233]:
+                          - generic [ref=e234]: get-ksu-manager
+                          - generic [ref=e235]: /
+                          - generic [ref=e236]: get_ksu_manager
+                        - generic [ref=e237]: 29s
+                - generic [ref=e238]:
+                  - paragraph [ref=e239]: Oh hello! Nice to see you.
+                  - paragraph [ref=e240]:
+                    - text: Made with ❤️ by
+                    - link [ref=e241] [cursor=pointer]:
+                      - /url: https://actions.github.io/humans.txt
+                      - text: humans.txt
+              - generic [ref=e242]:
+                - button "Fit to window" [disabled] [ref=e243]:
+                  - img
+                - generic [ref=e244]:
+                  - button "Zoom out" [disabled] [ref=e246]:
+                    - img
+                  - button "Zoom in" [disabled] [ref=e248]:
+                    - img
+          - img [ref=e249]
+          - region "Annotations" [ref=e250]:
+            - generic [ref=e251]:
+              - generic [ref=e253]:
+                - heading "Annotations" [level=2] [ref=e254]
+                - generic [ref=e255]: 1 error
+              - table [ref=e256]:
+                - rowgroup [ref=e257]:
+                  - row "5.15.178-android13-2025-03 / 5.15.178-android13-2025-03-Official Child_process exited with error code 1" [ref=e258]:
+                    - cell "5.15.178-android13-2025-03 / 5.15.178-android13-2025-03-Official Child_process exited with error code 1" [ref=e259]:
+                      - generic [ref=e260]:
+                        - img [ref=e262]
+                        - generic [ref=e264]:
+                          - link "5.15.178-android13-2025-03 / 5.15.178-android13-2025-03-Official" [ref=e265] [cursor=pointer]:
+                            - /url: /Nshpiter/ABK/actions/runs/25674588820/job/75368796416#step:48:5880
+                            - strong [ref=e266]: 5.15.178-android13-2025-03 / 5.15.178-android13-2025-03-Official
+                          - generic [ref=e269]: Child_process exited with error code 1
+          - region "Artifacts" [ref=e270]:
+            - generic [ref=e271]:
+              - generic [ref=e273]:
+                - heading "Artifacts" [level=2] [ref=e274]
+                - generic [ref=e275]: Produced during runtime
+              - table [ref=e276]:
+                - rowgroup [ref=e277]:
+                  - row "Name Size Digest" [ref=e278]:
+                    - columnheader "Name" [ref=e279]
+                    - columnheader "Size" [ref=e280]
+                    - columnheader "Digest" [ref=e281]
+                    - cell [ref=e282]
+                - rowgroup [ref=e283]:
+                  - row "Download Official-Manager(22484) (opens in a new tab) Download Official-Manager(22484) (opens in a new tab) 11 MB sha256:76ee2b5e7ffb430716f1f05debad26d466fe8658999620ac95654bde1357ab81 Copy artifact digest Download Official-Manager(22484) (opens in a new tab) Delete Official-Manager(22484)" [ref=e284]:
+                    - cell "Download Official-Manager(22484) (opens in a new tab) Download Official-Manager(22484) (opens in a new tab)" [ref=e285]:
+                      - generic [ref=e286]:
+                        - link "Download Official-Manager(22484) (opens in a new tab)" [ref=e287] [cursor=pointer]:
+                          - /url: /Nshpiter/ABK/actions/runs/25674588820/artifacts/6920367208
+                          - img [ref=e288]
+                        - link "Download Official-Manager(22484) (opens in a new tab)" [ref=e291] [cursor=pointer]:
+                          - /url: /Nshpiter/ABK/actions/runs/25674588820/artifacts/6920367208
+                          - text: Official-Manager(22484)
+                    - cell "11 MB" [ref=e292]
+                    - cell "sha256:76ee2b5e7ffb430716f1f05debad26d466fe8658999620ac95654bde1357ab81 Copy artifact digest" [ref=e293]:
+                      - generic [ref=e294]:
+                        - code [ref=e295]: sha256:76ee2b5e7ffb430716f1f05debad26d466fe8658999620ac95654bde1357ab81
+                        - button "Copy artifact digest" [ref=e297] [cursor=pointer]:
+                          - img [ref=e298]
+                    - cell "Download Official-Manager(22484) (opens in a new tab) Delete Official-Manager(22484)" [ref=e302]:
+                      - generic [ref=e303]:
+                        - link "Download Official-Manager(22484) (opens in a new tab)" [ref=e304] [cursor=pointer]:
+                          - /url: /Nshpiter/ABK/actions/runs/25674588820/artifacts/6920367208
+                          - img
+                        - button "Delete Official-Manager(22484)" [ref=e306] [cursor=pointer]:
+                          - img
+                  - row "Download Official_kernel-android13-5.15-178-Rejects (opens in a new tab) Download Official_kernel-android13-5.15-178-Rejects (opens in a new tab) 3.39 KB sha256:ad090cbcf74bb993bd559996c56ca35bef3ee29479b6c33f39606ca4a2f157ab Copy artifact digest Download Official_kernel-android13-5.15-178-Rejects (opens in a new tab) Delete Official_kernel-android13-5.15-178-Rejects" [ref=e307]:
+                    - cell "Download Official_kernel-android13-5.15-178-Rejects (opens in a new tab) Download Official_kernel-android13-5.15-178-Rejects (opens in a new tab)" [ref=e308]:
+                      - generic [ref=e309]:
+                        - link "Download Official_kernel-android13-5.15-178-Rejects (opens in a new tab)" [ref=e310] [cursor=pointer]:
+                          - /url: /Nshpiter/ABK/actions/runs/25674588820/artifacts/6920678876
+                          - img [ref=e311]
+                        - link "Download Official_kernel-android13-5.15-178-Rejects (opens in a new tab)" [ref=e314] [cursor=pointer]:
+                          - /url: /Nshpiter/ABK/actions/runs/25674588820/artifacts/6920678876
+                          - text: Official_kernel-android13-5.15-178-Rejects
+                    - cell "3.39 KB" [ref=e315]
+                    - cell "sha256:ad090cbcf74bb993bd559996c56ca35bef3ee29479b6c33f39606ca4a2f157ab Copy artifact digest" [ref=e316]:
+                      - generic [ref=e317]:
+                        - code [ref=e318]: sha256:ad090cbcf74bb993bd559996c56ca35bef3ee29479b6c33f39606ca4a2f157ab
+                        - button "Copy artifact digest" [ref=e320] [cursor=pointer]:
+                          - img [ref=e321]
+                    - cell "Download Official_kernel-android13-5.15-178-Rejects (opens in a new tab) Delete Official_kernel-android13-5.15-178-Rejects" [ref=e325]:
+                      - generic [ref=e326]:
+                        - link "Download Official_kernel-android13-5.15-178-Rejects (opens in a new tab)" [ref=e327] [cursor=pointer]:
+                          - /url: /Nshpiter/ABK/actions/runs/25674588820/artifacts/6920678876
+                          - img
+                        - button "Delete Official_kernel-android13-5.15-178-Rejects" [ref=e329] [cursor=pointer]:
+                          - img
+                  - row "Download susfs-release-1.5.2+_ff4f141 (opens in a new tab) Download susfs-release-1.5.2+_ff4f141 (opens in a new tab) 873 KB sha256:13aff7240ca74298aa373b3474c4026baca9f8b3ac1f5dd670a7ae88b41f5703 Copy artifact digest Download susfs-release-1.5.2+_ff4f141 (opens in a new tab) Delete susfs-release-1.5.2+_ff4f141" [ref=e330]:
+                    - cell "Download susfs-release-1.5.2+_ff4f141 (opens in a new tab) Download susfs-release-1.5.2+_ff4f141 (opens in a new tab)" [ref=e331]:
+                      - generic [ref=e332]:
+                        - link "Download susfs-release-1.5.2+_ff4f141 (opens in a new tab)" [ref=e333] [cursor=pointer]:
+                          - /url: /Nshpiter/ABK/actions/runs/25674588820/artifacts/6920367728
+                          - img [ref=e334]
+                        - link "Download susfs-release-1.5.2+_ff4f141 (opens in a new tab)" [ref=e337] [cursor=pointer]:
+                          - /url: /Nshpiter/ABK/actions/runs/25674588820/artifacts/6920367728
+                          - text: susfs-release-1.5.2+_ff4f141
+                    - cell "873 KB" [ref=e338]
+                    - cell "sha256:13aff7240ca74298aa373b3474c4026baca9f8b3ac1f5dd670a7ae88b41f5703 Copy artifact digest" [ref=e339]:
+                      - generic [ref=e340]:
+                        - code [ref=e341]: sha256:13aff7240ca74298aa373b3474c4026baca9f8b3ac1f5dd670a7ae88b41f5703
+                        - button "Copy artifact digest" [ref=e343] [cursor=pointer]:
+                          - img [ref=e344]
+                    - cell "Download susfs-release-1.5.2+_ff4f141 (opens in a new tab) Delete susfs-release-1.5.2+_ff4f141" [ref=e348]:
+                      - generic [ref=e349]:
+                        - link "Download susfs-release-1.5.2+_ff4f141 (opens in a new tab)" [ref=e350] [cursor=pointer]:
+                          - /url: /Nshpiter/ABK/actions/runs/25674588820/artifacts/6920367728
+                          - img
+                        - button "Delete susfs-release-1.5.2+_ff4f141" [ref=e352] [cursor=pointer]:
+                          - img

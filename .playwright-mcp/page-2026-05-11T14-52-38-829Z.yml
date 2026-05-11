@@ -1,0 +1,442 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner "Global Navigation Menu" [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]:
+          - button "Open menu" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+          - link "Homepage (g then d)" [ref=e15] [cursor=pointer]:
+            - /url: /
+            - img [ref=e16]
+        - generic [ref=e18]:
+          - navigation "Breadcrumbs" [ref=e19]:
+            - list [ref=e20]:
+              - listitem [ref=e21]:
+                - link "Nshpiter" [ref=e22] [cursor=pointer]:
+                  - /url: /Nshpiter
+                  - generic [ref=e23]: Nshpiter
+              - listitem [ref=e24]:
+                - link "ABK" [ref=e25] [cursor=pointer]:
+                  - /url: /Nshpiter/ABK
+                  - generic [ref=e26]: ABK
+                  - img [ref=e27]
+          - button "Search or jump to… (forward slash)" [ref=e29] [cursor=pointer]:
+            - img [ref=e30]
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - generic [ref=e35]:
+              - generic [ref=e36]:
+                - link "Chat with Copilot" [ref=e38] [cursor=pointer]:
+                  - /url: /copilot
+                  - img [ref=e39]
+                - button "Open Copilot…" [ref=e43] [cursor=pointer]:
+                  - generic:
+                    - img
+              - button "Open agents panel" [ref=e338] [cursor=pointer]:
+                - generic [ref=e339]:
+                  - generic:
+                    - img
+                  - generic:
+                    - img
+            - button "Create new..." [ref=e47] [cursor=pointer]:
+              - generic [ref=e48]:
+                - generic:
+                  - img
+              - generic:
+                - img
+            - generic [ref=e49]:
+              - link "All issues (g then i)" [ref=e50] [cursor=pointer]:
+                - /url: /issues
+                - img [ref=e51]
+              - link "All pull requests" [ref=e54] [cursor=pointer]:
+                - /url: /pulls
+                - img [ref=e55]
+              - link "All repositories" [ref=e57] [cursor=pointer]:
+                - /url: /repos
+                - img [ref=e58]
+          - link "You have unread notifications (g then n)" [ref=e340] [cursor=pointer]:
+            - /url: /notifications
+            - img [ref=e61]
+          - button "Open user navigation menu" [ref=e64] [cursor=pointer]:
+            - img "piter" [ref=e65]
+      - heading "Repository navigation" [level=2] [ref=e66]
+      - navigation "Repository" [ref=e67]:
+        - list [ref=e68]:
+          - listitem [ref=e69]:
+            - link "Code" [ref=e70] [cursor=pointer]:
+              - /url: /Nshpiter/ABK
+              - generic [ref=e71]: Code
+          - listitem [ref=e72]:
+            - link "Pull requests" [ref=e73] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/pulls
+              - generic [ref=e74]: Pull requests
+          - listitem [ref=e75]:
+            - link "Agents" [ref=e76] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/agents?author=Nshpiter
+              - generic [ref=e77]: Agents
+          - listitem [ref=e78]:
+            - link "Actions" [ref=e79] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/actions
+              - generic [ref=e80]: Actions
+          - listitem [ref=e81]:
+            - link "Projects" [ref=e82] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/projects
+              - generic [ref=e83]: Projects
+          - listitem [ref=e84]:
+            - link "Wiki" [ref=e85] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/wiki
+              - generic [ref=e86]: Wiki
+          - listitem [ref=e87]:
+            - link "Security and quality" [ref=e88] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/security
+              - generic [ref=e89]: Security and quality
+          - listitem [ref=e90]:
+            - link "Insights" [ref=e91] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/pulse
+              - generic [ref=e92]: Insights
+          - listitem [ref=e93]:
+            - link "Settings" [ref=e94] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/settings
+              - generic [ref=e95]: Settings
+  - main [ref=e99]:
+    - generic [ref=e101]:
+      - 'heading "Actions: Nshpiter/ABK" [level=1] [ref=e102]'
+      - generic [ref=e105]:
+        - generic [ref=e106]:
+          - generic [ref=e107]:
+            - heading "Actions" [level=2] [ref=e108]
+            - link "New workflow" [ref=e109] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/actions/new
+              - generic [ref=e111]: New workflow
+          - navigation "Actions Workflows" [ref=e115]:
+            - list [ref=e117]:
+              - listitem [ref=e118]:
+                - link "All workflows" [ref=e119] [cursor=pointer]:
+                  - /url: /Nshpiter/ABK/actions
+                  - generic [ref=e120]: All workflows
+              - listitem [ref=e121]
+              - listitem [ref=e122]:
+                - generic [ref=e125]:
+                  - list "Workflows" [ref=e126]:
+                    - listitem [ref=e127]:
+                      - link ".github/workflows/build.yml" [ref=e128] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/actions/workflows/build.yml
+                        - generic [ref=e129]: .github/workflows/build.yml
+                      - button "Pin .github/workflows/build.yml" [ref=e130] [cursor=pointer]:
+                        - img
+                    - listitem [ref=e131]:
+                      - link "Android 内核构建-自定义" [ref=e132] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/actions/workflows/kernel-custom.yml
+                        - generic [ref=e133]: Android 内核构建-自定义
+                      - button "Pin Android 内核构建-自定义" [ref=e134] [cursor=pointer]:
+                        - img
+                    - listitem [ref=e135]:
+                      - link "Auto Trigger on SukiSU Update" [ref=e136] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/actions/workflows/Auto_Trigger.yml
+                        - generic [ref=e137]: Auto Trigger on SukiSU Update
+                      - button "Pin Auto Trigger on SukiSU Update" [ref=e138] [cursor=pointer]:
+                        - img
+                    - listitem [ref=e139]:
+                      - link "Build ABK App" [ref=e140] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/actions/workflows/build-abk-app.yml
+                        - generic [ref=e141]: Build ABK App
+                      - button "Pin Build ABK App" [ref=e142] [cursor=pointer]:
+                        - img
+                    - listitem [ref=e143]:
+                      - link "Emergency Release Cleanup" [ref=e144] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/actions/workflows/emergency-cleanup.yml
+                        - generic [ref=e145]: Emergency Release Cleanup
+                      - button "Pin Emergency Release Cleanup" [ref=e146] [cursor=pointer]:
+                        - img
+                    - listitem [ref=e147]:
+                      - link "GetManager" [ref=e148] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/actions/workflows/get-manager.yml
+                        - generic [ref=e149]: GetManager
+                      - button "Pin GetManager" [ref=e150] [cursor=pointer]:
+                        - img
+                    - listitem [ref=e151]:
+                      - link "全属性内核构建矩阵" [ref=e152] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/actions/workflows/kernel-full-feature-matrix.yml
+                        - generic [ref=e153]: 全属性内核构建矩阵
+                      - button "Pin 全属性内核构建矩阵" [ref=e154] [cursor=pointer]:
+                        - img
+                    - listitem [ref=e155]:
+                      - link "内核构建 - Android 12 (5.10)" [ref=e156] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/actions/workflows/kernel-a12-5-10.yml
+                        - generic [ref=e157]: 内核构建 - Android 12 (5.10)
+                      - button "Pin 内核构建 - Android 12 (5.10)" [ref=e158] [cursor=pointer]:
+                        - img
+                    - listitem [ref=e159]:
+                      - link "内核构建 - Android 13 (5.15)" [ref=e160] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/actions/workflows/kernel-a13-5-15.yml
+                        - generic [ref=e161]: 内核构建 - Android 13 (5.15)
+                      - button "Pin 内核构建 - Android 13 (5.15)" [ref=e162] [cursor=pointer]:
+                        - img
+                    - listitem [ref=e163]:
+                      - link "内核构建 - Android 14 (6.1)" [ref=e164] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/actions/workflows/kernel-a14-6-1.yml
+                        - generic [ref=e165]: 内核构建 - Android 14 (6.1)
+                      - button "Pin 内核构建 - Android 14 (6.1)" [ref=e166] [cursor=pointer]:
+                        - img
+                  - button "Show more workflows..." [ref=e168] [cursor=pointer]:
+                    - generic [ref=e169]: Show more workflows...
+              - listitem [ref=e170]
+              - listitem [ref=e171]:
+                - generic [ref=e174]:
+                  - heading "Management" [level=3] [ref=e176]
+                  - list "Management" [ref=e177]:
+                    - listitem [ref=e178]:
+                      - link "Caches" [ref=e179] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/actions/caches
+                        - generic:
+                          - img
+                        - generic [ref=e180]: Caches
+                    - listitem [ref=e181]:
+                      - link "Attestations" [ref=e182] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/attestations
+                        - generic:
+                          - img
+                        - generic [ref=e183]: Attestations
+                        - generic:
+                          - img
+                    - listitem [ref=e184]:
+                      - link "Runners" [ref=e185] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/actions/runners
+                        - generic:
+                          - img
+                        - generic [ref=e186]: Runners
+                    - listitem [ref=e187]:
+                      - link "Usage metrics" [ref=e188] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/actions/metrics/usage
+                        - generic:
+                          - img
+                        - generic [ref=e189]: Usage metrics
+                        - generic:
+                          - img
+                    - listitem [ref=e190]:
+                      - link "Performance metrics" [ref=e191] [cursor=pointer]:
+                        - /url: /Nshpiter/ABK/actions/metrics/performance
+                        - generic:
+                          - img
+                        - generic [ref=e192]: Performance metrics
+                        - generic:
+                          - img
+        - generic [ref=e195]:
+          - generic [ref=e196]:
+            - generic [ref=e197]:
+              - heading "Android 内核构建-自定义" [level=2] [ref=e199]:
+                - generic [ref=e201]: Android 内核构建-自定义
+              - generic [ref=e202]:
+                - search [ref=e205]:
+                  - combobox "Filter workflow runs" [ref=e206]
+                  - img
+                - button "Show workflow options" [ref=e209] [cursor=pointer]:
+                  - img
+            - link "kernel-custom.yml" [ref=e211] [cursor=pointer]:
+              - /url: /Nshpiter/ABK/blob/dev/.github/workflows/kernel-custom.yml
+          - strong [ref=e214]: 3 workflow runs
+          - generic [ref=e215]:
+            - generic [ref=e217]:
+              - button "Event" [ref=e221] [cursor=pointer]:
+                - generic [ref=e223]: Event
+                - generic:
+                  - img
+              - button "Status" [ref=e227] [cursor=pointer]:
+                - generic [ref=e229]: Status
+                - generic:
+                  - img
+              - button "Branch" [ref=e233] [cursor=pointer]:
+                - generic [ref=e235]: Branch
+                - generic:
+                  - img
+              - button "Actor" [ref=e239] [cursor=pointer]:
+                - generic [ref=e241]: Actor
+                - generic:
+                  - img
+            - generic [ref=e242]:
+              - generic [ref=e243]: This workflow has a workflow_dispatch event trigger.
+              - group [ref=e244]:
+                - generic "Run workflow" [active] [ref=e245] [cursor=pointer]: Run workflow
+                - generic [ref=e342]:
+                  - generic [ref=e345]:
+                    - generic [ref=e346]: Use workflow from
+                    - group [ref=e347]:
+                      - 'generic "Branch: dev" [ref=e348] [cursor=pointer]':
+                        - text: "Branch:"
+                        - generic [ref=e349]: dev
+                  - generic [ref=e351]:
+                    - region "Workflow inputs" [ref=e353]:
+                      - generic [ref=e354]:
+                        - generic [ref=e355]: Android 版本*
+                        - combobox "Android 版本*" [ref=e357]:
+                          - option "android12"
+                          - option "android13" [selected]
+                          - option "android14"
+                          - option "android15"
+                          - option "android16"
+                      - generic [ref=e358]:
+                        - generic [ref=e359]: 内核版本*
+                        - combobox "内核版本*" [ref=e361]:
+                          - option "5.10"
+                          - option "5.15" [selected]
+                          - option "6.1"
+                          - option "6.6"
+                          - option "6.12"
+                      - generic [ref=e362]:
+                        - generic [ref=e363]: 子版本号 (如 66, 198, X)*
+                        - textbox "子版本号 (如 66, 198, X)*" [ref=e365]: "66"
+                      - generic [ref=e366]:
+                        - generic [ref=e367]: 安全补丁级别 (如 2022-01, lts)*
+                        - textbox "安全补丁级别 (如 2022-01, lts)*" [ref=e369]: 2022-01
+                      - generic [ref=e370]:
+                        - generic [ref=e371]: 修订版本 (如 r11, 仅 5.10 需要)
+                        - textbox "修订版本 (如 r11, 仅 5.10 需要)" [ref=e373]: r11
+                      - generic [ref=e374]:
+                        - generic [ref=e375]: KernelSU 变体*
+                        - combobox "KernelSU 变体*" [ref=e377]:
+                          - option "Official"
+                          - option "Next"
+                          - option "SukiSU"
+                          - option "ReSukiSU" [selected]
+                      - generic [ref=e378]:
+                        - generic [ref=e379]: KSU 分支*
+                        - combobox "KSU 分支*" [ref=e381]:
+                          - option "Stable(标准)" [selected]
+                          - option "Dev(开发)"
+                          - option "Other(其他/指定)"
+                      - generic [ref=e382]:
+                        - generic [ref=e383]: 自定义版本名 (可选)
+                        - textbox "自定义版本名 (可选)" [ref=e385]
+                      - generic [ref=e386]:
+                        - generic [ref=e387]: 自定义构建时间 (可选，N或留空=当前UTC)
+                        - textbox "自定义构建时间 (可选，N或留空=当前UTC)" [ref=e389]: Sun Dec 01 08:10:00 UTC 2024
+                      - generic [ref=e390]:
+                        - generic [ref=e391]: "虚拟化支持 (5.10~6.6: 槽位补丁, 6.12: 开/关)"
+                        - 'combobox "虚拟化支持 (5.10~6.6: 槽位补丁, 6.12: 开/关)" [ref=e393]':
+                          - option "off" [selected]
+                          - option "on"
+                          - option "678"
+                          - option "123"
+                          - option "345"
+                      - generic [ref=e397]:
+                        - checkbox "启用 ZRAM 增强算法" [ref=e398]
+                        - text: 启用 ZRAM 增强算法
+                      - generic [ref=e402]:
+                        - checkbox "启用 BBG 防格机" [ref=e403]
+                        - text: 启用 BBG 防格机
+                      - generic [ref=e407]:
+                        - checkbox "启用 DDK 防格机 LSM" [ref=e408]
+                        - text: 启用 DDK 防格机 LSM
+                      - generic [ref=e412]:
+                        - checkbox "启用 NTsync" [ref=e413]
+                        - text: 启用 NTsync
+                      - generic [ref=e417]:
+                        - checkbox "启用网络增强（IPSet + BBR）" [ref=e418]
+                        - text: 启用网络增强（IPSet + BBR）
+                      - generic [ref=e422]:
+                        - checkbox "启用 KPM 功能" [ref=e423]
+                        - text: 启用 KPM 功能
+                      - generic [ref=e427]:
+                        - checkbox "启用 Re-Kernel 驱动" [ref=e428]
+                        - text: 启用 Re-Kernel 驱动
+                      - generic [ref=e432]:
+                        - checkbox "禁用 SUSFS" [ref=e433]
+                        - text: 禁用 SUSFS
+                      - generic [ref=e437]:
+                        - checkbox "启用一加 8E 支持" [ref=e438]
+                        - text: 启用一加 8E 支持
+                      - generic [ref=e442]:
+                        - checkbox "启用 ZRAM 完整算法支持（LZO/LZ4/LZ4HC/LZ4K/LZ4KD/DEFLATE/842/ZSTD，默认 lzo-rle）" [ref=e443]
+                        - text: 启用 ZRAM 完整算法支持（LZO/LZ4/LZ4HC/LZ4K/LZ4KD/DEFLATE/842/ZSTD，默认 lzo-rle）
+                      - generic [ref=e444]:
+                        - generic [ref=e445]: 自定义 ZRAM 算法（逗号分隔，如 lzo,lz4,deflate,zstd；仅在未启用完整算法时生效）
+                        - textbox "自定义 ZRAM 算法（逗号分隔，如 lzo,lz4,deflate,zstd；仅在未启用完整算法时生效）" [ref=e447]
+                      - generic [ref=e448]:
+                        - generic [ref=e449]: 自定义 KPM 超级密码（留空=使用默认密码）
+                        - textbox "自定义 KPM 超级密码（留空=使用默认密码）" [ref=e451]
+                      - generic [ref=e455]:
+                        - checkbox "启用自定义外部模块注入" [ref=e456]
+                        - text: 启用自定义外部模块注入
+                      - generic [ref=e457]:
+                        - generic [ref=e458]: 自定义外部模块（链接;阶段，用 | 分隔多个，如 https://github.com/user/mod;after_patch|https://github.com/user/mod2;before_build）
+                        - textbox "自定义外部模块（链接;阶段，用 | 分隔多个，如 https://github.com/user/mod;after_patch|https://github.com/user/mod2;before_build）" [ref=e460]
+                    - button "Run workflow" [ref=e462] [cursor=pointer]:
+                      - generic [ref=e464]: Run workflow
+            - generic [ref=e247]:
+              - generic [ref=e249]:
+                - generic [ref=e250]:
+                  - 'link "failed: Run 4 of Android 内核构建-自定义." [ref=e251] [cursor=pointer]':
+                    - /url: /Nshpiter/ABK/actions/runs/25674588820
+                    - img "failed:" [ref=e253]
+                    - generic [ref=e255]: Android 内核构建-自定义
+                  - generic [ref=e256]:
+                    - text: "Android 内核构建-自定义 #4:"
+                    - generic [ref=e257]:
+                      - text: Manually run by
+                      - link "Nshpiter" [ref=e258] [cursor=pointer]:
+                        - /url: /Nshpiter
+                - link "dev" [ref=e260] [cursor=pointer]:
+                  - /url: /Nshpiter/ABK/tree/refs/heads/dev
+                - generic [ref=e262]:
+                  - generic [ref=e263]:
+                    - generic [ref=e264]:
+                      - img [ref=e266]
+                      - generic "May 11, 2026, 9:55 PM GMT+8" [ref=e268]: 1 hour ago
+                    - generic [ref=e269]:
+                      - img "Run duration" [ref=e270]
+                      - text: 13m 42s
+                  - group [ref=e273]:
+                    - generic "Show options" [ref=e274] [cursor=pointer]:
+                      - img "Show options" [ref=e275]
+              - generic [ref=e278]:
+                - generic [ref=e279]:
+                  - 'link "completed successfully: Run 3 of Android 内核构建-自定义." [ref=e280] [cursor=pointer]':
+                    - /url: /Nshpiter/ABK/actions/runs/25670583351
+                    - img "completed successfully:" [ref=e282]
+                    - generic [ref=e284]: Android 内核构建-自定义
+                  - generic [ref=e285]:
+                    - text: "Android 内核构建-自定义 #3:"
+                    - generic [ref=e286]:
+                      - text: Manually run by
+                      - link "Nshpiter" [ref=e287] [cursor=pointer]:
+                        - /url: /Nshpiter
+                - link "dev" [ref=e289] [cursor=pointer]:
+                  - /url: /Nshpiter/ABK/tree/refs/heads/dev
+                - generic [ref=e291]:
+                  - generic [ref=e292]:
+                    - generic [ref=e293]:
+                      - img [ref=e295]
+                      - generic "May 11, 2026, 8:38 PM GMT+8" [ref=e297]: Today at 8:38 PM
+                    - generic [ref=e298]:
+                      - img "Run duration" [ref=e299]
+                      - text: 20m 8s
+                  - group [ref=e302]:
+                    - generic "Show options" [ref=e303] [cursor=pointer]:
+                      - img "Show options" [ref=e304]
+              - generic [ref=e307]:
+                - generic [ref=e308]:
+                  - 'link "failed: Run 2 of Android 内核构建-自定义." [ref=e309] [cursor=pointer]':
+                    - /url: /Nshpiter/ABK/actions/runs/25667954263
+                    - img "failed:" [ref=e311]
+                    - generic [ref=e313]: Android 内核构建-自定义
+                  - generic [ref=e314]:
+                    - text: "Android 内核构建-自定义 #2:"
+                    - generic [ref=e315]:
+                      - text: Manually run by
+                      - link "Nshpiter" [ref=e316] [cursor=pointer]:
+                        - /url: /Nshpiter
+                - link "dev" [ref=e318] [cursor=pointer]:
+                  - /url: /Nshpiter/ABK/tree/refs/heads/dev
+                - generic [ref=e320]:
+                  - generic [ref=e321]:
+                    - generic [ref=e322]:
+                      - img [ref=e324]
+                      - generic "May 11, 2026, 7:41 PM GMT+8" [ref=e326]: Today at 7:41 PM
+                    - generic [ref=e327]:
+                      - img "Run duration" [ref=e328]
+                      - text: 13m 33s
+                  - group [ref=e331]:
+                    - generic "Show options" [ref=e332] [cursor=pointer]:
+                      - img "Show options" [ref=e333]

@@ -987,21 +987,6 @@ jobs:
           cd $KERNEL_ROOT/common
           patch -p1 < 50_add_susfs_in_gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}.patch || true
 
-          # Official SUSFS init.c 编译修复
-          if [ "${{ inputs.ksu_variant }}" == "Official" ] && [ "${{ inputs.enable_susfs }}" == "true" ]; then
-            echo "检查 Official SUSFS init.c 兼容性..."
-            INIT_C="./drivers/kernelsu/core/init.c"
-            if [ -f "$INIT_C" ]; then
-              HAS_SUSFS_CALLS=$(grep -c 'ksu_syscall_hook_manager_init\|ksu_late_loaded' "$INIT_C" 2>/dev/null || true)
-              HAS_SUSFS_INCLUDE=$(grep -c '#include.*susfs\|extern.*ksu_syscall_hook_manager\|extern.*ksu_late_loaded' "$INIT_C" 2>/dev/null || true)
-              if [ "$HAS_SUSFS_CALLS" -gt 0 ] && [ "$HAS_SUSFS_INCLUDE" -eq 0 ]; then
-                echo "添加 SUSFS 符号声明到 $INIT_C"
-                printf '\n#ifdef CONFIG_KSU_SUSFS\n#include <linux/susfs.h>\n#ifndef ksu_syscall_hook_manager_init\nextern int ksu_syscall_hook_manager_init(void);\nextern int ksu_syscall_hook_manager_exit(void);\nextern bool ksu_late_loaded;\n#endif\n#endif\n' >> "$INIT_C"
-              else
-                echo "init.c SUSFS 声明已存在或无需修复 (calls=$HAS_SUSFS_CALLS includes=$HAS_SUSFS_INCLUDE)"
-              fi
-            fi
-          fi
 
           if [ "${{ inputs.ksu_variant }}" == "SukiSU" ]; then
             SUSFS_C="./fs/susfs.c"
@@ -2136,8 +2121,8 @@ jobs:
             echo "没有配置 $CUSTOM_EXTERNAL_MODULE_STAGE 阶段的自定义外部模块。"
           fi
 
-      - name: 修复 android14-6.1.118 Official SUSFS 源码兼容
-        if: inputs.android_version == 'android14' && inputs.kernel_version == '6.1' && inputs.sub_level == '118' && inputs.ksu_variant == 'Official' && inputs.enable_susfs
+      - name: 修复 Official SUSFS init.c 源码兼容
+        if: inputs.ksu_variant == 'Official' && inputs.enable_susfs && ((inputs.android_version == 'android14' && inputs.kernel_version == '6.1' && inputs.sub_level == '118') || (inputs.android_version == 'android13' && inputs.kernel_version == '5.15'))
         working-directory: ${{ env.KERNEL_ROOT }}
         run: |
           set -euo pipefail
@@ -2269,7 +2254,7 @@ jobs:
 
           candidates = list(unique_kernel_dirs())
           if not candidates:
-              raise SystemExit("未找到 KernelSU 源码目录，无法修复 android14-6.1.118 Official SUSFS")
+              raise SystemExit("未找到 KernelSU 源码目录，无法修复 Official SUSFS")
 
           changed = False
           for ksu_dir in candidates:
@@ -2569,12 +2554,16 @@ jobs:
             set -ex
             cd "$KERNEL_ROOT"
 
-            if [ "${{ inputs.android_version }}" = "android14" ] \
-              && [ "${{ inputs.kernel_version }}" = "6.1" ] \
-              && [ "${{ inputs.sub_level }}" = "118" ] \
-              && [ "${{ inputs.ksu_variant }}" = "Official" ] \
-              && [ "${{ inputs.enable_susfs }}" = "true" ]; then
-              echo "编译前兜底修复 android14-6.1.118 Official SUSFS KernelSU init.c"
+            IS_TARGET_6_1_118=false
+            if [ "${{ inputs.android_version }}" = "android14" ] && [ "${{ inputs.kernel_version }}" = "6.1" ] && [ "${{ inputs.sub_level }}" = "118" ]; then
+              IS_TARGET_6_1_118=true
+            fi
+            IS_TARGET_5_15=false
+            if [ "${{ inputs.android_version }}" = "android13" ] && [ "${{ inputs.kernel_version }}" = "5.15" ]; then
+              IS_TARGET_5_15=true
+            fi
+            if { $IS_TARGET_6_1_118 || $IS_TARGET_5_15; } && [ "${{ inputs.ksu_variant }}" = "Official" ] && [ "${{ inputs.enable_susfs }}" = "true" ]; then
+              echo "编译前兜底修复 Official SUSFS KernelSU init.c"
               python3 - <<'PY'
             from pathlib import Path
             import re
@@ -2728,7 +2717,7 @@ jobs:
                 KernelSU/kernel/include/ksu.h; do
                 if [ -f "$ksu_check_file" ] \
                   && grep --line-number -E 'ksu_late_loaded|ksu_syscall_hook_manager_' "$ksu_check_file"; then
-                  echo "::error::android14-6.1.118 Official SUSFS 仍残留不兼容符号: $ksu_check_file"
+                  echo "::error::Official SUSFS 仍残留不兼容符号: $ksu_check_file"
                   exit 1
                 fi
               done
