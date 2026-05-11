@@ -987,6 +987,32 @@ jobs:
           cd $KERNEL_ROOT/common
           patch -p1 < 50_add_susfs_in_gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}.patch || true
 
+          # Official SUSFS init.c 编译修复
+          if [ "${{ inputs.ksu_variant }}" == "Official" ] && [ "${{ inputs.enable_susfs }}" == "true" ]; then
+            echo "检查 Official SUSFS init.c 兼容性..."
+            INIT_C="./drivers/kernelsu/core/init.c"
+            if [ -f "$INIT_C" ]; then
+              HAS_SUSFS_CALLS=$(grep -c 'ksu_syscall_hook_manager_init\|ksu_late_loaded' "$INIT_C" 2>/dev/null || true)
+              HAS_SUSFS_INCLUDE=$(grep -c '#include.*susfs\|extern.*ksu_syscall_hook_manager\|extern.*ksu_late_loaded' "$INIT_C" 2>/dev/null || true)
+              if [ "$HAS_SUSFS_CALLS" -gt 0 ] && [ "$HAS_SUSFS_INCLUDE" -eq 0 ]; then
+                echo "添加 SUSFS 符号声明到 $INIT_C"
+                cat >> "$INIT_C" <<'INITFIX'
+
+#ifdef CONFIG_KSU_SUSFS
+#include <linux/susfs.h>
+#ifndef ksu_syscall_hook_manager_init
+extern int ksu_syscall_hook_manager_init(void);
+extern int ksu_syscall_hook_manager_exit(void);
+extern bool ksu_late_loaded;
+#endif
+#endif
+INITFIX
+              else
+                echo "init.c SUSFS 声明已存在或无需修复 (calls=$HAS_SUSFS_CALLS includes=$HAS_SUSFS_INCLUDE)"
+              fi
+            fi
+          fi
+
           if [ "${{ inputs.ksu_variant }}" == "SukiSU" ]; then
             SUSFS_C="./fs/susfs.c"
             if [ -f "$SUSFS_C" ] && grep -q '^static void susfs_run_sus_path_loop(' "$SUSFS_C"; then
