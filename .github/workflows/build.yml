@@ -467,15 +467,9 @@ jobs:
                 git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
               fi
             elif [ "${{ inputs.ksu_variant }}" == "ReSukiSU" ]; then
-              if ! git clone https://github.com/ShirkNeko/susfs4ksu.git -b "$SUSFS_BRANCH" 2>/dev/null; then
-                echo "ShirkNeko 仓库未找到分支 $SUSFS_BRANCH，回退到 simonpunk 原版..."
-                git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
-              fi
+              git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
             else
-              if ! git clone https://github.com/ShirkNeko/susfs4ksu.git -b "$SUSFS_BRANCH" 2>/dev/null; then
-                echo "ShirkNeko 仓库未找到分支 $SUSFS_BRANCH，回退到 simonpunk 原版..."
-                git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
-              fi
+              git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
             fi
 
             CONFIG_FILE="config/config"
@@ -986,22 +980,6 @@ jobs:
 
           cd $KERNEL_ROOT/common
           patch -p1 < 50_add_susfs_in_gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}.patch || true
-
-          # Official SUSFS init.c 编译修复
-          if [ "${{ inputs.ksu_variant }}" == "Official" ] && [ "${{ inputs.enable_susfs }}" == "true" ]; then
-            echo "检查 Official SUSFS init.c 兼容性..."
-            INIT_C="./drivers/kernelsu/core/init.c"
-            if [ -f "$INIT_C" ]; then
-              HAS_SUSFS_CALLS=$(grep -c 'ksu_syscall_hook_manager_init\|ksu_late_loaded' "$INIT_C" 2>/dev/null || true)
-              HAS_SUSFS_INCLUDE=$(grep -c '#include.*susfs\|extern.*ksu_syscall_hook_manager\|extern.*ksu_late_loaded' "$INIT_C" 2>/dev/null || true)
-              if [ "$HAS_SUSFS_CALLS" -gt 0 ] && [ "$HAS_SUSFS_INCLUDE" -eq 0 ]; then
-                echo "添加 SUSFS 符号声明到 $INIT_C"
-                printf '\n#ifdef CONFIG_KSU_SUSFS\n#include <linux/susfs.h>\n#ifndef ksu_syscall_hook_manager_init\nextern int ksu_syscall_hook_manager_init(void);\nextern int ksu_syscall_hook_manager_exit(void);\nextern bool ksu_late_loaded;\n#endif\n#endif\n' >> "$INIT_C"
-              else
-                echo "init.c SUSFS 声明已存在或无需修复 (calls=$HAS_SUSFS_CALLS includes=$HAS_SUSFS_INCLUDE)"
-              fi
-            fi
-          fi
 
           if [ "${{ inputs.ksu_variant }}" == "SukiSU" ]; then
             SUSFS_C="./fs/susfs.c"
@@ -2223,17 +2201,6 @@ jobs:
           }
           """
 
-          def unique_kernel_dirs():
-              seen = set()
-              for base in (Path("common/drivers/kernelsu"), Path("drivers/kernelsu"), Path("KernelSU/kernel")):
-                  if not base.exists():
-                      continue
-                  resolved = base.resolve()
-                  if resolved in seen:
-                      continue
-                  seen.add(resolved)
-                  yield base
-
           def replace_function(text, signature, replacement):
               start = text.find(signature)
               if start == -1:
@@ -2267,56 +2234,80 @@ jobs:
                   raise SystemExit(f"include anchor not found: {anchor.strip()}")
               return text.replace(anchor, anchor + line, 1)
 
-          candidates = list(unique_kernel_dirs())
-          if not candidates:
-              raise SystemExit("未找到 KernelSU 源码目录，无法修复 android14-6.1.118 Official SUSFS")
+          def ensure_official_susfs_objects(ksu_dir):
+              kbuild = ksu_dir / "Kbuild"
+              if not kbuild.exists():
+                  return False
+
+              text = kbuild.read_text()
+              missing = []
+              if "hook/lsm_hook.o" not in text:
+                  missing.append("kernelsu-objs += hook/lsm_hook.o")
+              if "hook/arm64/patch_memory.o" not in text:
+                  missing.extend([
+                      "ifeq ($(CONFIG_ARM64),y)",
+                      "kernelsu-objs += hook/arm64/patch_memory.o",
+                      "endif",
+                  ])
+              if not missing:
+                  return False
+
+              block = "\n".join(["", "# ABK: selinux_hide.c still needs these hook helpers."] + missing + [""])
+              kbuild.write_text(text.rstrip() + "\n" + block)
+              print(f"已补回 {kbuild} 的 Official SUSFS hook helper 对象")
+              return True
+
+          ksu_dir = Path("common/drivers/kernelsu")
+          if not ksu_dir.exists():
+              raise SystemExit("未找到 common/drivers/kernelsu，无法修复 android14-6.1.118 Official SUSFS")
 
           changed = False
-          for ksu_dir in candidates:
-              init_c = ksu_dir / "core/init.c"
-              if not init_c.exists():
-                  continue
+          init_c = ksu_dir / "core/init.c"
+          if not init_c.exists():
+              raise SystemExit(f"未找到 {init_c}")
 
-              text = init_c.read_text()
-              original = text
+          text = init_c.read_text()
+          original = text
 
-              text = ensure_line_after(text, "#include <linux/moduleparam.h>\n", "#include <linux/susfs.h>\n")
-              text = text.replace('#include "hook/syscall_hook_manager.h"\n', "")
-              text = text.replace('#include "hook/syscall_hook.h"\n', "")
-              text = ensure_line_after(text, '#include "feature/adb_root.h"\n', '#include "hook/setuid_hook.h"\n')
-              text = ensure_line_after(text, '#include "hook/setuid_hook.h"\n', '#include "feature/sucompat.h"\n')
-              text = text.replace("bool ksu_late_loaded;\n", "")
-              text = re.sub(
-                  r'\n#if defined\(__x86_64__\)\n#include <asm/cpufeature\.h>\n#include <linux/version\.h>\n#ifndef X86_FEATURE_INDIRECT_SAFE\n#error "FATAL: Your kernel is missing the indirect syscall bypass patches!"\n#endif\n#endif\n',
-                  "\n",
-                  text,
-                  count=1,
-              )
+          text = ensure_line_after(text, "#include <linux/moduleparam.h>\n", "#include <linux/susfs.h>\n")
+          text = text.replace('#include "hook/syscall_hook_manager.h"\n', "")
+          text = text.replace('#include "hook/syscall_hook.h"\n', "")
+          text = ensure_line_after(text, '#include "feature/adb_root.h"\n', '#include "hook/setuid_hook.h"\n')
+          text = ensure_line_after(text, '#include "hook/setuid_hook.h"\n', '#include "feature/sucompat.h"\n')
+          text = text.replace("bool ksu_late_loaded;\n", "")
+          text = re.sub(
+              r'\n#if defined\(__x86_64__\)\n#include <asm/cpufeature\.h>\n#include <linux/version\.h>\n#ifndef X86_FEATURE_INDIRECT_SAFE\n#error "FATAL: Your kernel is missing the indirect syscall bypass patches!"\n#endif\n#endif\n',
+              "\n",
+              text,
+              count=1,
+          )
 
-              text = replace_function(text, "int __init kernelsu_init(void)", INIT_BODY)
-              text = replace_function(text, "void __exit kernelsu_exit(void)", EXIT_BODY)
+          text = replace_function(text, "int __init kernelsu_init(void)", INIT_BODY)
+          text = replace_function(text, "void __exit kernelsu_exit(void)", EXIT_BODY)
 
-              if "ksu_late_loaded" in text or "ksu_syscall_hook_manager_" in text:
-                  raise SystemExit(f"{init_c} 仍残留 Official SUSFS 不兼容符号")
-              for required in ("susfs_init();", "ksu_sucompat_init();", "ksu_setuid_hook_init();"):
-                  if required not in text:
-                      raise SystemExit(f"{init_c} 缺少必要初始化: {required}")
+          if "ksu_late_loaded" in text or "ksu_syscall_hook_manager_" in text:
+              raise SystemExit(f"{init_c} 仍残留 Official SUSFS 不兼容符号")
+          for required in ("susfs_init();", "ksu_sucompat_init();", "ksu_setuid_hook_init();"):
+              if required not in text:
+                  raise SystemExit(f"{init_c} 缺少必要初始化: {required}")
 
-              if text != original:
-                  init_c.write_text(text)
+          if text != original:
+              init_c.write_text(text)
+              changed = True
+              print(f"已修复 {init_c}")
+          else:
+              print(f"{init_c} 已满足 android14-6.1.118 Official SUSFS 兼容要求")
+
+          include_ksu = ksu_dir / "include/ksu.h"
+          if include_ksu.exists():
+              header = include_ksu.read_text()
+              updated = header.replace("extern bool ksu_late_loaded;\n", "")
+              if updated != header:
+                  include_ksu.write_text(updated)
                   changed = True
-                  print(f"已修复 {init_c}")
-              else:
-                  print(f"{init_c} 已满足 android14-6.1.118 Official SUSFS 兼容要求")
+                  print(f"已移除 {include_ksu} 中的 ksu_late_loaded 声明")
 
-              include_ksu = ksu_dir / "include/ksu.h"
-              if include_ksu.exists():
-                  header = include_ksu.read_text()
-                  updated = header.replace("extern bool ksu_late_loaded;\n", "")
-                  if updated != header:
-                      include_ksu.write_text(updated)
-                      changed = True
-                      print(f"已移除 {include_ksu} 中的 ksu_late_loaded 声明")
+          changed = ensure_official_susfs_objects(ksu_dir) or changed
 
           if not changed:
               print("android14-6.1.118 Official SUSFS 源码兼容修复无需修改。")
@@ -2664,56 +2655,68 @@ jobs:
                     raise SystemExit(f"anchor not found: {anchor.strip()}")
                 return text.replace(anchor, anchor + line, 1)
 
-            seen = set()
-            candidates = []
-            for base in (Path("common/drivers/kernelsu"), Path("drivers/kernelsu"), Path("KernelSU/kernel")):
-                if not base.exists():
-                    continue
-                resolved = base.resolve()
-                if resolved in seen:
-                    continue
-                seen.add(resolved)
-                candidates.append(base)
+            def ensure_official_susfs_objects(ksu_dir):
+                kbuild = ksu_dir / "Kbuild"
+                if not kbuild.exists():
+                    return False
+                text = kbuild.read_text()
+                missing = []
+                if "hook/lsm_hook.o" not in text:
+                    missing.append("kernelsu-objs += hook/lsm_hook.o")
+                if "hook/arm64/patch_memory.o" not in text:
+                    missing.extend([
+                        "ifeq ($(CONFIG_ARM64),y)",
+                        "kernelsu-objs += hook/arm64/patch_memory.o",
+                        "endif",
+                    ])
+                if not missing:
+                    return False
+                block = "\n".join(["", "# ABK: selinux_hide.c still needs these hook helpers."] + missing + [""])
+                kbuild.write_text(text.rstrip() + "\n" + block)
+                print(f"fixed {kbuild}: restored Official SUSFS hook helper objects")
+                return True
 
-            if not candidates:
-                raise SystemExit("no KernelSU source directory found before build")
+            ksu_dir = Path("common/drivers/kernelsu")
+            if not ksu_dir.exists():
+                raise SystemExit("common/drivers/kernelsu not found before build")
 
             fixed = False
-            for ksu_dir in candidates:
-                init_c = ksu_dir / "core/init.c"
-                if not init_c.exists():
-                    continue
-                text = init_c.read_text()
-                original = text
-                text = ensure_line_after(text, "#include <linux/moduleparam.h>\n", "#include <linux/susfs.h>\n")
-                text = text.replace('#include "hook/syscall_hook_manager.h"\n', "")
-                text = text.replace('#include "hook/syscall_hook.h"\n', "")
-                text = ensure_line_after(text, '#include "feature/adb_root.h"\n', '#include "hook/setuid_hook.h"\n')
-                text = ensure_line_after(text, '#include "hook/setuid_hook.h"\n', '#include "feature/sucompat.h"\n')
-                text = text.replace("bool ksu_late_loaded;\n", "")
-                text = re.sub(
-                    r'\n#if defined\(__x86_64__\)\n#include <asm/cpufeature\.h>\n#include <linux/version\.h>\n#ifndef X86_FEATURE_INDIRECT_SAFE\n#error "FATAL: Your kernel is missing the indirect syscall bypass patches!"\n#endif\n#endif\n',
-                    "\n",
-                    text,
-                    count=1,
-                )
-                text = replace_function(text, "int __init kernelsu_init(void)", INIT_BODY)
-                text = replace_function(text, "void __exit kernelsu_exit(void)", EXIT_BODY)
-                if "ksu_late_loaded" in text or "ksu_syscall_hook_manager_" in text:
-                    raise SystemExit(f"{init_c} still contains incompatible Official SUSFS symbols")
-                if text != original:
-                    init_c.write_text(text)
-                    fixed = True
-                    print(f"fixed {init_c}")
+            init_c = ksu_dir / "core/init.c"
+            if not init_c.exists():
+                raise SystemExit(f"{init_c} not found before build")
+            text = init_c.read_text()
+            original = text
+            text = ensure_line_after(text, "#include <linux/moduleparam.h>\n", "#include <linux/susfs.h>\n")
+            text = text.replace('#include "hook/syscall_hook_manager.h"\n', "")
+            text = text.replace('#include "hook/syscall_hook.h"\n', "")
+            text = ensure_line_after(text, '#include "feature/adb_root.h"\n', '#include "hook/setuid_hook.h"\n')
+            text = ensure_line_after(text, '#include "hook/setuid_hook.h"\n', '#include "feature/sucompat.h"\n')
+            text = text.replace("bool ksu_late_loaded;\n", "")
+            text = re.sub(
+                r'\n#if defined\(__x86_64__\)\n#include <asm/cpufeature\.h>\n#include <linux/version\.h>\n#ifndef X86_FEATURE_INDIRECT_SAFE\n#error "FATAL: Your kernel is missing the indirect syscall bypass patches!"\n#endif\n#endif\n',
+                "\n",
+                text,
+                count=1,
+            )
+            text = replace_function(text, "int __init kernelsu_init(void)", INIT_BODY)
+            text = replace_function(text, "void __exit kernelsu_exit(void)", EXIT_BODY)
+            if "ksu_late_loaded" in text or "ksu_syscall_hook_manager_" in text:
+                raise SystemExit(f"{init_c} still contains incompatible Official SUSFS symbols")
+            if text != original:
+                init_c.write_text(text)
+                fixed = True
+                print(f"fixed {init_c}")
 
-                include_ksu = ksu_dir / "include/ksu.h"
-                if include_ksu.exists():
-                    header = include_ksu.read_text()
-                    updated = header.replace("extern bool ksu_late_loaded;\n", "")
-                    if updated != header:
-                        include_ksu.write_text(updated)
-                        fixed = True
-                        print(f"fixed {include_ksu}")
+            include_ksu = ksu_dir / "include/ksu.h"
+            if include_ksu.exists():
+                header = include_ksu.read_text()
+                updated = header.replace("extern bool ksu_late_loaded;\n", "")
+                if updated != header:
+                    include_ksu.write_text(updated)
+                    fixed = True
+                    print(f"fixed {include_ksu}")
+
+            fixed = ensure_official_susfs_objects(ksu_dir) or fixed
 
             if not fixed:
                 print("Official SUSFS KernelSU init.c already fixed")
@@ -2721,17 +2724,19 @@ jobs:
 
               for ksu_check_file in \
                 common/drivers/kernelsu/core/init.c \
-                common/drivers/kernelsu/include/ksu.h \
-                drivers/kernelsu/core/init.c \
-                drivers/kernelsu/include/ksu.h \
-                KernelSU/kernel/core/init.c \
-                KernelSU/kernel/include/ksu.h; do
+                common/drivers/kernelsu/include/ksu.h; do
                 if [ -f "$ksu_check_file" ] \
                   && grep --line-number -E 'ksu_late_loaded|ksu_syscall_hook_manager_' "$ksu_check_file"; then
                   echo "::error::android14-6.1.118 Official SUSFS 仍残留不兼容符号: $ksu_check_file"
                   exit 1
                 fi
               done
+              if [ -f common/drivers/kernelsu/Kbuild ] \
+                && { ! grep -qF 'hook/lsm_hook.o' common/drivers/kernelsu/Kbuild \
+                  || ! grep -qF 'hook/arm64/patch_memory.o' common/drivers/kernelsu/Kbuild; }; then
+                echo "::error::android14-6.1.118 Official SUSFS 缺少 common/drivers/kernelsu Kbuild hook helper 对象"
+                exit 1
+              fi
             fi
 
             sed -i 's/BUILD_SYSTEM_DLKM=1/BUILD_SYSTEM_DLKM=0/' ./common/build.config.gki.aarch64
