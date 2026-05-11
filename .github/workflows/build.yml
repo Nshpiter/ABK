@@ -996,17 +996,7 @@ jobs:
               HAS_SUSFS_INCLUDE=$(grep -c '#include.*susfs\|extern.*ksu_syscall_hook_manager\|extern.*ksu_late_loaded' "$INIT_C" 2>/dev/null || true)
               if [ "$HAS_SUSFS_CALLS" -gt 0 ] && [ "$HAS_SUSFS_INCLUDE" -eq 0 ]; then
                 echo "添加 SUSFS 符号声明到 $INIT_C"
-                cat >> "$INIT_C" <<'INITFIX'
-
-#ifdef CONFIG_KSU_SUSFS
-#include <linux/susfs.h>
-#ifndef ksu_syscall_hook_manager_init
-extern int ksu_syscall_hook_manager_init(void);
-extern int ksu_syscall_hook_manager_exit(void);
-extern bool ksu_late_loaded;
-#endif
-#endif
-INITFIX
+                printf '\n#ifdef CONFIG_KSU_SUSFS\n#include <linux/susfs.h>\n#ifndef ksu_syscall_hook_manager_init\nextern int ksu_syscall_hook_manager_init(void);\nextern int ksu_syscall_hook_manager_exit(void);\nextern bool ksu_late_loaded;\n#endif\n#endif\n' >> "$INIT_C"
               else
                 echo "init.c SUSFS 声明已存在或无需修复 (calls=$HAS_SUSFS_CALLS includes=$HAS_SUSFS_INCLUDE)"
               fi
