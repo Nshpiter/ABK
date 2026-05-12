@@ -750,6 +750,7 @@ jobs:
           echo "KSU 分支: $BRANCH"
 
       - name: 添加 KernelSU
+        if: inputs.ksu_variant != 'None'
         working-directory: ${{ env.KERNEL_ROOT }}
         run: |
           case "${{ inputs.ksu_variant }}" in
@@ -789,7 +790,7 @@ jobs:
           fi
 
       - name: 修复 SukiSU SUSFS 源码兼容
-        if: inputs.ksu_variant == 'SukiSU' && inputs.enable_susfs
+        if: inputs.ksu_variant == 'SukiSU' && inputs.enable_susfs && inputs.ksu_variant != 'None'
         working-directory: ${{ env.KERNEL_ROOT }}
         run: |
           set -euo pipefail
@@ -945,7 +946,7 @@ jobs:
           echo "已更新 get_ksu_version_full 模板: $VERSION_TEMPLATE"
 
       - name: 应用 SUSFS 补丁
-        if: inputs.enable_susfs
+        if: inputs.enable_susfs && inputs.ksu_variant != 'None'
         working-directory: ${{ env.KERNEL_ROOT }}
         run: |
           echo "应用 SUSFS 补丁..."
@@ -1107,12 +1108,26 @@ jobs:
               echo "已修复 memory.c 缺少 susfs_def.h 问题"
             }
 
+            fix_selinux_extern_static() {
+              local file="./security/selinux/hooks.c"
+              if [ -f "$file" ] && grep -qF 'extern static int security_context_to_sid_with_policy' "$file"; then
+                sed -i 's/extern static int security_context_to_sid_with_policy/int security_context_to_sid_with_policy/' "$file"
+                echo "已修复 hooks.c 中 security_context_to_sid_with_policy 的 extern static 冲突"
+              fi
+
+              file="./security/selinux/selinuxfs.c"
+              if [ -f "$file" ] && grep -qF 'extern static int security_context_to_sid_with_policy' "$file"; then
+                sed -i 's/extern static int security_context_to_sid_with_policy/int security_context_to_sid_with_policy/' "$file"
+                echo "已修复 selinuxfs.c 中 security_context_to_sid_with_policy 的 extern static 冲突"
+              fi
+              if [ -f "$file" ] && grep -qF 'extern static int security_sid_to_context_with_policy' "$file"; then
+                sed -i 's/extern static int security_sid_to_context_with_policy/int security_sid_to_context_with_policy/' "$file"
+                echo "已修复 selinuxfs.c 中 security_sid_to_context_with_policy 的 extern static 冲突"
+              fi
+            }
+
             # Android 12 - 5.10 修复
             if [[ "${{ inputs.android_version }}" == "android12" && "${{ inputs.kernel_version }}" == "5.10" ]]; then
-              # 修复 2024-11 分支: mmap.c 调用了 vm_flags_clear()，但同分支 mm.h 未提供 helper
-              if [[ "${{ inputs.os_patch_level }}" == "2024-11" ]] && grep -qF 'vm_flags_clear(new_vma, VM_PAD_MASK);' ./mm/mmap.c; then
-                sed -i 's/vm_flags_clear(new_vma, VM_PAD_MASK);/new_vma->vm_flags \&= ~VM_PAD_MASK;/' ./mm/mmap.c
-              fi
               if [[ "$CURRENT_SUB" -le 209 ]]; then
                 fix_task_mmu_show_pad
               fi
@@ -1131,10 +1146,6 @@ jobs:
 
             # Android 13 - 5.15 修复
             if [[ "${{ inputs.android_version }}" == "android13" && "${{ inputs.kernel_version }}" == "5.15" ]]; then
-              # 修复 2024-11 分支: mmap.c 调用了 vm_flags_clear()，但同分支 mm.h 未提供 helper
-              if [[ "${{ inputs.os_patch_level }}" == "2024-11" ]] && grep -qF 'vm_flags_clear(new_vma, VM_PAD_MASK);' ./mm/mmap.c; then
-                sed -i 's/vm_flags_clear(new_vma, VM_PAD_MASK);/new_vma->vm_flags \&= ~VM_PAD_MASK;/' ./mm/mmap.c
-              fi
               if [[ "$CURRENT_SUB" -le 41 ]]; then
                 cp $KERNEL_PATCHES/wild/susfs_fix_patches/v${SUSFS_VERSION}/a13-5.15/namespace.c.patch ./
                 patch -p1 < namespace.c.patch || true
@@ -1203,6 +1214,9 @@ jobs:
 
             # Android 15 - 6.6 修复
             if [[ "${{ inputs.android_version }}" == "android15" && "${{ inputs.kernel_version }}" == "6.6" ]]; then
+              if [[ "${{ inputs.ksu_variant }}" == "Official" ]]; then
+                fix_selinux_extern_static
+              fi
               if [[ "$CURRENT_SUB" -ge 98 ]]; then
                 cp $KERNEL_PATCHES/wild/susfs_fix_patches/v${SUSFS_VERSION}/a15-6.6/base.c.patch ./
                 patch -p1 < base.c.patch || true
@@ -1219,10 +1233,8 @@ jobs:
               if [[ "$CURRENT_SUB" -le 58 ]]; then
                 cp $KERNEL_PATCHES/wild/susfs_fix_patches/v${SUSFS_VERSION}/a15-6.6/task_mmu.c.patch ./
                 patch -p1 < task_mmu.c.patch || true
-                if [[ "${{ inputs.ksu_variant }}" == "ReSukiSU" ]]; then
-                  fix_task_mmu_unused_vma_decl
-                  fix_memory_missing_susfs_def
-                fi
+                fix_task_mmu_unused_vma_decl
+                fix_memory_missing_susfs_def
               fi
             fi
 
@@ -1245,6 +1257,47 @@ jobs:
                 echo "已修复 exec.c 缺少 susfs_def.h 问题"
               fi
             fi
+          fi
+
+      - name: 应用 Kernel 特定补丁
+        working-directory: ${{ env.KERNEL_ROOT }}/common
+        run: |
+          # 修复 android15-6.6 2024-11: mmap.c 调用了 vm_flags_clear()，但同分支 mm.h 未提供 helper
+          if [[ "${{ inputs.android_version }}" == "android15" && "${{ inputs.kernel_version }}" == "6.6" && "${{ inputs.os_patch_level }}" == "2024-11" ]] \
+            && grep -qF 'vm_flags_clear(new_vma, VM_PAD_MASK);' ./mm/mmap.c \
+            && ! grep -qF 'static inline void vm_flags_clear(' ./include/linux/mm.h; then
+            python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("include/linux/mm.h")
+          text = path.read_text()
+          helper = """
+          static inline void vm_flags_clear(struct vm_area_struct *vma,
+                                            vm_flags_t flags)
+          {
+              vma_start_write(vma);
+              ACCESS_PRIVATE(vma, __vm_flags) &= ~flags;
+          }
+          """
+
+          if "static inline void vm_flags_clear(" not in text:
+              marker = "/*\n * Use only if VMA is not part of the VMA tree"
+              if marker in text:
+                  text = text.replace(marker, helper + "\n" + marker, 1)
+              else:
+                  needle = "static inline void vm_flags_set(struct vm_area_struct *vma,"
+                  start = text.find(needle)
+                  if start == -1:
+                      raise SystemExit("include/linux/mm.h missing vm_flags_set(), cannot inject vm_flags_clear()")
+                  body_start = text.find("{", start)
+                  body_end = text.find("\n}\n", body_start)
+                  if body_start == -1 or body_end == -1:
+                      raise SystemExit("include/linux/mm.h vm_flags_set() has unexpected format")
+                  insert_at = body_end + len("\n}\n")
+                  text = text[:insert_at] + helper + text[insert_at:]
+              path.write_text(text)
+          PY
+            echo "已为 android15-6.6 2024-11 补充 vm_flags_clear helper"
           fi
 
       - name: 备份基准 defconfig
@@ -1712,11 +1765,14 @@ jobs:
         run: |
           wget -O- https://github.com/vc-teahouse/Baseband-guard/raw/main/setup.sh | bash
           BBG_MAKEFILE="Baseband-guard/Makefile"
-          if [ "${{ inputs.android_version }}" = "android13" ] && \
-             [ "${{ inputs.kernel_version }}" = "5.15" ] && \
-             [ "${{ inputs.sub_level }}" = "41" ] && \
+          if { { [ "${{ inputs.android_version }}" = "android12" ] && \
+                 [ "${{ inputs.kernel_version }}" = "5.10" ] && \
+                 [ "${{ inputs.sub_level }}" = "43" ]; } || \
+               { [ "${{ inputs.android_version }}" = "android13" ] && \
+                 [ "${{ inputs.kernel_version }}" = "5.15" ] && \
+                 [ "${{ inputs.sub_level }}" = "41" ]; }; } && \
              [ -f "$BBG_MAKEFILE" ]; then
-            echo "应用 BBG legacy host header 生成兼容修复: android13-5.15.41"
+            echo "应用 BBG legacy host header 生成兼容修复: ${{ inputs.android_version }}-${{ inputs.kernel_version }}.${{ inputs.sub_level }}"
             python3 - "$BBG_MAKEFILE" "common/security/selinux" <<'PY'
           import sys
           import re
@@ -1961,11 +2017,13 @@ jobs:
       - name: 配置内核选项
         working-directory: ${{ env.KERNEL_ROOT }}
         run: |
-          cat >> "$DEFCONFIG" << 'EOF'
+          if [ "${{ inputs.ksu_variant }}" != "None" ]; then
+            cat >> "$DEFCONFIG" << 'EOF'
           CONFIG_KSU=y
           CONFIG_TMPFS_XATTR=y
           CONFIG_TMPFS_POSIX_ACL=y
           EOF
+          fi
 
           if [ "${{ inputs.use_kpm }}" == "true" ] && { [ "${{ inputs.ksu_variant }}" == "SukiSU" ] || [ "${{ inputs.ksu_variant }}" == "ReSukiSU" ] || [ "${{ inputs.ksu_variant }}" == "Next" ]; }; then
             echo "CONFIG_KPM=y" >> "$DEFCONFIG"
@@ -1997,7 +2055,7 @@ jobs:
           echo "CONFIG_KPM_SUPER_KEY 不是当前 KSU Kconfig 符号，不能写入 defconfig fragment。"
 
       - name: 添加 SUSFS 配置
-        if: inputs.enable_susfs
+        if: inputs.enable_susfs && inputs.ksu_variant != 'None'
         run: |
           cat >> "$DEFCONFIG" << 'EOF'
           CONFIG_KSU_SUSFS=y
@@ -2903,15 +2961,6 @@ jobs:
           path: |
             *AnyKernel3.zip
             *.img
-          compression-level: 9
-
-      - name: 上传 NTsync 权限修复和 IPSet 启用模块
-        if: ${{ inputs.upload_aux_artifacts && (inputs.use_ntsync || inputs.use_networking) }}
-        uses: actions/upload-artifact@v6
-        with:
-          name: ntsync权限修复&ipset启用
-          path: modules/ntsync-ipset-helper/ntsync权限修复&ipset启用.zip
-          if-no-files-found: error
           compression-level: 9
 
       - name: 上传补丁冲突文件
