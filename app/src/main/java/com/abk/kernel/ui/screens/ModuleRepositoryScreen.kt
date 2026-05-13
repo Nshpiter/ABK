@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.abk.kernel.data.model.CustomExternalModuleStage
@@ -148,7 +149,7 @@ fun ModuleRepositoryScreen(
                     title = "模块仓库",
                     actions = {
                         IconButton(onClick = ::openRepositorySettings) {
-                            Icon(Icons.Default.Storage, contentDescription = "配置模块仓库")
+                            Icon(Icons.Default.Dns, contentDescription = "配置模块仓库")
                         }
                     }
                 )
@@ -262,17 +263,25 @@ private fun ModuleRepositoryListContent(
             .padding(padding)
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 28.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp)
+            .padding(horizontal = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
         OutlinedTextField(
             value = searchQuery,
             onValueChange = onSearchQueryChange,
-            leadingIcon = { Icon(Icons.Default.Search, null) },
-            placeholder = { Text("搜索模块") },
-            modifier = Modifier.fillMaxWidth(),
+            leadingIcon = { Icon(Icons.Default.Search, null, modifier = Modifier.size(22.dp)) },
+            placeholder = {
+                Text(
+                    text = "搜索模块",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            },
+            textStyle = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
             singleLine = true,
-            shape = RoundedCornerShape(22.dp)
+            shape = RoundedCornerShape(18.dp)
         )
 
         if (refreshing) {
@@ -336,7 +345,7 @@ private fun EmptyModuleRepositoryState(
             color = MaterialTheme.colorScheme.onSurface
         )
         TextButton(onClick = onOpenRepositorySettings) {
-            Icon(Icons.Default.Storage, null, modifier = Modifier.size(18.dp))
+            Icon(Icons.Default.Dns, null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp))
             Text("管理中央仓库")
         }
@@ -354,8 +363,8 @@ private fun ModuleRepositoryListItem(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(vertical = 6.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -367,7 +376,7 @@ private fun ModuleRepositoryListItem(
             ) {
                 Text(
                     text = module.displayName(),
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 2,
@@ -377,7 +386,7 @@ private fun ModuleRepositoryListItem(
                 if (meta.isNotBlank()) {
                     Text(
                         text = meta,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -395,7 +404,7 @@ private fun ModuleRepositoryListItem(
                     )
                     Text(
                         text = sources.size.toString(),
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -405,9 +414,9 @@ private fun ModuleRepositoryListItem(
         if (module.description.isNotBlank()) {
             Text(
                 text = module.description,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 4,
+                maxLines = 3,
                 overflow = TextOverflow.Ellipsis
             )
         }
@@ -416,17 +425,17 @@ private fun ModuleRepositoryListItem(
             modifier = Modifier
                 .horizontalScroll(rememberScrollState())
                 .padding(top = 2.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            ModuleTagChip(label = module.repoUrl.repoSlug())
+            ModuleTagChip(label = module.repoUrl.repoName(), maxWidth = 220.dp)
             module.supportedStages.take(2).forEach { stage ->
                 ModuleTagChip(label = CustomExternalModuleStage.normalize(stage), secondary = true)
             }
             if (alreadyAdded) {
                 ModuleTagChip(label = "已加入", secondary = true)
             }
-            if (sources.isNotEmpty()) {
-                ModuleTagChip(label = "来源 ${sources.joinToString(", ")}", secondary = true)
+            if (sources.size > 1) {
+                ModuleTagChip(label = "来源 ${sources.size}", secondary = true)
             }
         }
 
@@ -437,19 +446,24 @@ private fun ModuleRepositoryListItem(
         ) {
             FilledTonalIconButton(
                 onClick = onOpen,
-                modifier = Modifier.width(76.dp).height(56.dp)
+                modifier = Modifier.width(56.dp).height(48.dp)
             ) {
-                Icon(Icons.Default.OpenInBrowser, contentDescription = "打开模块仓库")
+                Icon(
+                    Icons.Default.OpenInBrowser,
+                    contentDescription = "打开模块仓库",
+                    modifier = Modifier.size(22.dp)
+                )
             }
-            Spacer(Modifier.width(10.dp))
+            Spacer(Modifier.width(8.dp))
             FilledTonalIconButton(
                 onClick = onAdd,
                 enabled = !alreadyAdded,
-                modifier = Modifier.width(76.dp).height(56.dp)
+                modifier = Modifier.width(56.dp).height(48.dp)
             ) {
                 Icon(
                     imageVector = if (alreadyAdded) Icons.Default.CheckCircle else Icons.Default.Add,
-                    contentDescription = if (alreadyAdded) "已加入" else "加入构建配置"
+                    contentDescription = if (alreadyAdded) "已加入" else "加入构建配置",
+                    modifier = Modifier.size(22.dp)
                 )
             }
         }
@@ -466,7 +480,8 @@ private fun ModuleRepositoryListItem(
 @Composable
 private fun ModuleTagChip(
     label: String,
-    secondary: Boolean = false
+    secondary: Boolean = false,
+    maxWidth: Dp = 160.dp
 ) {
     val color = if (secondary) {
         MaterialTheme.colorScheme.secondaryContainer
@@ -485,10 +500,12 @@ private fun ModuleTagChip(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.labelMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            modifier = Modifier
+                .widthIn(max = maxWidth)
+                .padding(horizontal = 7.dp, vertical = 3.dp)
         )
     }
 }
@@ -515,7 +532,7 @@ private fun ModuleRepositorySettingsPage(
         ExpressiveSectionCard(
             title = "中央仓库",
             subtitle = "添加包含 abk-modules.json 的索引仓库。",
-            icon = Icons.Default.Storage
+            icon = Icons.Default.Dns
         ) {
             OutlinedTextField(
                 value = repositoryUrl,
@@ -587,7 +604,7 @@ private fun ModuleCatalogRepositoryCard(
     ExpressiveSectionCard(
         title = repository.name.ifBlank { repository.url },
         subtitle = repository.url,
-        icon = Icons.Default.Storage
+        icon = Icons.Default.Dns
     ) {
         if (refreshing) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -728,9 +745,9 @@ private fun ModuleCatalogItem.metaLine(): String =
         author.takeIf { it.isNotBlank() }?.let { "作者: $it" }
     ).joinToString("\n")
 
-private fun String.repoSlug(): String =
+private fun String.repoName(): String =
     trim()
         .trimEnd('/')
         .removeSuffix(".git")
-        .substringAfter("github.com/")
+        .substringAfterLast('/')
         .ifBlank { trim().trimEnd('/').substringAfterLast('/') }
