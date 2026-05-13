@@ -71,11 +71,13 @@ import kotlin.math.pow
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 private const val BUILD_PLAN_BACK_VISUAL_EXPONENT = 1.8f
 private const val BUILD_PLAN_BACK_SCALE_DELTA = 0.09f
 private const val BUILD_PLAN_BACK_SCRIM_ALPHA = 0.32f
 private const val BUILD_PLAN_PAGE_EXIT_DELAY_MS = 280L
+private const val CATALOG_MODULE_REMOVE_DELAY_MS = 260L
 private val BUILD_PLAN_BACK_MAX_OFFSET = 56.dp
 private val BUILD_PLAN_BACK_MAX_CORNER = 32.dp
 
@@ -137,11 +139,22 @@ fun BuildScreen(
     var deletePlanTarget by remember { mutableStateOf<BuildPlan?>(null) }
     var customModuleUrl by remember { mutableStateOf("") }
     var customModuleStage by remember { mutableStateOf(CustomExternalModuleStage.AFTER_PATCH) }
+    var removingCatalogModuleKeys by rememberSaveable { mutableStateOf(emptyList<String>()) }
+    val coroutineScope = rememberCoroutineScope()
     val catalogModules = remember(state.moduleCatalogRepositories) {
         mergeBuildCatalogModules(state.moduleCatalogRepositories)
     }
     val catalogModuleByUrl = remember(catalogModules) {
         catalogModules.associateBy { it.module.repoUrl.trim().lowercase() }
+    }
+    val catalogSelections = remember(config.customExternalModules, catalogModuleByUrl) {
+        config.customExternalModules.mapNotNull { customModule ->
+            val catalogModule = catalogModuleByUrl[customModule.url.trim().lowercase()] ?: return@mapNotNull null
+            BuildCatalogSelection(
+                catalogModule = catalogModule,
+                stage = CustomExternalModuleStage.normalize(customModule.stage)
+            )
+        }.distinctBy { it.key }
     }
 
     LaunchedEffect(config, rawConfig) {
@@ -577,38 +590,52 @@ fun BuildScreen(
                 }
                 AnimatedVisibility(config.useCustomExternalModules) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        if (catalogModules.isNotEmpty()) {
+                        if (catalogSelections.isNotEmpty()) {
                             Text(
                                 text = "从模块仓库添加",
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
-                            catalogModules.forEach { merged ->
+                            catalogSelections.forEach { selection ->
+                                val merged = selection.catalogModule
                                 val module = merged.module
-                                val stage = CustomExternalModuleStage.normalize(module.defaultStage)
-                                val alreadyAdded = config.customExternalModules.any {
-                                    it.url.equals(module.repoUrl, ignoreCase = true) &&
-                                        CustomExternalModuleStage.normalize(it.stage) == stage
-                                }
-                                ExpressiveListItem(
-                                    title = module.catalogModuleTitle(),
-                                    subtitle = buildString {
-                                        append("默认 ${stage} · 来源 ${merged.sources.joinToString(", ")}")
-                                        if (module.version.isNotBlank()) append(" · v${module.version}")
-                                        appendLine()
-                                        append(module.description.ifBlank { module.repoUrl })
-                                    },
-                                    leadingIcon = if (alreadyAdded) Icons.Default.CheckCircle else Icons.Default.Extension,
-                                    trailingContent = {
-                                        TextButton(
-                                            onClick = { vm.addModuleFromCatalog(module, stage) },
-                                            enabled = !alreadyAdded
-                                        ) {
-                                            Text(if (alreadyAdded) "已加入" else "加入")
-                                        }
+                                key(selection.key) {
+                                    AnimatedVisibility(
+                                        visible = selection.key !in removingCatalogModuleKeys,
+                                        enter = fadeIn() + expandVertically(),
+                                        exit = fadeOut() + shrinkVertically()
+                                    ) {
+                                        ExpressiveListItem(
+                                            title = module.catalogModuleTitle(),
+                                            subtitle = buildString {
+                                                append("${selection.stage} · 来源 ${merged.sources.joinToString(", ")}")
+                                                if (module.version.isNotBlank()) append(" · v${module.version}")
+                                                appendLine()
+                                                append(module.description.ifBlank { module.repoUrl })
+                                            },
+                                            leadingIcon = Icons.Default.CheckCircle,
+                                            trailingContent = {
+                                                TextButton(
+                                                    onClick = {
+                                                        if (selection.key in removingCatalogModuleKeys) return@TextButton
+                                                        removingCatalogModuleKeys =
+                                                            (removingCatalogModuleKeys + selection.key).distinct()
+                                                        coroutineScope.launch {
+                                                            delay(CATALOG_MODULE_REMOVE_DELAY_MS)
+                                                            vm.removeCustomExternalModule(module.repoUrl, selection.stage)
+                                                            removingCatalogModuleKeys =
+                                                                removingCatalogModuleKeys - selection.key
+                                                        }
+                                                    },
+                                                    enabled = selection.key !in removingCatalogModuleKeys
+                                                ) {
+                                                    Text("移除")
+                                                }
+                                            }
+                                        )
                                     }
-                                )
+                                }
                             }
                         }
 
@@ -630,26 +657,32 @@ fun BuildScreen(
                             onClick = {
                                 val cleanUrl = customModuleUrl.trim()
                                 if (cleanUrl.isNotEmpty()) {
-                                    vm.updateBuildConfig(
-                                        config.copy(
-                                            customExternalModules = config.customExternalModules + CustomExternalModule(
-                                                url = cleanUrl,
-                                                stage = customModuleStage
-                                            )
-                                        )
-                                    )
-                                    customModuleUrl = ""
+                                    coroutineScope.launch {
+                                        if (vm.addCustomExternalModuleFromUrl(cleanUrl, customModuleStage)) {
+                                            customModuleUrl = ""
+                                        }
+                                    }
                                 }
                             },
-                            enabled = customModuleUrl.isNotBlank(),
+                            enabled = customModuleUrl.isNotBlank() && !state.validatingCustomExternalModule,
                             modifier = Modifier.fillMaxWidth().height(48.dp)
                         ) {
-                            Icon(Icons.Default.Add, null)
+                            Icon(
+                                imageVector = if (state.validatingCustomExternalModule) {
+                                    Icons.Default.Refresh
+                                } else {
+                                    Icons.Default.Add
+                                },
+                                contentDescription = null
+                            )
                             Spacer(Modifier.width(8.dp))
-                            Text("添加模块")
+                            Text(if (state.validatingCustomExternalModule) "检查中" else "添加模块")
                         }
 
-                        config.customExternalModules.forEachIndexed { index, module ->
+                        val manualModules = config.customExternalModules.filter {
+                            catalogModuleByUrl[it.url.trim().lowercase()] == null
+                        }
+                        manualModules.forEach { module ->
                             val catalogModule = catalogModuleByUrl[module.url.trim().lowercase()]
                             ExpressiveListItem(
                                 title = catalogModule?.module?.catalogModuleTitle()
@@ -666,12 +699,7 @@ fun BuildScreen(
                                 trailingContent = {
                                     IconButton(
                                         onClick = {
-                                            vm.updateBuildConfig(
-                                                config.copy(
-                                                    customExternalModules = config.customExternalModules
-                                                        .filterIndexed { i, _ -> i != index }
-                                                )
-                                            )
+                                            vm.removeCustomExternalModule(module.url, module.stage)
                                         }
                                     ) {
                                         Icon(Icons.Default.Delete, contentDescription = "删除模块")
@@ -1481,6 +1509,13 @@ private data class BuildCatalogModule(
     val module: ModuleCatalogItem,
     val sources: List<String>
 )
+
+private data class BuildCatalogSelection(
+    val catalogModule: BuildCatalogModule,
+    val stage: String
+) {
+    val key: String = "${catalogModule.module.repoUrl.trim().lowercase()}|${CustomExternalModuleStage.normalize(stage)}"
+}
 
 private fun mergeBuildCatalogModules(repositories: List<ModuleCatalogRepository>): List<BuildCatalogModule> =
     repositories
