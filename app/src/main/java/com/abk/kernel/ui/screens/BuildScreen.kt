@@ -50,6 +50,8 @@ import com.abk.kernel.data.model.CustomExternalModule
 import com.abk.kernel.data.model.CustomExternalModuleStage
 import com.abk.kernel.data.model.KernelSupport
 import com.abk.kernel.data.model.KernelBuildConfig
+import com.abk.kernel.data.model.ModuleCatalogItem
+import com.abk.kernel.data.model.ModuleCatalogRepository
 import com.abk.kernel.ui.components.ExpressiveHeroCard
 import com.abk.kernel.ui.components.ExpressiveListItem
 import com.abk.kernel.ui.components.ExpressiveSectionCard
@@ -135,6 +137,12 @@ fun BuildScreen(
     var deletePlanTarget by remember { mutableStateOf<BuildPlan?>(null) }
     var customModuleUrl by remember { mutableStateOf("") }
     var customModuleStage by remember { mutableStateOf(CustomExternalModuleStage.AFTER_PATCH) }
+    val catalogModules = remember(state.moduleCatalogRepositories) {
+        mergeBuildCatalogModules(state.moduleCatalogRepositories)
+    }
+    val catalogModuleByUrl = remember(catalogModules) {
+        catalogModules.associateBy { it.module.repoUrl.trim().lowercase() }
+    }
 
     LaunchedEffect(config, rawConfig) {
         if (config != rawConfig) vm.updateBuildConfig(config)
@@ -569,6 +577,41 @@ fun BuildScreen(
                 }
                 AnimatedVisibility(config.useCustomExternalModules) {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        if (catalogModules.isNotEmpty()) {
+                            Text(
+                                text = "从模块仓库添加",
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            catalogModules.forEach { merged ->
+                                val module = merged.module
+                                val stage = CustomExternalModuleStage.normalize(module.defaultStage)
+                                val alreadyAdded = config.customExternalModules.any {
+                                    it.url.equals(module.repoUrl, ignoreCase = true) &&
+                                        CustomExternalModuleStage.normalize(it.stage) == stage
+                                }
+                                ExpressiveListItem(
+                                    title = module.catalogModuleTitle(),
+                                    subtitle = buildString {
+                                        append("默认 ${stage} · 来源 ${merged.sources.joinToString(", ")}")
+                                        if (module.version.isNotBlank()) append(" · v${module.version}")
+                                        appendLine()
+                                        append(module.description.ifBlank { module.repoUrl })
+                                    },
+                                    leadingIcon = if (alreadyAdded) Icons.Default.CheckCircle else Icons.Default.Extension,
+                                    trailingContent = {
+                                        TextButton(
+                                            onClick = { vm.addModuleFromCatalog(module, stage) },
+                                            enabled = !alreadyAdded
+                                        ) {
+                                            Text(if (alreadyAdded) "已加入" else "加入")
+                                        }
+                                    }
+                                )
+                            }
+                        }
+
                         OutlinedTextField(
                             value = customModuleUrl,
                             onValueChange = { customModuleUrl = it },
@@ -607,9 +650,18 @@ fun BuildScreen(
                         }
 
                         config.customExternalModules.forEachIndexed { index, module ->
+                            val catalogModule = catalogModuleByUrl[module.url.trim().lowercase()]
                             ExpressiveListItem(
-                                title = CustomExternalModuleStage.normalize(module.stage),
-                                subtitle = module.url,
+                                title = catalogModule?.module?.catalogModuleTitle()
+                                    ?: CustomExternalModuleStage.normalize(module.stage),
+                                subtitle = buildString {
+                                    append(CustomExternalModuleStage.normalize(module.stage))
+                                    catalogModule?.sources?.takeIf { it.isNotEmpty() }?.let {
+                                        append(" · ${it.joinToString(", ")}")
+                                    }
+                                    appendLine()
+                                    append(module.url)
+                                },
                                 leadingIcon = Icons.Default.Extension,
                                 trailingContent = {
                                     IconButton(
@@ -619,12 +671,12 @@ fun BuildScreen(
                                                     customExternalModules = config.customExternalModules
                                                         .filterIndexed { i, _ -> i != index }
                                                 )
-                                    )
+                                            )
+                                        }
+                                    ) {
+                                        Icon(Icons.Default.Delete, contentDescription = "删除模块")
+                                    }
                                 }
-                            ) {
-                                Icon(Icons.Default.Delete, contentDescription = "删除模块")
-                            }
-                        }
                             )
                         }
                     }
@@ -1424,6 +1476,29 @@ private fun BuildStepRow(step: BuildStepProgress) {
         Text(label, color = color, style = MaterialTheme.typography.labelSmall)
     }
 }
+
+private data class BuildCatalogModule(
+    val module: ModuleCatalogItem,
+    val sources: List<String>
+)
+
+private fun mergeBuildCatalogModules(repositories: List<ModuleCatalogRepository>): List<BuildCatalogModule> =
+    repositories
+        .flatMap { repository ->
+            repository.modules.map { module -> repository.name.ifBlank { repository.url } to module }
+        }
+        .groupBy { (_, module) -> module.repoUrl.trim().lowercase() }
+        .values
+        .map { entries ->
+            BuildCatalogModule(
+                module = entries.first().second,
+                sources = entries.map { it.first }.distinct()
+            )
+        }
+        .sortedBy { it.module.catalogModuleTitle().lowercase(Locale.ROOT) }
+
+private fun ModuleCatalogItem.catalogModuleTitle(): String =
+    name.ifBlank { repoUrl.trim().trimEnd('/').substringAfterLast('/').removeSuffix(".git") }
 
 @Composable
 fun SectionCard(title: String, content: @Composable ColumnScope.() -> Unit) {

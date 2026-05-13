@@ -302,6 +302,35 @@ data class CustomExternalModule(
     val stage: String = CustomExternalModuleStage.AFTER_PATCH
 )
 
+data class ModuleCatalogItem(
+    val name: String = "",
+    val version: String = "",
+    val description: String = "",
+    val repoUrl: String = "",
+    val defaultStage: String = CustomExternalModuleStage.AFTER_PATCH,
+    val supportedStages: List<String> = listOf(CustomExternalModuleStage.AFTER_PATCH),
+    val author: String = "",
+    val homepage: String = ""
+)
+
+data class ModuleCatalogRepository(
+    val id: String = "",
+    val url: String = "",
+    val indexJsonUrl: String = "",
+    val name: String = "",
+    val modules: List<ModuleCatalogItem> = emptyList(),
+    val lastUpdated: Long = 0L,
+    val error: String? = null,
+    val skippedCount: Int = 0
+)
+
+data class ModuleCatalogFetchResult(
+    val name: String,
+    val indexUrl: String,
+    val modules: List<ModuleCatalogItem>,
+    val skippedCount: Int
+)
+
 // App-level build config model (mirrors kernel-custom.yml inputs)
 data class KernelBuildConfig(
     val androidVersion: String = "android12",

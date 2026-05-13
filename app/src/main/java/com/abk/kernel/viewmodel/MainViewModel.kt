@@ -69,6 +69,8 @@ data class MainUiState(
     val buildProgress: BuildProgress = BuildProgress(),
     val buildConfig: KernelBuildConfig = KernelBuildConfig(),
     val buildPlans: List<BuildPlan> = emptyList(),
+    val moduleCatalogRepositories: List<ModuleCatalogRepository> = emptyList(),
+    val refreshingModuleCatalogRepositoryIds: Set<String> = emptySet(),
     val recommendedBuildConfig: KernelBuildConfig? = null,
     val workflowEnablementPrompt: WorkflowEnablementPrompt? = null,
     val buildParameterSummaries: Map<Long, BuildParameterSummary> = emptyMap(),
@@ -285,6 +287,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         viewModelScope.launch {
+            prefs.moduleCatalogRepositoriesJson.collect { json ->
+                _uiState.update { it.copy(moduleCatalogRepositories = parseModuleCatalogRepositories(json)) }
+            }
+        }
+        viewModelScope.launch {
             prefs.downloadedArtifactsJson.collect { json ->
                 val restored = parseDownloadedArtifacts(json)
                     .distinctBy { it.filePath }
@@ -487,7 +494,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     uiSurfaceAlpha = it.uiSurfaceAlpha,
                     downloadMirrorBaseUrl = it.downloadMirrorBaseUrl,
                     prebuiltGkiEnabled = it.prebuiltGkiEnabled,
-                    predictiveBackEnabled = it.predictiveBackEnabled
+                    predictiveBackEnabled = it.predictiveBackEnabled,
+                    moduleCatalogRepositories = it.moduleCatalogRepositories
                 )
             }
         }
@@ -1554,6 +1562,103 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         updateBuildConfig(preview.plan.config)
     }
 
+    fun addModuleCatalogRepository(url: String) {
+        val cleanUrl = normalizeModuleCatalogUrl(url)
+        if (cleanUrl.isBlank()) {
+            _uiState.update { it.copy(error = "模块仓库链接不能为空") }
+            return
+        }
+
+        val current = _uiState.value.moduleCatalogRepositories
+        val existing = current.firstOrNull { it.url.equals(cleanUrl, ignoreCase = true) }
+        if (existing != null) {
+            refreshModuleCatalogRepository(existing.id)
+            return
+        }
+
+        val repository = ModuleCatalogRepository(
+            id = UUID.randomUUID().toString(),
+            url = cleanUrl,
+            name = cleanUrl.moduleCatalogFallbackName()
+        )
+        saveModuleCatalogRepositories(current + repository)
+        refreshModuleCatalogRepository(repository.id)
+    }
+
+    fun deleteModuleCatalogRepository(id: String) {
+        saveModuleCatalogRepositories(_uiState.value.moduleCatalogRepositories.filterNot { it.id == id })
+    }
+
+    fun refreshModuleCatalogRepository(id: String) {
+        val repository = _uiState.value.moduleCatalogRepositories.firstOrNull { it.id == id } ?: return
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(refreshingModuleCatalogRepositoryIds = it.refreshingModuleCatalogRepositoryIds + id)
+            }
+            when (val result = github.fetchModuleCatalog(repository.url)) {
+                is Result.Success -> {
+                    val data = result.data
+                    val updated = repository.copy(
+                        indexJsonUrl = data.indexUrl,
+                        name = data.name,
+                        modules = data.modules,
+                        lastUpdated = System.currentTimeMillis(),
+                        error = null,
+                        skippedCount = data.skippedCount
+                    )
+                    saveModuleCatalogRepositories(
+                        _uiState.value.moduleCatalogRepositories.map {
+                            if (it.id == id) updated else it
+                        }
+                    )
+                }
+                is Result.Error -> {
+                    val updated = repository.copy(error = result.message)
+                    saveModuleCatalogRepositories(
+                        _uiState.value.moduleCatalogRepositories.map {
+                            if (it.id == id) updated else it
+                        }
+                    )
+                }
+                Result.Loading -> Unit
+            }
+            _uiState.update {
+                it.copy(refreshingModuleCatalogRepositoryIds = it.refreshingModuleCatalogRepositoryIds - id)
+            }
+        }
+    }
+
+    fun refreshAllModuleCatalogRepositories() {
+        _uiState.value.moduleCatalogRepositories.forEach { repository ->
+            refreshModuleCatalogRepository(repository.id)
+        }
+    }
+
+    fun addModuleFromCatalog(module: ModuleCatalogItem, stage: String = module.defaultStage) {
+        val cleanUrl = module.repoUrl.trim()
+        if (cleanUrl.isBlank()) return
+        val normalizedStage = CustomExternalModuleStage.normalize(stage)
+        val currentConfig = KernelSupport.normalize(_uiState.value.buildConfig)
+        val exists = currentConfig.customExternalModules.any {
+            it.url.equals(cleanUrl, ignoreCase = true) &&
+                CustomExternalModuleStage.normalize(it.stage) == normalizedStage
+        }
+        val modules = if (exists) {
+            currentConfig.customExternalModules
+        } else {
+            currentConfig.customExternalModules + CustomExternalModule(
+                url = cleanUrl,
+                stage = normalizedStage
+            )
+        }
+        updateBuildConfig(
+            currentConfig.copy(
+                useCustomExternalModules = true,
+                customExternalModules = modules
+            )
+        )
+    }
+
     private fun saveBuildPlans(plans: List<BuildPlan>) {
         val sanitized = plans
             .mapNotNull(::sanitizeBuildPlan)
@@ -1561,6 +1666,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             .sortedByDescending { it.updatedAt }
         _uiState.update { it.copy(buildPlans = sanitized) }
         viewModelScope.launch { prefs.saveBuildPlansJson(gson.toJson(sanitized)) }
+    }
+
+    private fun saveModuleCatalogRepositories(repositories: List<ModuleCatalogRepository>) {
+        val sanitized = sanitizeModuleCatalogRepositories(repositories)
+        _uiState.update { it.copy(moduleCatalogRepositories = sanitized) }
+        viewModelScope.launch { prefs.saveModuleCatalogRepositoriesJson(gson.toJson(sanitized)) }
     }
 
     fun loadBuildParameterSummary(runId: Long, force: Boolean = false) {
@@ -1670,6 +1781,75 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )
     }.getOrNull()
 
+    private fun parseModuleCatalogRepositories(json: String?): List<ModuleCatalogRepository> {
+        if (json.isNullOrBlank()) return defaultModuleCatalogRepositories()
+        return runCatching<List<ModuleCatalogRepository>> {
+            val type = object : TypeToken<List<ModuleCatalogRepository>>() {}.type
+            sanitizeModuleCatalogRepositories(
+                gson.fromJson<List<ModuleCatalogRepository>>(json, type).orEmpty()
+            )
+        }.getOrDefault(defaultModuleCatalogRepositories())
+    }
+
+    private fun sanitizeModuleCatalogRepositories(
+        repositories: List<ModuleCatalogRepository>
+    ): List<ModuleCatalogRepository> {
+        return repositories
+            .mapNotNull { repository ->
+                val url = normalizeModuleCatalogUrl(repository.url)
+                if (url.isBlank()) return@mapNotNull null
+                val modules = repository.modules
+                    .mapNotNull(::sanitizeModuleCatalogItem)
+                    .distinctBy { it.repoUrl.trim().lowercase() }
+                    .sortedBy { it.name.lowercase() }
+                repository.copy(
+                    id = repository.id.ifBlank { UUID.randomUUID().toString() },
+                    url = url,
+                    indexJsonUrl = repository.indexJsonUrl.trim(),
+                    name = repository.name.trim().ifBlank { url.moduleCatalogFallbackName() },
+                    modules = modules,
+                    lastUpdated = repository.lastUpdated.takeIf { it > 0L } ?: 0L,
+                    error = repository.error?.takeIf { it.isNotBlank() },
+                    skippedCount = repository.skippedCount.coerceAtLeast(0)
+                )
+            }
+            .distinctBy { it.url.lowercase() }
+            .sortedWith(compareByDescending<ModuleCatalogRepository> {
+                if (it.url == OFFICIAL_MODULE_CATALOG_URL) 1 else 0
+            }
+                .thenBy { it.name.lowercase() })
+    }
+
+    private fun sanitizeModuleCatalogItem(item: ModuleCatalogItem): ModuleCatalogItem? {
+        val repoUrl = item.repoUrl.trim()
+        if (repoUrl.isBlank()) return null
+        val supportedStages = item.supportedStages
+            .map { CustomExternalModuleStage.normalize(it) }
+            .distinct()
+            .ifEmpty { listOf(CustomExternalModuleStage.AFTER_PATCH) }
+        val defaultStage = CustomExternalModuleStage.normalize(item.defaultStage)
+            .takeIf { it in supportedStages }
+            ?: supportedStages.first()
+        return item.copy(
+            name = item.name.trim().ifBlank { repoUrl.moduleCatalogFallbackName() },
+            version = item.version.trim(),
+            description = item.description.trim(),
+            repoUrl = repoUrl,
+            defaultStage = defaultStage,
+            supportedStages = supportedStages,
+            author = item.author.trim(),
+            homepage = item.homepage.trim()
+        )
+    }
+
+    private fun defaultModuleCatalogRepositories(): List<ModuleCatalogRepository> = listOf(
+        ModuleCatalogRepository(
+            id = OFFICIAL_MODULE_CATALOG_ID,
+            url = OFFICIAL_MODULE_CATALOG_URL,
+            name = "ABK 官方模块仓库"
+        )
+    )
+
     private fun parseBuildArtifacts(json: String?): List<BuildArtifact> {
         if (json.isNullOrBlank()) return emptyList()
         return runCatching<List<BuildArtifact>> {
@@ -1742,6 +1922,15 @@ private fun defaultBuildPlanName(config: KernelBuildConfig): String {
         .filter { it.isNotBlank() }
         .joinToString(" · ")
 }
+
+private fun normalizeModuleCatalogUrl(url: String): String = url.trim().trimEnd('/')
+
+private fun String.moduleCatalogFallbackName(): String = trim()
+    .trimEnd('/')
+    .substringAfterLast('/')
+    .removeSuffix(".git")
+    .removeSuffix(".json")
+    .ifBlank { "模块仓库" }
 
 private fun padBase64Url(value: String): String =
     value + "=".repeat((4 - value.length % 4) % 4)
@@ -1975,6 +2164,8 @@ private const val BUILD_PLAN_CODE_VERSION = 2
 private const val BUILD_PLAN_NAME_LIMIT = 80
 private const val BUILD_PLAN_MAX_STRING_BYTES = 4096
 private const val BUILD_PLAN_MAX_MODULES = 32
+private const val OFFICIAL_MODULE_CATALOG_ID = "official-abk-module-catalog"
+private const val OFFICIAL_MODULE_CATALOG_URL = "https://github.com/xingguangcuican6666/ABK_repo"
 
 private val BUILD_PLAN_KSU_VARIANTS = listOf("Official", "SukiSU", "ReSukiSU")
 private val BUILD_PLAN_KSU_BRANCHES = listOf("Stable(标准)", "Dev(开发)")
