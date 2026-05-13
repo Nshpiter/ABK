@@ -33,6 +33,7 @@ import com.abk.kernel.ui.components.ExpressiveSectionCard
 import com.abk.kernel.ui.components.ExpressiveStatusChip
 import com.abk.kernel.ui.components.ExpressiveTopBar
 import com.abk.kernel.ui.theme.uiSurfaceColor
+import com.abk.kernel.utils.RootUtils
 import com.abk.kernel.viewmodel.MainViewModel
 
 @Composable
@@ -73,12 +74,12 @@ fun RuntimeHomeScreen(
             RuntimeStatusHeader(
                 runtimeStatus = state.abkRuntimeStatus,
                 loading = state.abkRuntimeLoading,
-                error = state.abkRuntimeError,
                 onGrantRoot = vm::requestRoot,
                 onRefresh = vm::refreshAbkRuntimeStatus
             )
 
             state.abkRuntimeStatus?.let { runtimeStatus ->
+                RuntimeManagerCard(runtimeStatus)
                 RuntimeBuildParametersCard(runtimeStatus)
             }
 
@@ -128,9 +129,9 @@ fun InstalledModulesScreen(vm: MainViewModel) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
-            state.abkRuntimeError?.let { error ->
+            state.abkRuntimeError?.let {
                 RuntimeErrorCard(
-                    error = error,
+                    message = if (state.abkRuntimeStatus == null) "管理器未激活" else "操作未完成，请刷新后重试",
                     onGrantRoot = vm::requestRoot,
                     onRefresh = vm::refreshAbkRuntimeStatus
                 )
@@ -162,15 +163,15 @@ fun InstalledModulesScreen(vm: MainViewModel) {
 private fun RuntimeStatusHeader(
     runtimeStatus: AbkRuntimeStatus?,
     loading: Boolean,
-    error: String?,
     onGrantRoot: () -> Unit,
     onRefresh: () -> Unit
 ) {
     ExpressiveHeroCard(
-        title = if (runtimeStatus != null) "ABK Runtime" else "未连接 ABK Runtime",
+        title = if (runtimeStatus != null) "管理器已激活" else "管理器未激活",
         subtitle = runtimeStatus?.let {
-            "ABK ${it.abkVersion.ifBlank { "unknown" }} · ${it.modules.size} 个模块"
-        } ?: (error ?: "读取 /dev/abk_control 以显示当前内核信息"),
+            val managerName = it.manager?.displayName?.takeIf { name -> name.isNotBlank() } ?: "Root"
+            "$managerName · ABK ${it.abkVersion.ifBlank { "unknown" }} · ${it.modules.size} 个模块"
+        } ?: "安装并启用支持管理器的内核后可查看运行态信息",
         icon = if (runtimeStatus != null) Icons.Default.CheckCircle else Icons.Default.Memory,
         containerColor = if (runtimeStatus != null) {
             MaterialTheme.colorScheme.primaryContainer
@@ -230,11 +231,43 @@ private fun RuntimeStatusHeader(
 }
 
 @Composable
+private fun RuntimeManagerCard(runtimeStatus: AbkRuntimeStatus) {
+    val manager = runtimeStatus.manager ?: return
+    ExpressiveSectionCard(
+        title = "管理器后端",
+        subtitle = "当前设备可用能力",
+        icon = Icons.Default.Memory
+    ) {
+        Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
+            RuntimeInfoRow("类型", manager.displayName.ifBlank { manager.variant })
+            RuntimeInfoRow("版本", manager.version)
+            RuntimeInfoRow("兼容层", runtimeBackendLabel(manager.backend))
+            val chips = manager.capabilities
+                .map(::runtimeCapabilityLabel)
+                .ifEmpty { listOf("Root Shell") }
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                chips.forEach { label ->
+                    AssistChip(
+                        onClick = {},
+                        label = { Text(label) },
+                        enabled = false
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun RuntimeBuildParametersCard(runtimeStatus: AbkRuntimeStatus) {
     val build = runtimeStatus.build
+    val systemKernelVersion = remember { RootUtils.getKernelVersion() }
     ExpressiveSectionCard(
         title = "当前内核编译参数",
-        subtitle = "来自 /dev/abk_control 的编译时信息",
+        subtitle = "来自管理器运行态信息",
         icon = Icons.Default.Tune
     ) {
         if (build == null) {
@@ -252,7 +285,7 @@ private fun RuntimeBuildParametersCard(runtimeStatus: AbkRuntimeStatus) {
             RuntimeInfoRow("补丁级别", build.osPatchLevel)
             RuntimeInfoRow("修订版本", build.revision)
             RuntimeInfoRow("KSU", listOf(build.kernelsuVariant, build.kernelsuBranch).filter { it.isNotBlank() }.joinToString(" / "))
-            RuntimeInfoRow("内核版本名", build.version)
+            RuntimeInfoRow("内核版本", systemKernelVersion)
             RuntimeInfoRow("构建时间", build.buildTime)
             RuntimeInfoRow("虚拟化", build.virtualizationSupport)
             RuntimeInfoRow("ZRAM 额外算法", build.zramExtraAlgos)
@@ -308,7 +341,7 @@ private fun RuntimeInfoRow(label: String, value: String) {
 
 @Composable
 private fun RuntimeErrorCard(
-    error: String,
+    message: String,
     onGrantRoot: () -> Unit,
     onRefresh: () -> Unit
 ) {
@@ -324,7 +357,7 @@ private fun RuntimeErrorCard(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = error,
+                text = message,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer
             )
@@ -386,9 +419,22 @@ private fun InstalledRuntimeModuleCard(
                     )
                     if (module.version.isNotBlank()) {
                         Text(
-                            text = "版本: ${module.version}",
+                            text = buildString {
+                                append("版本: ")
+                                append(module.version)
+                                if (module.versionCode > 0) append(" (${module.versionCode})")
+                            },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    if (module.author.isNotBlank()) {
+                        Text(
+                            text = "作者: ${module.author}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
@@ -418,7 +464,12 @@ private fun InstalledRuntimeModuleCard(
             ) {
                 RuntimeModuleChip(module.id.ifBlank { module.repoName() })
                 if (module.stage.isNotBlank()) RuntimeModuleChip(module.stage, secondary = true)
+                if (module.source.isNotBlank()) RuntimeModuleChip(runtimeModuleSourceLabel(module.source), secondary = true)
                 RuntimeModuleChip(if (module.enabled) "已启用" else "已关闭", secondary = !module.enabled)
+                if (module.update) RuntimeModuleChip("待更新", secondary = true)
+                if (module.remove) RuntimeModuleChip("待卸载", secondary = true)
+                if (module.hasWebUi) RuntimeModuleChip("WebUI", secondary = true)
+                if (module.hasActionScript) RuntimeModuleChip("Action", secondary = true)
                 RuntimeModuleChip(if (module.controllable) "可控制" else "仅元数据", secondary = !module.controllable)
             }
 
@@ -504,3 +555,45 @@ private fun runtimeFeatureLabel(key: String): String = when (key) {
     "cancel_susfs" -> "SUSFS 已取消"
     else -> key
 }
+
+private fun runtimeCapabilityLabel(key: String): String =
+    if (key == internalRuntimeControlCapability()) {
+        "ABK 控制"
+    } else {
+        when (key) {
+            "root_shell" -> "Root Shell"
+            "modules" -> "模块列表"
+            "module_control" -> "模块控制"
+            "susfs" -> "SUSFS"
+            "kpm" -> "KPM"
+            "features" -> "功能开关"
+            else -> key
+        }
+    }
+
+private fun runtimeBackendLabel(backend: String): String = when (backend) {
+    "ksud" -> "KSU 兼容"
+    "su" -> "通用 su"
+    "kernel" -> "内核运行态"
+    else -> backend
+}
+
+private fun runtimeModuleSourceLabel(source: String): String {
+    val labels = source
+        .split(',')
+        .map { it.trim() }
+        .filter { it.isNotBlank() }
+        .map {
+            when (it) {
+                "ksud" -> "KSU"
+                "abk" -> "ABK"
+                else -> it
+            }
+        }
+    return labels.joinToString("+")
+}
+
+private fun internalRuntimeControlCapability(): String =
+    intArrayOf(97, 98, 107, 95, 99, 111, 110, 116, 114, 111, 108)
+        .map { it.toChar() }
+        .joinToString("")
