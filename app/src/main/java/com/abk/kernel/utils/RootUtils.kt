@@ -247,6 +247,19 @@ object RootUtils {
 
     fun reboot(): ShellResult = execRootScript("svc power reboot || reboot", timeoutSeconds = 15L)
 
+    fun readAbkControlStatus(): ShellResult = execRootScript(
+        "cat /dev/abk_control",
+        timeoutSeconds = 10L
+    )
+
+    fun writeAbkControlCommand(command: String): ShellResult {
+        val safeCommand = shellQuote(command.trim())
+        return execRootScript(
+            "printf '%s\\n' $safeCommand > /dev/abk_control",
+            timeoutSeconds = 10L
+        )
+    }
+
     data class ShellResult(val success: Boolean, val output: List<String>)
 
     private fun execRootScript(

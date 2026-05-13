@@ -39,6 +39,7 @@ class PreferencesRepository(private val context: Context) {
         val KEY_DOWNLOAD_MIRROR_BASE_URL = stringPreferencesKey("download_mirror_base_url")
         val KEY_PREBUILT_GKI_ENABLED = booleanPreferencesKey("prebuilt_gki_enabled")
         val KEY_PREDICTIVE_BACK_ENABLED = booleanPreferencesKey("predictive_back_enabled")
+        val KEY_RUNTIME_NAVIGATION_ENABLED = booleanPreferencesKey("runtime_navigation_enabled")
         val KEY_TERMS_ACCEPTED_VERSION = intPreferencesKey("terms_accepted_version")
     }
 
@@ -68,6 +69,9 @@ class PreferencesRepository(private val context: Context) {
     val downloadMirrorBaseUrl: Flow<String> = context.dataStore.data.map { it[KEY_DOWNLOAD_MIRROR_BASE_URL] ?: "" }
     val prebuiltGkiEnabled: Flow<Boolean> = context.dataStore.data.map { it[KEY_PREBUILT_GKI_ENABLED] ?: true }
     val predictiveBackEnabled: Flow<Boolean> = context.dataStore.data.map { it[KEY_PREDICTIVE_BACK_ENABLED] ?: true }
+    val runtimeNavigationEnabled: Flow<Boolean> = context.dataStore.data.map {
+        it[KEY_RUNTIME_NAVIGATION_ENABLED] ?: false
+    }
     val termsAcceptedVersion: Flow<Int> = context.dataStore.data.map { it[KEY_TERMS_ACCEPTED_VERSION] ?: 0 }
 
     suspend fun saveToken(token: String) = context.dataStore.edit { it[KEY_ACCESS_TOKEN] = token }
@@ -123,6 +127,9 @@ class PreferencesRepository(private val context: Context) {
     suspend fun setDownloadMirrorBaseUrl(url: String) = context.dataStore.edit { it[KEY_DOWNLOAD_MIRROR_BASE_URL] = url }
     suspend fun setPrebuiltGkiEnabled(v: Boolean) = context.dataStore.edit { it[KEY_PREBUILT_GKI_ENABLED] = v }
     suspend fun setPredictiveBackEnabled(v: Boolean) = context.dataStore.edit { it[KEY_PREDICTIVE_BACK_ENABLED] = v }
+    suspend fun setRuntimeNavigationEnabled(v: Boolean) = context.dataStore.edit {
+        it[KEY_RUNTIME_NAVIGATION_ENABLED] = v
+    }
     suspend fun acceptCurrentTerms() = context.dataStore.edit {
         it[KEY_TERMS_ACCEPTED_VERSION] = CURRENT_TERMS_VERSION
     }

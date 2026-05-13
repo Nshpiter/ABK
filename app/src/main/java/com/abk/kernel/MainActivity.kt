@@ -32,10 +32,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LibraryBooks
+import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -70,7 +72,9 @@ import coil.compose.AsyncImage
 import com.abk.kernel.ui.screens.AuthGateScreen
 import com.abk.kernel.ui.screens.BuildScreen
 import com.abk.kernel.ui.screens.FlashScreen
+import com.abk.kernel.ui.screens.InstalledModulesScreen
 import com.abk.kernel.ui.screens.ModuleRepositoryScreen
+import com.abk.kernel.ui.screens.RuntimeHomeScreen
 import com.abk.kernel.ui.screens.SettingsScreen
 import com.abk.kernel.ui.screens.StatusScreen
 import com.abk.kernel.ui.theme.AbkTheme
@@ -277,6 +281,8 @@ private enum class AbkTab(val label: String) {
     Build("构建内核"),
     Modules("模块仓库"),
     Flash("刷写"),
+    RuntimeHome("首页"),
+    InstalledModules("已安装模块"),
     Settings("设置")
 }
 
@@ -290,7 +296,13 @@ private fun AbkMainScaffold(vm: MainViewModel) {
     var buildPlanPageVisible by rememberSaveable { mutableStateOf(false) }
     var moduleRepositoryPageVisible by rememberSaveable { mutableStateOf(false) }
     var lastBackAt by remember { mutableStateOf(0L) }
-    val visibleTabs = AbkTab.entries
+    val visibleTabs = remember(state.runtimeNavigationEnabled) {
+        if (state.runtimeNavigationEnabled) {
+            listOf(AbkTab.RuntimeHome, AbkTab.InstalledModules, AbkTab.Settings)
+        } else {
+            listOf(AbkTab.Status, AbkTab.Build, AbkTab.Modules, AbkTab.Flash, AbkTab.Settings)
+        }
+    }
     val activeTab = selectedTab
     val motionScheme = MaterialTheme.motionScheme
     val hideBottomBar = when (activeTab) {
@@ -329,6 +341,14 @@ private fun AbkMainScaffold(vm: MainViewModel) {
                 flashDetailPageVisible = false
                 settingsThemePageVisible = false
             }
+        }
+    }
+
+    LaunchedEffect(state.runtimeNavigationEnabled) {
+        if (state.runtimeNavigationEnabled && selectedTab !in visibleTabs) {
+            selectedTab = AbkTab.RuntimeHome
+        } else if (!state.runtimeNavigationEnabled && selectedTab !in visibleTabs) {
+            selectedTab = AbkTab.Status
         }
     }
 
@@ -378,6 +398,8 @@ private fun AbkMainScaffold(vm: MainViewModel) {
                                         AbkTab.Build -> Icons.Default.RocketLaunch
                                         AbkTab.Modules -> Icons.Default.LibraryBooks
                                         AbkTab.Flash -> if (state.rootGranted) Icons.Default.FlashOn else Icons.Default.FolderOpen
+                                        AbkTab.RuntimeHome -> Icons.Default.Memory
+                                        AbkTab.InstalledModules -> Icons.Default.Extension
                                         AbkTab.Settings -> Icons.Default.Settings
                                     },
                                     contentDescription = tab.displayLabel(state.rootGranted)
@@ -413,7 +435,11 @@ private fun AbkMainScaffold(vm: MainViewModel) {
                 label = "abk-tab"
             ) { tab ->
                 when (tab) {
-                    AbkTab.Status -> StatusScreen(vm)
+                    AbkTab.Status -> StatusScreen(
+                        vm = vm,
+                        runtimeNavigationEnabled = state.runtimeNavigationEnabled,
+                        onToggleRuntimeNavigation = { vm.setRuntimeNavigationEnabled(true) }
+                    )
                     AbkTab.Build -> BuildScreen(
                         vm = vm,
                         outerPadding = contentPadding,
@@ -429,6 +455,11 @@ private fun AbkMainScaffold(vm: MainViewModel) {
                         outerPadding = contentPadding,
                         onDetailPageVisibleChange = { flashDetailPageVisible = it }
                     )
+                    AbkTab.RuntimeHome -> RuntimeHomeScreen(
+                        vm = vm,
+                        onSwitchToClassic = { vm.setRuntimeNavigationEnabled(false) }
+                    )
+                    AbkTab.InstalledModules -> InstalledModulesScreen(vm)
                     AbkTab.Settings -> SettingsScreen(
                         vm = vm,
                         outerPadding = contentPadding,

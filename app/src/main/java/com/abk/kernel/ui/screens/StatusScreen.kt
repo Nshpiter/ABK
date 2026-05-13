@@ -36,7 +36,11 @@ import com.abk.kernel.viewmodel.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun StatusScreen(vm: MainViewModel) {
+fun StatusScreen(
+    vm: MainViewModel,
+    runtimeNavigationEnabled: Boolean = false,
+    onToggleRuntimeNavigation: () -> Unit = {}
+) {
     val state by vm.uiState.collectAsState()
     val context = LocalContext.current
 
@@ -46,7 +50,15 @@ fun StatusScreen(vm: MainViewModel) {
         containerColor = uiSurfaceColor(MaterialTheme.colorScheme.surface),
         topBar = {
             ExpressiveTopBar(
-                title = stringResource(R.string.app_name)
+                title = stringResource(R.string.app_name),
+                actions = {
+                    IconButton(onClick = onToggleRuntimeNavigation) {
+                        Icon(
+                            imageVector = if (runtimeNavigationEnabled) Icons.Default.SwapHoriz else Icons.Default.Home,
+                            contentDescription = if (runtimeNavigationEnabled) "切换到完整导航" else "切换到运行态首页"
+                        )
+                    }
+                }
             )
         }
     ) { padding ->

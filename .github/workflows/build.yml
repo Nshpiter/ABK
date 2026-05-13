@@ -701,7 +701,7 @@ jobs:
           branch_input="${{ inputs.ksu_branch }}"
           variant_input="${{ inputs.ksu_variant }}"
           KSU_OFFICIAL_COMMIT="3f388ef137c78e1ca0c92c0ada3b8717cdcc4302"
-          SUKISU_COMMIT="6a316b122eb3ee6a03203d6e7241a8437dd17e1c"
+          SUKISU_COMMIT="a992f224f5ea5a69b56ba20e925379c9a226f2b2"
           RESUKISU_COMMIT="0d096be05c40338205bc183f5ec072233e15f9c0"
 
           if [ "$variant_input" = "Official" ]; then
@@ -2139,6 +2139,27 @@ jobs:
         if: inputs.use_custom_external_modules
         env:
           CUSTOM_EXTERNAL_MODULE_STAGE: after_patch
+          ABK_BUILD_ANDROID_VERSION: ${{ inputs.android_version }}
+          ABK_BUILD_KERNEL_VERSION: ${{ inputs.kernel_version }}
+          ABK_BUILD_SUB_LEVEL: ${{ inputs.sub_level }}
+          ABK_BUILD_OS_PATCH_LEVEL: ${{ inputs.os_patch_level }}
+          ABK_BUILD_REVISION: ${{ inputs.revision }}
+          ABK_BUILD_KSU_VARIANT: ${{ inputs.ksu_variant }}
+          ABK_BUILD_KSU_BRANCH: ${{ inputs.ksu_branch }}
+          ABK_BUILD_VERSION: ${{ inputs.version }}
+          ABK_BUILD_TIME: ${{ inputs.build_time }}
+          ABK_BUILD_VIRTUALIZATION_SUPPORT: ${{ inputs.virtualization_support }}
+          ABK_BUILD_ZRAM_EXTRA_ALGOS: ${{ inputs.zram_extra_algos }}
+          ABK_FEATURE_USE_ZRAM: ${{ inputs.use_zram }}
+          ABK_FEATURE_USE_BBG: ${{ inputs.use_bbg }}
+          ABK_FEATURE_USE_DDK: ${{ inputs.use_ddk }}
+          ABK_FEATURE_USE_NTSYNC: ${{ inputs.use_ntsync }}
+          ABK_FEATURE_USE_NETWORKING: ${{ inputs.use_networking }}
+          ABK_FEATURE_USE_KPM: ${{ inputs.use_kpm }}
+          ABK_FEATURE_USE_REKERNEL: ${{ inputs.use_rekernel }}
+          ABK_FEATURE_ENABLE_SUSFS: ${{ inputs.enable_susfs }}
+          ABK_FEATURE_SUPP_OP: ${{ inputs.supp_op }}
+          ABK_FEATURE_ZRAM_FULL_ALGO: ${{ inputs.zram_full_algo }}
         run: |
           set -euo pipefail
 
@@ -2306,6 +2327,27 @@ jobs:
         if: inputs.use_custom_external_modules
         env:
           CUSTOM_EXTERNAL_MODULE_STAGE: before_build
+          ABK_BUILD_ANDROID_VERSION: ${{ inputs.android_version }}
+          ABK_BUILD_KERNEL_VERSION: ${{ inputs.kernel_version }}
+          ABK_BUILD_SUB_LEVEL: ${{ inputs.sub_level }}
+          ABK_BUILD_OS_PATCH_LEVEL: ${{ inputs.os_patch_level }}
+          ABK_BUILD_REVISION: ${{ inputs.revision }}
+          ABK_BUILD_KSU_VARIANT: ${{ inputs.ksu_variant }}
+          ABK_BUILD_KSU_BRANCH: ${{ inputs.ksu_branch }}
+          ABK_BUILD_VERSION: ${{ inputs.version }}
+          ABK_BUILD_TIME: ${{ inputs.build_time }}
+          ABK_BUILD_VIRTUALIZATION_SUPPORT: ${{ inputs.virtualization_support }}
+          ABK_BUILD_ZRAM_EXTRA_ALGOS: ${{ inputs.zram_extra_algos }}
+          ABK_FEATURE_USE_ZRAM: ${{ inputs.use_zram }}
+          ABK_FEATURE_USE_BBG: ${{ inputs.use_bbg }}
+          ABK_FEATURE_USE_DDK: ${{ inputs.use_ddk }}
+          ABK_FEATURE_USE_NTSYNC: ${{ inputs.use_ntsync }}
+          ABK_FEATURE_USE_NETWORKING: ${{ inputs.use_networking }}
+          ABK_FEATURE_USE_KPM: ${{ inputs.use_kpm }}
+          ABK_FEATURE_USE_REKERNEL: ${{ inputs.use_rekernel }}
+          ABK_FEATURE_ENABLE_SUSFS: ${{ inputs.enable_susfs }}
+          ABK_FEATURE_SUPP_OP: ${{ inputs.supp_op }}
+          ABK_FEATURE_ZRAM_FULL_ALGO: ${{ inputs.zram_full_algo }}
         run: |
           set -euo pipefail
 

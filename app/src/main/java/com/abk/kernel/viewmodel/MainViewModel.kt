@@ -21,10 +21,12 @@ import com.abk.kernel.utils.NotificationUtils
 import com.abk.kernel.utils.RootUtils
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -103,7 +105,12 @@ data class MainUiState(
     val uiSurfaceAlpha: Float = 1f,
     val downloadMirrorBaseUrl: String = "",
     val prebuiltGkiEnabled: Boolean = true,
-    val predictiveBackEnabled: Boolean = true
+    val predictiveBackEnabled: Boolean = true,
+    val runtimeNavigationEnabled: Boolean = false,
+    val abkRuntimeStatus: AbkRuntimeStatus? = null,
+    val abkRuntimeLoading: Boolean = false,
+    val abkRuntimeError: String? = null,
+    val abkRuntimeModuleActionId: String? = null
 )
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
@@ -324,6 +331,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 _uiState.update { it.copy(pendingAutoDownloadRunId = runId) }
             }
         }
+        viewModelScope.launch {
+            prefs.runtimeNavigationEnabled.collect { enabled ->
+                _uiState.update { it.copy(runtimeNavigationEnabled = enabled) }
+            }
+        }
     }
 
     private fun registerStatusReceiver() {
@@ -370,6 +382,89 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 )
             }
             if (shouldAdvance) advanceStep()
+        }
+    }
+
+    fun setRuntimeNavigationEnabled(enabled: Boolean) {
+        _uiState.update { it.copy(runtimeNavigationEnabled = enabled) }
+        viewModelScope.launch { prefs.setRuntimeNavigationEnabled(enabled) }
+        if (enabled) refreshAbkRuntimeStatus()
+    }
+
+    fun refreshAbkRuntimeStatus() {
+        if (!_uiState.value.rootGranted) {
+            _uiState.update {
+                it.copy(
+                    abkRuntimeStatus = null,
+                    abkRuntimeLoading = false,
+                    abkRuntimeError = "需要 Root 权限读取 /dev/abk_control"
+                )
+            }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(abkRuntimeLoading = true, abkRuntimeError = null) }
+            val result = withContext(Dispatchers.IO) { RootUtils.readAbkControlStatus() }
+            if (result.success) {
+                val body = result.output.joinToString("\n").trim()
+                val runtimeStatus = runCatching {
+                    gson.fromJson(body, AbkRuntimeStatus::class.java)
+                }.getOrNull()
+                _uiState.update {
+                    if (runtimeStatus != null) {
+                        it.copy(
+                            abkRuntimeStatus = runtimeStatus,
+                            abkRuntimeLoading = false,
+                            abkRuntimeError = null
+                        )
+                    } else {
+                        it.copy(
+                            abkRuntimeStatus = null,
+                            abkRuntimeLoading = false,
+                            abkRuntimeError = "无法解析 /dev/abk_control 输出"
+                        )
+                    }
+                }
+            } else {
+                _uiState.update {
+                    it.copy(
+                        abkRuntimeStatus = null,
+                        abkRuntimeLoading = false,
+                        abkRuntimeError = result.output.joinToString("\n").ifBlank {
+                            "无法读取 /dev/abk_control"
+                        }
+                    )
+                }
+            }
+        }
+    }
+
+    fun setAbkRuntimeModuleEnabled(moduleId: String, enabled: Boolean) {
+        val cleanId = moduleId.trim()
+        if (cleanId.isBlank() || _uiState.value.abkRuntimeModuleActionId != null) return
+        if (!_uiState.value.rootGranted) {
+            _uiState.update { it.copy(abkRuntimeError = "需要 Root 权限写入 /dev/abk_control") }
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(abkRuntimeModuleActionId = cleanId, abkRuntimeError = null) }
+            val command = if (enabled) "enable $cleanId" else "disable $cleanId"
+            val result = withContext(Dispatchers.IO) { RootUtils.writeAbkControlCommand(command) }
+            if (!result.success) {
+                _uiState.update {
+                    it.copy(
+                        abkRuntimeModuleActionId = null,
+                        abkRuntimeError = result.output.joinToString("\n").ifBlank {
+                            "模块控制命令执行失败"
+                        }
+                    )
+                }
+            } else {
+                _uiState.update { it.copy(abkRuntimeModuleActionId = null) }
+                refreshAbkRuntimeStatus()
+            }
         }
     }
 
@@ -1676,52 +1771,62 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    suspend fun addCustomExternalModuleFromUrl(url: String, stage: String): Boolean {
+    suspend fun checkCustomExternalModuleMetadata(url: String): ExternalModuleMetadata? {
+        val cleanUrl = url.trim()
+        if (cleanUrl.isBlank()) {
+            _uiState.update { it.copy(customExternalModuleError = "模块仓库链接不能为空") }
+            return null
+        }
+        _uiState.update { it.copy(validatingCustomExternalModule = true, customExternalModuleError = null) }
+        return try {
+            when (val result = github.fetchExternalModuleMetadata(cleanUrl)) {
+                is Result.Success -> result.data
+                is Result.Error -> {
+                    _uiState.update { it.copy(customExternalModuleError = result.message) }
+                    null
+                }
+                Result.Loading -> null
+            }
+        } finally {
+            _uiState.update { it.copy(validatingCustomExternalModule = false) }
+        }
+    }
+
+    fun addCustomExternalModulesFromUrl(url: String, stages: List<String>): Boolean {
         val cleanUrl = url.trim()
         if (cleanUrl.isBlank()) {
             _uiState.update { it.copy(customExternalModuleError = "模块仓库链接不能为空") }
             return false
         }
+        val normalizedStages = stages
+            .map { CustomExternalModuleStage.normalize(it) }
+            .distinct()
+            .ifEmpty { listOf(CustomExternalModuleStage.AFTER_PATCH) }
+        val currentConfig = KernelSupport.normalize(_uiState.value.buildConfig)
+        val existing = currentConfig.customExternalModules.map {
+            it.url.trim().lowercase() to CustomExternalModuleStage.normalize(it.stage)
+        }.toSet()
+        val modules = currentConfig.customExternalModules + normalizedStages
+            .filterNot { stage -> cleanUrl.lowercase() to stage in existing }
+            .map { stage -> CustomExternalModule(url = cleanUrl, stage = stage) }
+        updateBuildConfig(
+            currentConfig.copy(
+                useCustomExternalModules = true,
+                customExternalModules = modules
+            )
+        )
+        _uiState.update { it.copy(customExternalModuleError = null) }
+        return true
+    }
+
+    suspend fun addCustomExternalModuleFromUrl(url: String, stage: String): Boolean {
+        val metadata = checkCustomExternalModuleMetadata(url) ?: return false
         val normalizedStage = CustomExternalModuleStage.normalize(stage)
-        _uiState.update { it.copy(validatingCustomExternalModule = true, customExternalModuleError = null) }
-        return try {
-            when (val result = github.fetchExternalModuleMetadata(cleanUrl)) {
-                is Result.Success -> {
-                    val metadata = result.data
-                    if (normalizedStage !in metadata.supportedStages) {
-                        _uiState.update { it.copy(customExternalModuleError = "该模块不支持 $normalizedStage") }
-                        false
-                    } else {
-                        val currentConfig = KernelSupport.normalize(_uiState.value.buildConfig)
-                        val exists = currentConfig.customExternalModules.any {
-                            it.url.equals(cleanUrl, ignoreCase = true) &&
-                                CustomExternalModuleStage.normalize(it.stage) == normalizedStage
-                        }
-                        val modules = if (exists) {
-                            currentConfig.customExternalModules
-                        } else {
-                            currentConfig.customExternalModules + CustomExternalModule(
-                                url = cleanUrl,
-                                stage = normalizedStage
-                            )
-                        }
-                        updateBuildConfig(
-                            currentConfig.copy(
-                                useCustomExternalModules = true,
-                                customExternalModules = modules
-                            )
-                        )
-                        true
-                    }
-                }
-                is Result.Error -> {
-                    _uiState.update { it.copy(customExternalModuleError = result.message) }
-                    false
-                }
-                Result.Loading -> false
-            }
-        } finally {
-            _uiState.update { it.copy(validatingCustomExternalModule = false) }
+        return if (normalizedStage in metadata.supportedStages) {
+            addCustomExternalModulesFromUrl(url, listOf(normalizedStage))
+        } else {
+            _uiState.update { it.copy(customExternalModuleError = "该模块不支持 $normalizedStage") }
+            false
         }
     }
 
@@ -1896,6 +2001,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val defaultStage = CustomExternalModuleStage.normalize(item.defaultStage)
             .takeIf { it in supportedStages }
             ?: supportedStages.first()
+        val recommendedStages = item.recommendedStages
+            .map { CustomExternalModuleStage.normalize(it) }
+            .distinct()
+            .filter { it in supportedStages }
+            .ifEmpty { listOf(defaultStage) }
         return item.copy(
             name = item.name.trim().ifBlank { repoUrl.moduleCatalogFallbackName() },
             version = item.version.trim(),
@@ -1903,6 +2013,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             repoUrl = repoUrl,
             defaultStage = defaultStage,
             supportedStages = supportedStages,
+            recommendedStages = recommendedStages,
             author = item.author.trim(),
             homepage = item.homepage.trim()
         )
