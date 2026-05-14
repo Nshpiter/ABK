@@ -288,7 +288,12 @@ object RootUtils {
             ?.takeIf { it.isNotBlank() && it.startsWith("[") }
 
         if (manager.backend == "su" && control == null && modules == null) {
-            return ManagerRuntimeSnapshot(manager = ManagerRuntimeProbe())
+            return ManagerRuntimeSnapshot(
+                manager = manager.copy(
+                    active = false,
+                    diagnostics = (manager.diagnostics + "仅检测到通用 su shell，未检测到可用于 ABK 运行态管理的 KernelSU/ReSukiSU 控制接口。").distinct()
+                )
+            )
         }
 
         return ManagerRuntimeSnapshot(
@@ -494,7 +499,8 @@ object RootUtils {
         val variant: String = "",
         val backend: String = "",
         val version: String = "",
-        val capabilities: List<String> = emptyList()
+        val capabilities: List<String> = emptyList(),
+        val diagnostics: List<String> = emptyList()
     )
 
     private fun execRootScript(
@@ -580,7 +586,10 @@ object RootUtils {
                         variant = variant.ifBlank { "KernelSU" },
                         backend = "ksud",
                         version = version,
-                        capabilities = capabilities.ifEmpty { listOf("root_shell", "modules") }
+                        capabilities = capabilities.ifEmpty { listOf("root_shell", "modules") },
+                        diagnostics = listOf(
+                            "当前仅通过 ksud/root shell 兼容层工作，ABK 尚未被内核识别为原生管理器，无法管理 Root 授权策略。"
+                        )
                     )
                 } else {
                     ManagerRuntimeProbe(
@@ -588,19 +597,45 @@ object RootUtils {
                         displayName = "Root",
                         variant = "Generic",
                         backend = "su",
-                        capabilities = listOf("root_shell")
+                        capabilities = listOf("root_shell"),
+                        diagnostics = listOf(
+                            "当前仅有通用 su shell 可用，未检测到 KernelSU/ReSukiSU 原生管理器接口。"
+                        )
                     )
                 }
             }
         } catch (error: Throwable) {
-            ManagerRuntimeProbe()
+            ManagerRuntimeProbe(
+                diagnostics = listOf("未检测到可用的 KernelSU/ReSukiSU 管理器接口或 Root shell。")
+            )
         }
     }
 
     private fun detectNativeManagerRuntime(): ManagerRuntimeProbe? {
         val status = AbkKsuNative.status() ?: return null
-        if (!status.isManager) return null
-        val controlVariant = AbkKsuNative.controlStatus()
+        val versionText = listOf(
+            status.fullVersion,
+            "kernel ${status.version}",
+            status.hookType
+        )
+            .filter { it.isNotBlank() }
+            .joinToString(" · ")
+        val nativeVariant = inferManagerVariant(versionText).ifBlank { "KernelSU" }
+        if (!status.isManager) {
+            return ManagerRuntimeProbe(
+                active = false,
+                displayName = nativeVariant,
+                variant = nativeVariant,
+                backend = "native",
+                version = versionText,
+                capabilities = listOf("native_kernel"),
+                diagnostics = listOf(
+                    "KernelSU/ReSukiSU native 接口可访问，但当前 ABK APK 未被识别为管理器。请确认安装的是与内核构建时 ABK_MANAGER_CERT_SHA256 匹配的 com.abk.kernel 正式签名 APK。"
+                )
+            )
+        }
+        val controlJson = AbkKsuNative.controlStatus()
+        val controlVariant = controlJson
             ?.let { json ->
                 runCatching {
                     JSONObject(json)
@@ -611,7 +646,12 @@ object RootUtils {
                 }.getOrDefault("")
             }
             .orEmpty()
-        val displayVariant = controlVariant.ifBlank { "KernelSU" }
+        val displayVariant = controlVariant.ifBlank { nativeVariant }
+        val diagnostics = buildList {
+            if (controlJson == null) {
+                add("ABK control 未响应；内核可能没有启用 CONFIG_ABK_CONTROL，或 ABK Control 外部模块缺少 before_build 阶段。")
+            }
+        }
         val capabilities = buildList {
             add("native_manager")
             add("root_policy")
@@ -621,20 +661,14 @@ object RootUtils {
             if (status.isLateLoadMode) add("late_load")
             if (status.isSafeMode) add("safe_mode")
         }
-        val versionText = listOf(
-            status.fullVersion,
-            "kernel ${status.version}",
-            status.hookType
-        )
-            .filter { it.isNotBlank() }
-            .joinToString(" · ")
         return ManagerRuntimeProbe(
             active = true,
             displayName = displayVariant,
             variant = displayVariant,
             backend = "native",
             version = versionText,
-            capabilities = capabilities
+            capabilities = capabilities,
+            diagnostics = diagnostics
         )
     }
 

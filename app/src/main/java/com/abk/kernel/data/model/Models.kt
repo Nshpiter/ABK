@@ -385,7 +385,8 @@ data class AbkRuntimeManagerInfo(
     val backend: String = "",
     val version: String = "",
     val active: Boolean = false,
-    val capabilities: List<String> = emptyList()
+    val capabilities: List<String> = emptyList(),
+    val diagnostics: List<String> = emptyList()
 )
 
 data class AbkRuntimeBuildInfo(

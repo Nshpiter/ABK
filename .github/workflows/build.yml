@@ -43,11 +43,11 @@ on:
 
       # ==================== 功能开关 ====================
       use_zram:
-        required: true
+        required: false
         type: boolean
         default: true
       use_bbg:
-        required: true
+        required: false
         type: boolean
         default: true
       use_ddk:
@@ -55,15 +55,15 @@ on:
         type: boolean
         default: false
       use_ntsync:
-        required: true
+        required: false
         type: boolean
         default: true
       use_networking:
-        required: true
+        required: false
         type: boolean
         default: true
       use_kpm:
-        required: true
+        required: false
         type: boolean
         default: true
       use_rekernel:
@@ -71,7 +71,7 @@ on:
         type: boolean
         default: false
       enable_susfs:
-        required: true
+        required: false
         type: boolean
         default: true
       supp_op:
@@ -105,6 +105,18 @@ on:
         type: boolean
         default: false
       custom_external_modules:
+        required: false
+        type: string
+        default: ""
+      manager_package:
+        required: false
+        type: string
+        default: ""
+      manager_cert_size:
+        required: false
+        type: string
+        default: ""
+      manager_cert_sha256:
         required: false
         type: string
         default: ""
@@ -160,6 +172,7 @@ jobs:
           echo "补丁级别      : ${{ inputs.os_patch_level }}"
           echo "KSU 变体      : ${{ inputs.ksu_variant }}"
           echo "KSU 分支      : ${{ inputs.ksu_branch }}"
+          echo "管理器包名    : ${{ inputs.manager_package || 'app/signing/abk-manager-cert.env' }}"
           echo "构建时间      : ${{ inputs.build_time }}"
           echo "SUSFS 状态    : ${{ inputs.enable_susfs }}"
           echo "ZRAM 增强     : $effective_use_zram"
@@ -369,6 +382,70 @@ jobs:
 
       - name: 检出代码仓库
         uses: actions/checkout@v6
+
+      - name: 准备 ABK 管理器证书元数据
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          read_cert_value() {
+            local key="$1"
+            local file="$GITHUB_WORKSPACE/app/signing/abk-manager-cert.env"
+            [ -f "$file" ] || return 0
+            awk -F= -v target="$key" '
+              /^[[:space:]]*#/ { next }
+              $1 == target {
+                value = substr($0, index($0, "=") + 1)
+                gsub(/^[[:space:]\042\047]+|[[:space:]\042\047]+$/, "", value)
+                print value
+                exit
+              }
+            ' "$file"
+          }
+
+          package="${{ inputs.manager_package }}"
+          cert_size="${{ inputs.manager_cert_size }}"
+          cert_sha="${{ inputs.manager_cert_sha256 }}"
+
+          [ -n "$package" ] || package="$(read_cert_value ABK_MANAGER_PACKAGE)"
+          [ -n "$cert_size" ] || cert_size="$(read_cert_value ABK_MANAGER_CERT_SIZE)"
+          [ -n "$cert_sha" ] || cert_sha="$(read_cert_value ABK_MANAGER_CERT_SHA256)"
+
+          package="${package:-com.abk.kernel}"
+          cert_size="${cert_size:-1407}"
+          cert_sha="${cert_sha:-34e5e843952277759603cd0f949770b24c868530d80d7baeff08776a7e132b16}"
+          cert_sha="$(printf '%s' "$cert_sha" | tr '[:upper:]' '[:lower:]')"
+
+          if ! [[ "$package" =~ ^[A-Za-z0-9_.]+$ ]]; then
+            echo "::error::ABK manager package is invalid: $package"
+            exit 1
+          fi
+          if ! [[ "$cert_size" =~ ^(0x[0-9a-fA-F]+|[0-9]+)$ ]]; then
+            echo "::error::ABK manager certificate size is invalid: $cert_size"
+            exit 1
+          fi
+          if ! [[ "$cert_sha" =~ ^[0-9a-f]{64}$ ]]; then
+            echo "::error::ABK manager certificate SHA-256 is invalid: $cert_sha"
+            exit 1
+          fi
+
+          {
+            echo "ABK_MANAGER_PACKAGE=$package"
+            echo "ABK_MANAGER_CERT_SIZE=$cert_size"
+            echo "ABK_MANAGER_CERT_SHA256=$cert_sha"
+          } >> "$GITHUB_ENV"
+
+          {
+            echo "### ABK manager identity"
+            echo
+            echo "- Package: \`$package\`"
+            echo "- Certificate size: \`$cert_size\`"
+            echo "- Certificate SHA-256: \`$cert_sha\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "ABK manager package: $package"
+          echo "ABK manager cert size: $cert_size"
+          echo "ABK manager cert sha256: $cert_sha"
 
       - name: 初始化构建环境
         run: |
@@ -2814,6 +2891,94 @@ jobs:
           if not changed:
               print("SukiSU/ReSukiSU android16-6.12 专项兼容修复无需修改。")
           PY
+
+      - name: 校验 ABK 管理器桥接
+        if: inputs.use_custom_external_modules && inputs.ksu_variant != 'None'
+        working-directory: ${{ env.KERNEL_ROOT }}
+        run: |
+          set -euo pipefail
+
+          needs_abk_control=false
+          manifest="$CUSTOM_EXTERNAL_MODULES_MANIFEST"
+          if [ -s "$manifest" ]; then
+            while IFS=$'\t' read -r _stage module_dir repo_url; do
+              if [ -f "$module_dir/module.conf" ] \
+                && grep -Eq '^[[:space:]]*ABK_MODULE_ID=' "$module_dir/module.conf" \
+                && grep -qF 'abk_control' "$module_dir/module.conf"; then
+                needs_abk_control=true
+              fi
+              case "$repo_url" in
+                *ABK_control_module*|*abk_control_module*) needs_abk_control=true ;;
+              esac
+            done < "$manifest"
+          fi
+
+          if [ "$needs_abk_control" != "true" ]; then
+            echo "未检测到 ABK Control 外部模块，跳过管理器桥接校验。"
+            exit 0
+          fi
+
+          echo "校验 ABK Control 管理器桥接:"
+          echo "  package: ${ABK_MANAGER_PACKAGE:-}"
+          echo "  cert size: ${ABK_MANAGER_CERT_SIZE:-}"
+          echo "  cert sha256: ${ABK_MANAGER_CERT_SHA256:-}"
+
+          require_marker() {
+            local file="$1"
+            shift
+            if [ ! -f "$file" ]; then
+              echo "::error::缺少 ABK 管理器桥接文件: $file"
+              exit 1
+            fi
+            local marker
+            for marker in "$@"; do
+              if ! grep -qF "$marker" "$file"; then
+                echo "::error::$file 缺少 ABK 管理器桥接标记: $marker"
+                exit 1
+              fi
+            done
+          }
+
+          found_ksu=false
+          for ksu_dir in common/drivers/kernelsu drivers/kernelsu KernelSU/kernel kernel; do
+            [ -d "$ksu_dir" ] || continue
+            if [ ! -f "$ksu_dir/Kbuild" ] \
+              || [ ! -f "$ksu_dir/manager/apk_sign.c" ] \
+              || [ ! -f "$ksu_dir/supercall/dispatch.c" ]; then
+              echo "跳过非 KernelSU 源码目录: $ksu_dir"
+              continue
+            fi
+            found_ksu=true
+            echo "检查 KSU 源码目录: $ksu_dir"
+            require_marker "$ksu_dir/Kbuild" \
+              "ABK_MANAGER_PACKAGE" \
+              "${ABK_MANAGER_PACKAGE:-com.abk.kernel}" \
+              "ABK_MANAGER_CERT_SIZE" \
+              "${ABK_MANAGER_CERT_SIZE:-1407}" \
+              "ABK_MANAGER_CERT_SHA256" \
+              "${ABK_MANAGER_CERT_SHA256:-34e5e843952277759603cd0f949770b24c868530d80d7baeff08776a7e132b16}" \
+              "ABK_MANAGER_CERT_MAX_LENGTH" \
+              "ABK_MANAGER_OFFICIAL_CERT"
+            require_marker "$ksu_dir/manager/apk_sign.c" "ABK_MANAGER_CERT_SHA256" "ABK_MANAGER_CERT_MAX_LENGTH"
+            require_marker "$ksu_dir/manager/throne_tracker.h" "abk_try_register_manager"
+            require_marker "$ksu_dir/manager/throne_tracker.c" "abk_try_register_manager"
+            require_marker "$ksu_dir/supercall/dispatch.c" \
+              "abk_try_register_manager" \
+              "KSU_GET_INFO_FLAG_MANAGER" \
+              "ABK_CONTROL_IOCTL_GET_STATUS"
+          done
+
+          if [ "$found_ksu" != "true" ]; then
+            echo "::error::未找到 KernelSU/ReSukiSU 源码目录，无法校验 ABK 管理器桥接。"
+            exit 1
+          fi
+
+          if ! grep -q '^CONFIG_ABK_CONTROL=y$' "$DEFCONFIG"; then
+            echo "::error::缺少 CONFIG_ABK_CONTROL=y；请同时选择 ABK Control 的 before_build 阶段。"
+            exit 1
+          fi
+
+          echo "ABK Control 管理器桥接校验通过。"
 
       - name: 编译内核
         uses: nick-fields/retry@v4

@@ -91,6 +91,46 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Verify checked-in ABK manager certificate metadata
+        if: ${{ env.HAS_RELEASE_SIGNING == 'true' }}
+        run: |
+          set -euo pipefail
+
+          expected="app/signing/abk-manager-cert.env"
+          actual="app/signing/abk-manager-cert.generated.env"
+          if [ ! -f "$expected" ]; then
+            echo "::error::$expected is missing. Commit the public manager certificate metadata so kernel builds can trust the release APK."
+            exit 1
+          fi
+
+          read_value() {
+            local file="$1"
+            local key="$2"
+            awk -F= -v target="$key" '
+              /^[[:space:]]*#/ { next }
+              $1 == target {
+                value = substr($0, index($0, "=") + 1)
+                gsub(/^[[:space:]\042\047]+|[[:space:]\042\047]+$/, "", value)
+                print value
+                exit
+              }
+            ' "$file"
+          }
+
+          mismatch=0
+          for key in ABK_MANAGER_PACKAGE ABK_MANAGER_CERT_SIZE ABK_MANAGER_CERT_SHA256; do
+            expected_value="$(read_value "$expected" "$key")"
+            actual_value="$(read_value "$actual" "$key")"
+            if [ "$expected_value" != "$actual_value" ]; then
+              echo "::error::$key mismatch: checked-in='$expected_value' generated='$actual_value'"
+              mismatch=1
+            fi
+          done
+          if [ "$mismatch" -ne 0 ]; then
+            echo "::error::Update $expected with the generated metadata before building trusted manager kernels."
+            exit 1
+          fi
+
       - name: Build release APK
         env:
           ABK_RELEASE_STORE_FILE: ${{ github.workspace }}/app/signing/abk-release.jks

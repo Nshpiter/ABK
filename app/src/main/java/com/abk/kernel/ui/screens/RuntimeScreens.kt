@@ -8,6 +8,7 @@ package com.abk.kernel.ui.screens
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.OpenableColumns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -101,6 +102,7 @@ fun RuntimeHomeScreen(
             RuntimeStatusHeader(
                 runtimeStatus = state.abkRuntimeStatus,
                 loading = state.abkRuntimeLoading,
+                error = state.abkRuntimeError,
                 onRefresh = vm::refreshAbkRuntimeStatus
             )
 
@@ -115,11 +117,16 @@ fun RuntimeHomeScreen(
 }
 
 @Composable
-fun InstalledModulesScreen(vm: MainViewModel) {
+fun InstalledModulesScreen(
+    vm: MainViewModel,
+    pendingModuleInstallUri: String? = null,
+    onPendingModuleInstallUriConsumed: () -> Unit = {}
+) {
     val state by vm.uiState.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var query by rememberSaveable { mutableStateOf("") }
+    var pendingInstallUri by remember { mutableStateOf<Uri?>(null) }
     var installDialogVisible by remember { mutableStateOf(false) }
     var installRunning by remember { mutableStateOf(false) }
     var installSuccess by remember { mutableStateOf<Boolean?>(null) }
@@ -191,7 +198,16 @@ fun InstalledModulesScreen(vm: MainViewModel) {
     val modulePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
-        if (uri != null) installModuleFromUri(uri)
+        if (uri != null) pendingInstallUri = uri
+    }
+
+    LaunchedEffect(pendingModuleInstallUri) {
+        if (!pendingModuleInstallUri.isNullOrBlank()) {
+            runCatching { Uri.parse(pendingModuleInstallUri) }.getOrNull()?.let { uri ->
+                pendingInstallUri = uri
+            }
+            onPendingModuleInstallUriConsumed()
+        }
     }
 
     LaunchedEffect(state.runtimeNavigationEnabled, state.rootGranted) {
@@ -240,7 +256,7 @@ fun InstalledModulesScreen(vm: MainViewModel) {
 
             state.abkRuntimeError?.let {
                 RuntimeErrorCard(
-                    message = if (state.abkRuntimeStatus == null) "管理器未激活" else "操作未完成，请刷新后重试",
+                    message = if (state.abkRuntimeStatus == null) it else "操作未完成，请刷新后重试",
                     onRefresh = vm::refreshAbkRuntimeStatus
                 )
             }
@@ -298,6 +314,20 @@ fun InstalledModulesScreen(vm: MainViewModel) {
         )
     }
 
+    pendingInstallUri?.let { uri ->
+        RuntimeModuleInstallConfirmDialog(
+            uri = uri,
+            displayName = remember(context, uri) { runtimeModuleUriDisplayName(context, uri) },
+            onDismiss = { if (!installRunning) pendingInstallUri = null },
+            onConfirm = {
+                if (!installRunning) {
+                    pendingInstallUri = null
+                    installModuleFromUri(uri)
+                }
+            }
+        )
+    }
+
     if (installDialogVisible) {
         RuntimeModuleInstallDialog(
             running = installRunning,
@@ -317,6 +347,7 @@ fun InstalledModulesScreen(vm: MainViewModel) {
 private fun RuntimeStatusHeader(
     runtimeStatus: AbkRuntimeStatus?,
     loading: Boolean,
+    error: String?,
     onRefresh: () -> Unit
 ) {
     ExpressiveHeroCard(
@@ -324,8 +355,8 @@ private fun RuntimeStatusHeader(
         subtitle = runtimeStatus?.let {
             val managerName = it.manager?.displayName?.takeIf { name -> name.isNotBlank() } ?: "Root"
             "$managerName · ABK ${it.abkVersion.ifBlank { "unknown" }} · ${it.modules.size} 个模块"
-        } ?: "安装并启用支持管理器的内核后可查看运行态信息",
-        icon = if (runtimeStatus != null) Icons.Default.CheckCircle else Icons.Default.Memory,
+        } ?: (error ?: "安装并启用支持管理器的内核后可查看运行态信息"),
+        icon = if (runtimeStatus != null) Icons.Default.CheckCircle else Icons.Default.Error,
         containerColor = if (runtimeStatus != null) {
             MaterialTheme.colorScheme.primaryContainer
         } else {
@@ -389,6 +420,16 @@ private fun RuntimeManagerCard(runtimeStatus: AbkRuntimeStatus) {
                 RuntimeInfoRow("运行后端", backend.displayName.ifBlank { backend.variant })
                 RuntimeInfoRow("后端版本", backend.version)
                 RuntimeInfoRow("兼容层", runtimeBackendLabel(backend.backend))
+            }
+            val diagnostics = manager.diagnostics
+                .plus(backend?.diagnostics.orEmpty())
+                .distinct()
+            diagnostics.forEach { message ->
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error
+                )
             }
             val chips = manager.capabilities
                 .plus(backend?.capabilities.orEmpty())
@@ -660,6 +701,55 @@ private fun InstalledRuntimeModuleCard(
 }
 
 @Composable
+private fun RuntimeModuleInstallConfirmDialog(
+    uri: Uri,
+    displayName: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { Icon(Icons.Default.UploadFile, null) },
+        title = { Text("确认刷写模块") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = displayName,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = uri.toString(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 4,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = "确认后会调用当前系统可用的模块安装器，安装完成通常需要重启后生效。",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Icon(Icons.Default.UploadFile, null, modifier = Modifier.size(17.dp))
+                Spacer(Modifier.width(4.dp))
+                Text("确认刷写")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("取消")
+            }
+        }
+    )
+}
+
+@Composable
 private fun RuntimeModuleInstallDialog(
     running: Boolean,
     success: Boolean?,
@@ -878,10 +968,24 @@ private fun internalRuntimeControlCapability(): String =
 
 private val MODULE_INSTALL_MIME_TYPES = arrayOf(
     "application/zip",
+    "application/x-zip",
     "application/octet-stream",
     "application/x-zip-compressed",
     "*/*"
 )
+
+private fun runtimeModuleUriDisplayName(context: Context, uri: Uri): String {
+    context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+        val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        if (index >= 0 && cursor.moveToFirst()) {
+            cursor.getString(index)?.takeIf { it.isNotBlank() }?.let { return it }
+        }
+    }
+    return uri.lastPathSegment
+        ?.substringAfterLast('/')
+        ?.takeIf { it.isNotBlank() }
+        ?: "module.zip"
+}
 
 private fun copyRuntimeModuleUriToCache(context: Context, uri: Uri): File {
     val cacheDir = File(context.cacheDir, "runtime-module-install").apply {

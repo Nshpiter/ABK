@@ -401,19 +401,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun refreshAbkRuntimeStatus() {
         viewModelScope.launch {
             _uiState.update { it.copy(abkRuntimeLoading = true, abkRuntimeError = null) }
-            val runtimeStatus = withContext(Dispatchers.IO) {
+            val (runtimeStatus, runtimeError) = withContext(Dispatchers.IO) {
                 if (!RootUtils.isNativeManagerActive()) {
                     RootUtils.refreshRootState()
                 }
                 val snapshot = RootUtils.readManagerRuntimeSnapshot()
                 if (!snapshot.manager.active) {
-                    null
+                    null to snapshot.manager.diagnostics.firstOrNull()
                 } else {
                     mergeRuntimeStatus(
                         manager = snapshot.manager,
                         controlJson = snapshot.controlStatusJson,
                         ksuModulesJson = snapshot.ksuModulesJson
-                    )
+                    ) to null
                 }
             }
             _uiState.update {
@@ -428,7 +428,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     it.copy(
                         abkRuntimeStatus = null,
                         abkRuntimeLoading = false,
-                        abkRuntimeError = "管理器未激活"
+                        abkRuntimeError = runtimeError ?: "管理器未激活"
                     )
                 }
             }
@@ -440,20 +440,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update {
                 it.copy(rootGrantLoading = true, rootGrantError = null)
             }
-            val (active, apps) = withContext(Dispatchers.IO) {
+            val (active, apps, diagnostic) = withContext(Dispatchers.IO) {
                 val nativeActive = RootUtils.isNativeManagerActive()
-                nativeActive to if (nativeActive) {
+                val rootGrantApps = if (nativeActive) {
                     RootUtils.listRootGrantApps(getApplication<Application>())
                 } else {
                     emptyList()
                 }
+                val inactiveDiagnostic = if (nativeActive) {
+                    null
+                } else {
+                    RootUtils.refreshRootState()
+                    RootUtils.readManagerRuntimeSnapshot().manager.diagnostics.firstOrNull()
+                }
+                Triple(nativeActive, rootGrantApps, inactiveDiagnostic)
             }
             _uiState.update {
                 if (!active) {
                     it.copy(
                         rootGrantApps = emptyList(),
                         rootGrantLoading = false,
-                        rootGrantError = "管理器未激活"
+                        rootGrantError = diagnostic ?: "管理器未激活"
                     )
                 } else {
                     it.copy(
@@ -540,7 +547,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             compilerManager.copy(
                 active = true,
-                capabilities = (compilerManager.capabilities + extraCaps).distinct()
+                capabilities = (compilerManager.capabilities + extraCaps).distinct(),
+                diagnostics = (compilerManager.diagnostics + manager.diagnostics).distinct()
             )
         } ?: runtimeBackendInfo
         return (controlStatus ?: AbkRuntimeStatus()).copy(
@@ -559,7 +567,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             backend = backend,
             version = version,
             active = active,
-            capabilities = capabilities
+            capabilities = capabilities,
+            diagnostics = diagnostics
         )
 
     private fun parseKsuModules(json: String?): List<AbkRuntimeModule> {
@@ -2159,6 +2168,27 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     it.url.equals(cleanUrl, ignoreCase = true) &&
                         CustomExternalModuleStage.normalize(it.stage) == normalizedStage
                 }
+            )
+        )
+    }
+
+    fun setCustomExternalModuleStages(url: String, stages: List<String>) {
+        val cleanUrl = url.trim()
+        if (cleanUrl.isBlank()) return
+        val normalizedStages = stages
+            .map { CustomExternalModuleStage.normalize(it) }
+            .filter { it in CustomExternalModuleStage.options }
+            .distinct()
+        val currentConfig = KernelSupport.normalize(_uiState.value.buildConfig)
+        val remainingModules = currentConfig.customExternalModules.filterNot {
+            it.url.equals(cleanUrl, ignoreCase = true)
+        }
+        val updatedModules = remainingModules + normalizedStages.map { stage ->
+            CustomExternalModule(url = cleanUrl, stage = stage)
+        }
+        updateBuildConfig(
+            currentConfig.copy(
+                customExternalModules = updatedModules
             )
         )
     }
