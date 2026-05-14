@@ -69,8 +69,13 @@ data class MainUiState(
     val currentRun: WorkflowRun? = null,
     val recentRuns: List<WorkflowRun> = emptyList(),
     val buildProgress: BuildProgress = BuildProgress(),
+    val activeBuildRuns: List<WorkflowRun> = emptyList(),
+    val buildProgressByRunId: Map<Long, BuildProgress> = emptyMap(),
     val buildConfig: KernelBuildConfig = KernelBuildConfig(),
     val buildPlans: List<BuildPlan> = emptyList(),
+    val buildQueue: List<BuildQueueItem> = emptyList(),
+    val buildQueueProcessing: Boolean = false,
+    val cancellingWorkflowRunIds: Set<Long> = emptySet(),
     val moduleCatalogRepositories: List<ModuleCatalogRepository> = emptyList(),
     val refreshingModuleCatalogRepositoryIds: Set<String> = emptySet(),
     val validatingCustomExternalModule: Boolean = false,
@@ -114,6 +119,7 @@ data class MainUiState(
     val abkRuntimeModuleActionTitle: String? = null,
     val abkRuntimeModuleActionOutput: List<String> = emptyList(),
     val rootGrantApps: List<RootGrantApp> = emptyList(),
+    val rootGrantRuntimeBackend: String? = null,
     val rootGrantLoading: Boolean = false,
     val rootGrantError: String? = null,
     val rootGrantSavingPackage: String? = null
@@ -126,10 +132,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val gson = Gson()
     private val ksuModuleListType = object : TypeToken<List<Map<String, Any?>>>() {}.type
     private var hasSavedBuildConfig = false
-    private var monitoredRunId: Long = -1L
+    private val monitoredRunIds = mutableSetOf<Long>()
     private val preparedMirrorArtifacts = mutableMapOf<Long, Set<String>>()
     private val artifactDownloadJobs = mutableMapOf<Long, Job>()
     private var hasCheckedWorkflowEnablementThisLaunch = false
+    private var buildQueueJob: Job? = null
 
     private val _uiState = MutableStateFlow(MainUiState())
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
@@ -144,14 +151,34 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     runCatching { gson.fromJson(it, BuildProgress::class.java) }.getOrNull()
                 } ?: _uiState.value.buildProgress
                 val bs = when (status) {
-                    "queued", "waiting", "requested" -> BuildStatus.QUEUED
+                    "queued", "waiting", "requested", "pending" -> BuildStatus.QUEUED
                     "in_progress" -> BuildStatus.IN_PROGRESS
-                    "completed" -> if (run.conclusion == "success") BuildStatus.SUCCESS else BuildStatus.FAILURE
+                    "completed" -> when (run.conclusion) {
+                        "success" -> BuildStatus.SUCCESS
+                        "cancelled" -> BuildStatus.CANCELLED
+                        else -> BuildStatus.FAILURE
+                    }
                     else -> BuildStatus.IDLE
                 }
-                _uiState.update { it.copy(buildStatus = bs, currentRun = run, buildProgress = progress) }
+                _uiState.update {
+                    it.withBuildRunDisplay(
+                        run = run,
+                        status = bs,
+                        progress = progress,
+                        cancellingWorkflowRunIds = if (status == "completed") {
+                            it.cancellingWorkflowRunIds - run.id
+                        } else {
+                            it.cancellingWorkflowRunIds
+                        }
+                    )
+                }
+                syncBuildQueueWithRun(run, bs)
                 if (bs == BuildStatus.SUCCESS) {
                     loadArtifacts(run.id, autoDownload = true)
+                }
+                if (bs !in ACTIVE_BUILD_STATUSES) {
+                    monitoredRunIds.remove(run.id)
+                    processBuildQueue()
                 }
             } catch (_: Exception) {}
         }
@@ -303,6 +330,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         viewModelScope.launch {
+            prefs.buildQueueJson.collect { json ->
+                _uiState.update { it.copy(buildQueue = parseBuildQueue(json)) }
+                processBuildQueue()
+            }
+        }
+        viewModelScope.launch {
             prefs.moduleCatalogRepositoriesJson.collect { json ->
                 _uiState.update { it.copy(moduleCatalogRepositories = parseModuleCatalogRepositories(json)) }
             }
@@ -435,8 +468,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun refreshRootGrantApps() {
+    fun refreshRootGrantApps(force: Boolean = false) {
+        val current = _uiState.value
+        val currentBackend = current.abkRuntimeStatus?.runtimeBackend?.backend
+        if (!force && current.rootGrantLoading) return
+        if (
+            !force &&
+            current.rootGrantApps.isNotEmpty() &&
+            current.rootGrantRuntimeBackend == currentBackend &&
+            current.rootGrantError == null
+        ) {
+            return
+        }
+
         viewModelScope.launch {
+            val backendAtRequest = _uiState.value.abkRuntimeStatus?.runtimeBackend?.backend
             _uiState.update {
                 it.copy(rootGrantLoading = true, rootGrantError = null)
             }
@@ -459,12 +505,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 if (!active) {
                     it.copy(
                         rootGrantApps = emptyList(),
+                        rootGrantRuntimeBackend = backendAtRequest,
                         rootGrantLoading = false,
                         rootGrantError = diagnostic ?: "管理器未激活"
                     )
                 } else {
                     it.copy(
                         rootGrantApps = apps,
+                        rootGrantRuntimeBackend = backendAtRequest,
                         rootGrantLoading = false,
                         rootGrantError = null
                     )
@@ -516,7 +564,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 }
             }
-            if (result) refreshRootGrantApps()
+            if (result) refreshRootGrantApps(force = true)
         }
     }
 
@@ -1083,6 +1131,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.update { it.copy(authStep = AuthStep.READY) }
         loadRecentRuns()
         ensureBuildWorkflowEnabled()
+        processBuildQueue()
     }
 
     private fun ensureBuildWorkflowEnabled() {
@@ -1171,39 +1220,84 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     // ── Build ─────────────────────────────────────────────────────────────
 
     fun dispatchBuild(config: KernelBuildConfig) {
+        enqueueBuild(config)
+    }
+
+    private fun enqueueBuild(config: KernelBuildConfig) {
         val state = _uiState.value
         val buildConfig = KernelSupport.normalize(config)
-        val username = state.user?.login ?: return
-        val repoName = state.forkRepo?.name ?: BuildConfig.SOURCE_REPO_NAME
-        val ref = state.forkRepo?.defaultBranch ?: "main"
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-            val wfId = ensureBuildWorkflowEnabled(username, repoName, reportError = true) ?: return@launch
-            val previousRunId = when (val prior = github.listRecentRuns(username, repoName, 1, wfId)) {
-                is Result.Success -> prior.data.firstOrNull()?.id
-                else -> null
-            }
-            val inputs = buildConfig.toInputMap()
-            when (val r = github.dispatchWorkflow(username, repoName, wfId, inputs, ref)) {
-                is Result.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            buildStatus = BuildStatus.QUEUED,
-                            buildProgress = BuildProgress(percent = 0, currentStep = "构建已排队")
-                        )
-                    }
-                    delay(5000) // wait for GH to create the run
-                    findAndMonitorLatestRun(username, repoName, wfId, previousRunId)
+        val now = System.currentTimeMillis()
+        val item = BuildQueueItem(
+            id = UUID.randomUUID().toString(),
+            name = suggestedBuildPlanName(buildConfig),
+            config = buildConfig,
+            createdAt = now,
+            status = BuildQueueItemStatus.PENDING
+        )
+        saveBuildQueue(state.buildQueue + item)
+        _uiState.update { it.copy(error = null) }
+        processBuildQueue()
+    }
+
+    private fun processBuildQueue() {
+        val snapshot = _uiState.value
+        if (!snapshot.isLoggedIn || snapshot.authStep != AuthStep.READY) return
+        if (snapshot.buildQueueProcessing || buildQueueJob?.isActive == true) return
+        val next = snapshot.buildQueue.firstOrNull { it.status == BuildQueueItemStatus.PENDING } ?: return
+        val username = snapshot.user?.login ?: return
+        val repoName = snapshot.forkRepo?.name ?: BuildConfig.SOURCE_REPO_NAME
+        val ref = snapshot.forkRepo?.defaultBranch ?: "main"
+
+        buildQueueJob = viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(buildQueueProcessing = true, isLoading = true, error = null) }
+                val wfId = ensureBuildWorkflowEnabled(username, repoName, reportError = true)
+                if (wfId == null) {
+                    markBuildQueueItemFailed(next.id, "无法确认构建工作流")
+                    return@launch
                 }
-                is Result.Error -> {
-                    if (r.code == 403 || r.code == 404) {
-                        showWorkflowEnablementPrompt("触发工作流失败: ${r.message}", workflowActionsUrl(username, repoName))
-                    } else {
-                        _uiState.update { it.copy(isLoading = false, error = r.message) }
+
+                updateBuildQueueItem(next.id) {
+                    it.copy(status = BuildQueueItemStatus.DISPATCHING, error = null)
+                }
+                _uiState.update {
+                    it.copy(
+                        buildStatus = BuildStatus.QUEUED,
+                        buildProgress = BuildProgress(percent = 0, currentStep = "正在提交队列中的构建")
+                    )
+                }
+                val previousRunId = when (val prior = github.listRecentRuns(username, repoName, 1, wfId)) {
+                    is Result.Success -> prior.data.firstOrNull()?.id
+                    else -> null
+                }
+                when (val r = github.dispatchWorkflow(username, repoName, wfId, next.config.toInputMap(), ref)) {
+                    is Result.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                buildStatus = BuildStatus.QUEUED,
+                                buildProgress = BuildProgress(percent = 0, currentStep = "构建已排队")
+                            )
+                        }
+                        delay(5000)
+                        findAndMonitorLatestRun(username, repoName, wfId, previousRunId, next.id)
+                    }
+                    is Result.Error -> {
+                        markBuildQueueItemFailed(next.id, r.message)
+                        if (r.code == 403 || r.code == 404) {
+                            showWorkflowEnablementPrompt("触发工作流失败: ${r.message}", workflowActionsUrl(username, repoName))
+                        } else {
+                            _uiState.update { it.copy(error = r.message, buildStatus = BuildStatus.FAILURE) }
+                        }
+                    }
+                    Result.Loading -> {
+                        markBuildQueueItemFailed(next.id, "触发构建未返回结果")
+                        _uiState.update { it.copy(buildStatus = BuildStatus.FAILURE) }
                     }
                 }
-                else -> {}
+            } finally {
+                _uiState.update { it.copy(buildQueueProcessing = false, isLoading = false) }
+                buildQueueJob = null
+                processBuildQueue()
             }
         }
     }
@@ -1212,7 +1306,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         owner: String,
         repo: String,
         workflowId: Long,
-        previousRunId: Long?
+        previousRunId: Long?,
+        queueItemId: String? = null
     ) {
         repeat(6) { attempt ->
             when (val r = github.listRecentRuns(owner, repo, 5, workflowId)) {
@@ -1227,8 +1322,29 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         } else {
                             prefs.clearPendingAutoDownloadRunId()
                         }
-                        _uiState.update { it.copy(currentRun = run, buildStatus = BuildStatus.QUEUED) }
-                        monitoredRunId = run.id
+                        queueItemId?.let { id ->
+                            updateBuildQueueItem(id) {
+                                it.copy(
+                                    status = BuildQueueItemStatus.RUNNING,
+                                    runId = run.id,
+                                    runNumber = run.runNumber,
+                                    error = null
+                                )
+                            }
+                        }
+                        _uiState.update {
+                            it.withBuildRunDisplay(
+                                run = run,
+                                status = BuildStatus.QUEUED,
+                                progress = BuildProgress(
+                                    percent = 0,
+                                    currentStep = "构建已排队",
+                                    completedSteps = 0,
+                                    totalSteps = 1
+                                )
+                            )
+                        }
+                        monitoredRunIds += run.id
                         BuildMonitorService.startMonitoring(getApplication(), owner, repo, run.id)
                         return
                     }
@@ -1238,8 +1354,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             if (attempt < 5) delay(5_000)
         }
         _uiState.update {
-            it.copy(error = "已提交构建，但暂未找到工作流运行，请稍后刷新最近构建。")
+            it.copy(
+                error = "已提交构建，但暂未找到工作流运行，请稍后刷新最近构建。",
+                buildStatus = BuildStatus.FAILURE
+            )
         }
+        queueItemId?.let { markBuildQueueItemFailed(it, "已提交构建，但暂未找到工作流运行") }
     }
 
     fun loadRecentRuns() {
@@ -1250,6 +1370,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             when (val r = github.listRecentRuns(username, repoName, perPage = 30)) {
                 is Result.Success -> {
                     _uiState.update { it.copy(recentRuns = r.data) }
+                    r.data.forEach { run ->
+                        syncBuildQueueWithRun(run, run.toBuildStatus())
+                        if (_uiState.value.activeBuildRuns.any { it.id == run.id }) {
+                            _uiState.update {
+                                it.withBuildRunDisplay(
+                                    run = run,
+                                    status = run.toBuildStatus(),
+                                    progress = it.buildProgressByRunId[run.id] ?: BuildProgressUtils.defaultFor(run)
+                                )
+                            }
+                        }
+                    }
                     autoMonitorRunningCustomBuild(username, repoName, r.data)
                     refreshArtifactsForRuns(username, repoName, r.data)
                 }
@@ -1273,29 +1405,110 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 else -> emptyList()
             }
         }
-        val running = workflowRuns.firstOrNull { it.isActiveBuildRun() } ?: return
-        if (monitoredRunId == running.id && _uiState.value.currentRun?.id == running.id) return
+        workflowRuns
+            .filter { it.isActiveBuildRun() }
+            .forEach { run ->
+                if (run.id !in monitoredRunIds || _uiState.value.activeBuildRuns.none { it.id == run.id }) {
+                    monitorExistingBuildRun(owner, repoName, run)
+                }
+            }
+    }
 
-        monitoredRunId = running.id
-        prefs.saveLastRunId(running.id)
+    private suspend fun monitorExistingBuildRun(owner: String, repoName: String, run: WorkflowRun) {
+        monitoredRunIds += run.id
+        prefs.saveLastRunId(run.id)
         if (_uiState.value.autoDownload) {
-            prefs.savePendingAutoDownloadRunId(running.id)
+            prefs.savePendingAutoDownloadRunId(run.id)
         }
+        attachRunToActiveQueueItem(run)
         _uiState.update {
-            it.copy(
-                currentRun = running,
-                buildStatus = running.toBuildStatus(),
-                buildProgress = BuildProgress(
-                    percent = if (running.status == "in_progress") 5 else 0,
-                    currentStep = if (running.status == "in_progress") {
+            it.withBuildRunDisplay(
+                run = run,
+                status = run.toBuildStatus(),
+                progress = BuildProgress(
+                    percent = if (run.status == "in_progress") 5 else 0,
+                    currentStep = if (run.status == "in_progress") {
                         "已接管运行中的工作流"
                     } else {
                         "发现运行中的工作流，等待 Runner"
-                    }
+                    },
+                    completedSteps = 0,
+                    totalSteps = 1
                 )
             )
         }
-        BuildMonitorService.startMonitoring(getApplication(), owner, repoName, running.id)
+        BuildMonitorService.startMonitoring(getApplication(), owner, repoName, run.id)
+    }
+
+    fun removeBuildQueueItem(itemId: String) {
+        val cleanId = itemId.trim()
+        if (cleanId.isBlank()) return
+        val item = _uiState.value.buildQueue.firstOrNull { it.id == cleanId } ?: return
+        if (item.status in setOf(BuildQueueItemStatus.DISPATCHING, BuildQueueItemStatus.RUNNING) && item.runId > 0L) {
+            cancelWorkflowRun(item.runId)
+            return
+        }
+        saveBuildQueue(_uiState.value.buildQueue.filterNot { it.id == cleanId })
+    }
+
+    fun retryBuildQueueItem(itemId: String) {
+        val cleanId = itemId.trim()
+        if (cleanId.isBlank()) return
+        updateBuildQueueItem(cleanId) {
+            it.copy(status = BuildQueueItemStatus.PENDING, runId = 0L, runNumber = 0, error = null)
+        }
+        processBuildQueue()
+    }
+
+    fun clearCompletedBuildQueueItems() {
+        saveBuildQueue(
+            _uiState.value.buildQueue.filter {
+                it.status !in setOf(
+                    BuildQueueItemStatus.DONE,
+                    BuildQueueItemStatus.FAILED,
+                    BuildQueueItemStatus.CANCELLED
+                )
+            }
+        )
+    }
+
+    fun cancelWorkflowRun(runId: Long) {
+        if (runId <= 0L || runId in _uiState.value.cancellingWorkflowRunIds) return
+        val state = _uiState.value
+        val owner = state.user?.login ?: return
+        val repoName = state.forkRepo?.name ?: return
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    cancellingWorkflowRunIds = it.cancellingWorkflowRunIds + runId,
+                    error = null
+                )
+            }
+            when (val result = github.cancelWorkflowRun(owner, repoName, runId)) {
+                is Result.Success -> {
+                    syncBuildQueueWithRunId(runId, BuildQueueItemStatus.CANCELLED)
+                    monitoredRunIds.remove(runId)
+                    _uiState.update {
+                        val affectsDisplay = it.currentRun?.id == runId || it.activeBuildRuns.any { run -> run.id == runId }
+                        it.withoutActiveBuildRun(
+                            runId = runId,
+                            fallbackStatus = if (affectsDisplay) BuildStatus.CANCELLED else it.buildStatus,
+                            fallbackProgress = if (affectsDisplay) {
+                                it.buildProgress.copy(currentStep = "已请求取消工作流")
+                            } else {
+                                it.buildProgress
+                            },
+                            fallbackRun = it.currentRun
+                        )
+                    }
+                    loadRecentRuns()
+                    processBuildQueue()
+                }
+                is Result.Error -> _uiState.update { it.copy(error = "取消工作流失败: ${result.message}") }
+                Result.Loading -> {}
+            }
+            _uiState.update { it.copy(cancellingWorkflowRunIds = it.cancellingWorkflowRunIds - runId) }
+        }
     }
 
     fun loadArtifacts(runId: Long, autoDownload: Boolean = false) {
@@ -1525,8 +1738,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         buildParameterErrors = state.buildParameterErrors - runId,
                         downloadProgress = state.downloadProgress.filterKeys { it !in removedRemoteIds },
                         recentRuns = state.recentRuns.filterNot { it.id == runId },
-                        currentRun = state.currentRun?.takeUnless { it.id == runId },
-                        buildStatus = if (state.currentRun?.id == runId) BuildStatus.IDLE else state.buildStatus
+                        currentRun = state.currentRun?.takeUnless { it.id == runId }
+                    ).withoutActiveBuildRun(
+                        runId = runId,
+                        fallbackStatus = if (state.currentRun?.id == runId) BuildStatus.IDLE else state.buildStatus,
+                        fallbackProgress = state.buildProgress,
+                        fallbackRun = state.currentRun?.takeUnless { it.id == runId }
                     )
                 }
                 if (_uiState.value.pendingAutoDownloadRunId == runId) {
@@ -2261,6 +2478,88 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { prefs.saveBuildPlansJson(gson.toJson(sanitized)) }
     }
 
+    private fun saveBuildQueue(items: List<BuildQueueItem>) {
+        val sanitized = items
+            .map(::sanitizeBuildQueueItem)
+            .distinctBy { it.id }
+        _uiState.update { it.copy(buildQueue = sanitized) }
+        viewModelScope.launch { prefs.saveBuildQueueJson(gson.toJson(sanitized)) }
+    }
+
+    private fun updateBuildQueueItem(
+        itemId: String,
+        transform: (BuildQueueItem) -> BuildQueueItem
+    ) {
+        val updated = _uiState.value.buildQueue.map { item ->
+            if (item.id == itemId) sanitizeBuildQueueItem(transform(item)) else item
+        }
+        saveBuildQueue(updated)
+    }
+
+    private fun markBuildQueueItemFailed(itemId: String, message: String) {
+        updateBuildQueueItem(itemId) {
+            it.copy(status = BuildQueueItemStatus.FAILED, error = message)
+        }
+    }
+
+    private fun attachRunToActiveQueueItem(run: WorkflowRun) {
+        val current = _uiState.value.buildQueue
+        val target = current.firstOrNull { it.runId == run.id }
+            ?: current.firstOrNull {
+                it.status in setOf(BuildQueueItemStatus.DISPATCHING, BuildQueueItemStatus.RUNNING)
+            }
+            ?: return
+        updateBuildQueueItem(target.id) {
+            it.copy(
+                status = BuildQueueItemStatus.RUNNING,
+                runId = run.id,
+                runNumber = run.runNumber,
+                error = null
+            )
+        }
+    }
+
+    private fun syncBuildQueueWithRun(run: WorkflowRun, status: BuildStatus) {
+        val itemStatus = when (status) {
+            BuildStatus.SUCCESS -> BuildQueueItemStatus.DONE
+            BuildStatus.FAILURE -> BuildQueueItemStatus.FAILED
+            BuildStatus.CANCELLED -> BuildQueueItemStatus.CANCELLED
+            BuildStatus.QUEUED,
+            BuildStatus.IN_PROGRESS -> BuildQueueItemStatus.RUNNING
+            BuildStatus.IDLE -> return
+        }
+        val error = when (itemStatus) {
+            BuildQueueItemStatus.FAILED -> "工作流结束: ${run.conclusion ?: run.status}"
+            else -> null
+        }
+        val current = _uiState.value.buildQueue
+        if (current.none { it.runId == run.id }) return
+        saveBuildQueue(
+            current.map { item ->
+                if (item.runId == run.id) {
+                    item.copy(
+                        status = itemStatus,
+                        runNumber = run.runNumber,
+                        error = error
+                    )
+                } else {
+                    item
+                }
+            }
+        )
+    }
+
+    private fun syncBuildQueueWithRunId(runId: Long, status: BuildQueueItemStatus) {
+        if (runId <= 0L) return
+        val current = _uiState.value.buildQueue
+        if (current.none { it.runId == runId }) return
+        saveBuildQueue(
+            current.map { item ->
+                if (item.runId == runId) item.copy(status = status) else item
+            }
+        )
+    }
+
     private fun saveModuleCatalogRepositories(repositories: List<ModuleCatalogRepository>) {
         val sanitized = sanitizeModuleCatalogRepositories(repositories)
         _uiState.update { it.copy(moduleCatalogRepositories = sanitized) }
@@ -2373,6 +2672,39 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             updatedAt = plan.updatedAt.takeIf { it > 0L } ?: createdAt
         )
     }.getOrNull()
+
+    private fun parseBuildQueue(json: String?): List<BuildQueueItem> {
+        if (json.isNullOrBlank()) return emptyList()
+        return runCatching<List<BuildQueueItem>> {
+            val type = object : TypeToken<List<BuildQueueItem>>() {}.type
+            gson.fromJson<List<BuildQueueItem>>(json, type).orEmpty()
+                .map(::sanitizeBuildQueueItem)
+                .distinctBy { it.id }
+        }.getOrDefault(emptyList())
+    }
+
+    private fun sanitizeBuildQueueItem(item: BuildQueueItem): BuildQueueItem {
+        val normalized = KernelSupport.normalize(item.config)
+        val createdAt = item.createdAt.takeIf { it > 0L } ?: System.currentTimeMillis()
+        val status = if (
+            item.runId <= 0L &&
+            item.status in setOf(BuildQueueItemStatus.DISPATCHING, BuildQueueItemStatus.RUNNING)
+        ) {
+            BuildQueueItemStatus.PENDING
+        } else {
+            item.status
+        }
+        return item.copy(
+            id = item.id.ifBlank { UUID.randomUUID().toString() },
+            name = item.name.ifBlank { sanitizeBuildPlanName("", normalized) },
+            config = normalized,
+            createdAt = createdAt,
+            status = status,
+            runId = item.runId.coerceAtLeast(0L),
+            runNumber = item.runNumber.coerceAtLeast(0),
+            error = item.error?.takeIf { it.isNotBlank() }
+        )
+    }
 
     private fun parseModuleCatalogRepositories(json: String?): List<ModuleCatalogRepository> {
         if (json.isNullOrBlank()) return defaultModuleCatalogRepositories()
@@ -2993,13 +3325,108 @@ private fun prebuiltRecommendationScore(asset: PrebuiltGkiAsset, recommended: Ke
     return 10 + (if (hasAndroid) 5 else 0) + (if (hasPatch) 8 else 0)
 }
 
+private data class BuildDisplaySnapshot(
+    val status: BuildStatus,
+    val currentRun: WorkflowRun?,
+    val progress: BuildProgress
+)
+
+private fun MainUiState.withBuildRunDisplay(
+    run: WorkflowRun,
+    status: BuildStatus,
+    progress: BuildProgress,
+    cancellingWorkflowRunIds: Set<Long> = this.cancellingWorkflowRunIds
+): MainUiState {
+    val updatedRuns = if (run.isActiveBuildRun()) {
+        (activeBuildRuns.filterNot { it.id == run.id } + run)
+            .distinctBy { it.id }
+            .sortedByDescending { it.id }
+    } else {
+        activeBuildRuns.filterNot { it.id == run.id }
+    }
+    val updatedProgressByRunId = if (run.isActiveBuildRun()) {
+        buildProgressByRunId + (run.id to progress)
+    } else {
+        buildProgressByRunId - run.id
+    }
+    val display = buildDisplaySnapshot(
+        activeRuns = updatedRuns,
+        progressByRunId = updatedProgressByRunId,
+        fallbackRun = run,
+        fallbackStatus = status,
+        fallbackProgress = progress
+    )
+    return copy(
+        buildStatus = display.status,
+        currentRun = display.currentRun,
+        buildProgress = display.progress,
+        activeBuildRuns = updatedRuns,
+        buildProgressByRunId = updatedProgressByRunId,
+        cancellingWorkflowRunIds = cancellingWorkflowRunIds
+    )
+}
+
+private fun MainUiState.withoutActiveBuildRun(
+    runId: Long,
+    fallbackStatus: BuildStatus,
+    fallbackProgress: BuildProgress,
+    fallbackRun: WorkflowRun? = currentRun
+): MainUiState {
+    val updatedRuns = activeBuildRuns.filterNot { it.id == runId }
+    val updatedProgressByRunId = buildProgressByRunId - runId
+    val display = buildDisplaySnapshot(
+        activeRuns = updatedRuns,
+        progressByRunId = updatedProgressByRunId,
+        fallbackRun = fallbackRun,
+        fallbackStatus = fallbackStatus,
+        fallbackProgress = fallbackProgress
+    )
+    return copy(
+        buildStatus = display.status,
+        currentRun = display.currentRun,
+        buildProgress = display.progress,
+        activeBuildRuns = updatedRuns,
+        buildProgressByRunId = updatedProgressByRunId
+    )
+}
+
+private fun buildDisplaySnapshot(
+    activeRuns: List<WorkflowRun>,
+    progressByRunId: Map<Long, BuildProgress>,
+    fallbackRun: WorkflowRun?,
+    fallbackStatus: BuildStatus,
+    fallbackProgress: BuildProgress
+): BuildDisplaySnapshot {
+    val sortedRuns = activeRuns
+        .filter { it.isActiveBuildRun() }
+        .distinctBy { it.id }
+        .sortedByDescending { it.id }
+    if (sortedRuns.isEmpty()) {
+        return BuildDisplaySnapshot(fallbackStatus, fallbackRun, fallbackProgress)
+    }
+    val status = if (sortedRuns.any { it.status == "in_progress" }) {
+        BuildStatus.IN_PROGRESS
+    } else {
+        BuildStatus.QUEUED
+    }
+    return BuildDisplaySnapshot(
+        status = status,
+        currentRun = sortedRuns.firstOrNull(),
+        progress = BuildProgressUtils.merge(sortedRuns, progressByRunId)
+    )
+}
+
 private fun WorkflowRun.isActiveBuildRun(): Boolean =
     status in setOf("queued", "waiting", "requested", "pending", "in_progress")
 
 private fun WorkflowRun.toBuildStatus(): BuildStatus = when (status) {
     "queued", "waiting", "requested", "pending" -> BuildStatus.QUEUED
     "in_progress" -> BuildStatus.IN_PROGRESS
-    "completed" -> if (conclusion == "success") BuildStatus.SUCCESS else BuildStatus.FAILURE
+    "completed" -> when (conclusion) {
+        "success" -> BuildStatus.SUCCESS
+        "cancelled" -> BuildStatus.CANCELLED
+        else -> BuildStatus.FAILURE
+    }
     else -> BuildStatus.IDLE
 }
 
@@ -3047,6 +3474,7 @@ private const val MAX_REMOTE_ARTIFACT_RUNS = 30
 private const val MAX_PERSISTED_REMOTE_ARTIFACTS = 240
 private const val KERNEL_WORKFLOW_FILE = "kernel-custom.yml"
 private const val MIRROR_WORKFLOW_FILE = "mirror-custom-artifacts.yml"
+private val ACTIVE_BUILD_STATUSES = setOf(BuildStatus.QUEUED, BuildStatus.IN_PROGRESS)
 
 private fun workflowActionsUrl(owner: String, repoName: String): String =
     "https://github.com/$owner/$repoName/actions/workflows/$KERNEL_WORKFLOW_FILE"
