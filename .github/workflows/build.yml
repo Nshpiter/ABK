@@ -2966,6 +2966,34 @@ jobs:
               "abk_try_register_manager" \
               "KSU_GET_INFO_FLAG_MANAGER" \
               "ABK_CONTROL_IOCTL_GET_STATUS"
+
+            if grep -qF "TRACK_THRONE_FORCE_SEARCH_MGR" "$ksu_dir/manager/throne_tracker.h"; then
+              echo "检测到 ReSukiSU 多管理器实现，跳过 KernelSU/SukiSU 多管理器移植标记。"
+            else
+              require_marker "$ksu_dir/manager/manager_identity.h" \
+                "ABK_MANAGER_MULTI_MANAGER_BRIDGE" \
+                "ksu_register_manager" \
+                "ksu_has_manager"
+              require_marker "$ksu_dir/manager/throne_tracker.c" \
+                "ABK_MANAGER_MULTI_MANAGER_BRIDGE" \
+                "abk_prune_missing_managers" \
+                "ksu_register_manager"
+              if [ -f "$ksu_dir/policy/allowlist.c" ]; then
+                require_marker "$ksu_dir/policy/allowlist.c" "is_uid_manager(uid)"
+              fi
+              if grep -qF "ABK Control: prefer ABK manager" "$ksu_dir/manager/throne_tracker.c"; then
+                echo "::error::$ksu_dir/manager/throne_tracker.c 仍包含旧的 ABK 优先抢占逻辑。"
+                exit 1
+              fi
+              if grep -qF "bool should_stop = get_pkg_from_apk_path" "$ksu_dir/manager/throne_tracker.c"; then
+                echo "::error::$ksu_dir/manager/throne_tracker.c 仍包含只等 ABK 后停止扫描的旧逻辑。"
+                exit 1
+              fi
+              if grep -qF "ksu_invalidate_manager_uid();" "$ksu_dir/manager/throne_tracker.c"; then
+                echo "::error::$ksu_dir/manager/throne_tracker.c 仍会在 ABK 注册时清空官方管理器。"
+                exit 1
+              fi
+            fi
           done
 
           if [ "$found_ksu" != "true" ]; then
