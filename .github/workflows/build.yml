@@ -161,6 +161,14 @@ jobs:
             echo "EFFECTIVE_ZRAM_EXTRA_ALGOS=$effective_zram_extra_algos"
           } >> "$GITHUB_ENV"
 
+          effective_ksu_branch="${{ inputs.ksu_branch }}"
+          if [ "$effective_ksu_branch" = "SUSFS(自动)" ] && { [ "${{ inputs.enable_susfs }}" != "true" ] || [ "${{ inputs.ksu_variant }}" = "ReSukiSU" ]; }; then
+            effective_ksu_branch="Stable(标准)"
+          elif [ "${{ inputs.enable_susfs }}" = "true" ] && [ "${{ inputs.ksu_variant }}" != "ReSukiSU" ]; then
+            effective_ksu_branch="SUSFS(自动)"
+          fi
+          echo "EFFECTIVE_KSU_BRANCH=$effective_ksu_branch" >> "$GITHUB_ENV"
+
           zram_extra_label="${effective_zram_extra_algos:-无}"
 
           echo "========================================"
@@ -171,7 +179,7 @@ jobs:
           echo "子版本号      : ${{ inputs.sub_level }}"
           echo "补丁级别      : ${{ inputs.os_patch_level }}"
           echo "KSU 变体      : ${{ inputs.ksu_variant }}"
-          echo "KSU 分支      : ${{ inputs.ksu_branch }}"
+          echo "KSU 分支      : $effective_ksu_branch"
           echo "管理器包名    : ${{ inputs.manager_package || 'app/signing/abk-manager-cert.env' }}"
           echo "构建时间      : ${{ inputs.build_time }}"
           echo "SUSFS 状态    : ${{ inputs.enable_susfs }}"
@@ -777,40 +785,69 @@ jobs:
         run: |
           branch_input="${{ inputs.ksu_branch }}"
           variant_input="${{ inputs.ksu_variant }}"
-          KSU_OFFICIAL_COMMIT="3f388ef137c78e1ca0c92c0ada3b8717cdcc4302"
-          SUKISU_COMMIT="a992f224f5ea5a69b56ba20e925379c9a226f2b2"
-          RESUKISU_COMMIT="0d096be05c40338205bc183f5ec072233e15f9c0"
+          susfs_enabled="${{ inputs.enable_susfs }}"
+          OFFICIAL_STABLE_REF="3f388ef137c78e1ca0c92c0ada3b8717cdcc4302"
+          SUKISU_STABLE_REF="a992f224f5ea5a69b56ba20e925379c9a226f2b2"
+          RESUKISU_STABLE_REF="3d790eaaabe9e7e33d938bbf836e0f247121e79e"
 
-          if [ "$variant_input" = "Official" ]; then
-            BRANCH="-s $KSU_OFFICIAL_COMMIT"
-          elif [ "$variant_input" = "SukiSU" ]; then
-            BRANCH="-s $SUKISU_COMMIT"
-          elif [ "$variant_input" = "ReSukiSU" ]; then
-            BRANCH="$RESUKISU_COMMIT"
-          else
-            case "$branch_input" in
-              "Stable(标准)")
-                case "$variant_input" in
-                  "Next") ;;
-                  *) BRANCH="-" ;;
-                esac
-                ;;
-              "Dev(开发)")
-                case "$variant_input" in
-                  "Next") ;;
-                  *) echo "未知变体: $variant_input" >&2; exit 1 ;;
-                esac
-                ;;
-              *)
-                echo "未知分支: $branch_input" >&2
-                exit 1
-                ;;
-            esac
+          # Dev 固定引用先完整复制 Stable 配置，后续只改这里的 *_DEV_REF 即可。
+          OFFICIAL_DEV_REF="$OFFICIAL_STABLE_REF"
+          SUKISU_DEV_REF="$SUKISU_STABLE_REF"
+          RESUKISU_DEV_REF="$RESUKISU_STABLE_REF"
 
+          # SUSFS 固定引用独立于 Stable/Dev；后续只改这里的 *_SUSFS_REF 即可。
+          OFFICIAL_SUSFS_REF="$OFFICIAL_STABLE_REF"
+          SUKISU_SUSFS_REF="$SUKISU_STABLE_REF"
+          RESUKISU_SUSFS_REF="$RESUKISU_STABLE_REF"
+
+          if [ "$susfs_enabled" = "true" ] && [ "$variant_input" != "ReSukiSU" ]; then
+            if [ "$branch_input" != "SUSFS(自动)" ]; then
+              echo "SUSFS 已启用，忽略传入 KSU 分支: $branch_input"
+            fi
+            branch_input="SUSFS(自动)"
           fi
 
+          if [ "$branch_input" = "SUSFS(自动)" ] && { [ "$susfs_enabled" != "true" ] || [ "$variant_input" = "ReSukiSU" ]; }; then
+            echo "当前组合不使用 SUSFS 分支选项，回退到 Stable。"
+            branch_input="Stable(标准)"
+          fi
+
+          case "$branch_input" in
+            "Stable(标准)")
+              OFFICIAL_REF="$OFFICIAL_STABLE_REF"
+              SUKISU_REF="$SUKISU_STABLE_REF"
+              RESUKISU_REF="$RESUKISU_STABLE_REF"
+              NEXT_BRANCH="dev_susfs"
+              ;;
+            "Dev(开发)")
+              OFFICIAL_REF="$OFFICIAL_DEV_REF"
+              SUKISU_REF="$SUKISU_DEV_REF"
+              RESUKISU_REF="$RESUKISU_DEV_REF"
+              NEXT_BRANCH="dev_susfs"
+              ;;
+            "SUSFS(自动)")
+              OFFICIAL_REF="$OFFICIAL_SUSFS_REF"
+              SUKISU_REF="$SUKISU_SUSFS_REF"
+              RESUKISU_REF="$RESUKISU_SUSFS_REF"
+              NEXT_BRANCH="dev_susfs"
+              ;;
+            *)
+              echo "未知分支: $branch_input" >&2
+              exit 1
+              ;;
+          esac
+
+          case "$variant_input" in
+            "Official") BRANCH="-s $OFFICIAL_REF" ;;
+            "SukiSU") BRANCH="-s $SUKISU_REF" ;;
+            "ReSukiSU") BRANCH="$RESUKISU_REF" ;;
+            "Next") BRANCH="$NEXT_BRANCH" ;;
+            *) echo "未知变体: $variant_input" >&2; exit 1 ;;
+          esac
+
+          echo "EFFECTIVE_KSU_BRANCH=$branch_input" >> $GITHUB_ENV
           echo "BRANCH=$BRANCH" >> $GITHUB_ENV
-          echo "KSU 分支: $BRANCH"
+          echo "KSU 分支: $branch_input -> $BRANCH"
 
       - name: 添加 KernelSU
         if: inputs.ksu_variant != 'None'
@@ -833,7 +870,7 @@ jobs:
               ;;
             "Next")
               echo "添加 KernelSU-Next..."
-              curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/refs/heads/dev/kernel/setup.sh" | bash -s dev_susfs
+              curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/refs/heads/dev/kernel/setup.sh" | bash -s "$BRANCH"
               ;;
             "SukiSU")
               echo "添加 SukiSU..."
@@ -2239,6 +2276,7 @@ jobs:
           ABK_FEATURE_ZRAM_FULL_ALGO: ${{ inputs.zram_full_algo }}
         run: |
           set -euo pipefail
+          export ABK_BUILD_KSU_BRANCH="${EFFECTIVE_KSU_BRANCH:-$ABK_BUILD_KSU_BRANCH}"
 
           manifest="$CUSTOM_EXTERNAL_MODULES_MANIFEST"
           if [ ! -s "$manifest" ]; then
@@ -2427,6 +2465,7 @@ jobs:
           ABK_FEATURE_ZRAM_FULL_ALGO: ${{ inputs.zram_full_algo }}
         run: |
           set -euo pipefail
+          export ABK_BUILD_KSU_BRANCH="${EFFECTIVE_KSU_BRANCH:-$ABK_BUILD_KSU_BRANCH}"
 
           manifest="$CUSTOM_EXTERNAL_MODULES_MANIFEST"
           if [ ! -s "$manifest" ]; then

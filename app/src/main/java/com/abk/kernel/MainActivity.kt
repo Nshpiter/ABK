@@ -318,6 +318,7 @@ private fun AbkMainScaffold(
     var buildPlanPageVisible by rememberSaveable { mutableStateOf(false) }
     var moduleRepositoryPageVisible by rememberSaveable { mutableStateOf(false) }
     var rootAuthDetailPageVisible by rememberSaveable { mutableStateOf(false) }
+    var managerPatchPageVisible by rememberSaveable { mutableStateOf(false) }
     var lastBackAt by remember { mutableStateOf(0L) }
     val runtimeNativeManagerActive = state.abkRuntimeStatus?.runtimeBackend?.backend == "native"
     val visibleTabs = remember(state.runtimeNavigationEnabled, runtimeNativeManagerActive) {
@@ -340,6 +341,7 @@ private fun AbkMainScaffold(
         AbkTab.Flash -> flashDetailPageVisible
         AbkTab.Settings -> settingsThemePageVisible
         AbkTab.RootAuth -> rootAuthDetailPageVisible
+        AbkTab.RuntimeHome -> managerPatchPageVisible
         else -> false
     }
 
@@ -357,30 +359,42 @@ private fun AbkMainScaffold(
                 flashDetailPageVisible = false
                 settingsThemePageVisible = false
                 rootAuthDetailPageVisible = false
+                managerPatchPageVisible = false
             }
             AbkTab.Flash -> {
                 buildPlanPageVisible = false
                 moduleRepositoryPageVisible = false
                 settingsThemePageVisible = false
                 rootAuthDetailPageVisible = false
+                managerPatchPageVisible = false
             }
             AbkTab.Modules -> {
                 buildPlanPageVisible = false
                 flashDetailPageVisible = false
                 settingsThemePageVisible = false
                 rootAuthDetailPageVisible = false
+                managerPatchPageVisible = false
             }
             AbkTab.Settings -> {
                 buildPlanPageVisible = false
                 moduleRepositoryPageVisible = false
                 flashDetailPageVisible = false
                 rootAuthDetailPageVisible = false
+                managerPatchPageVisible = false
             }
             AbkTab.RootAuth -> {
                 buildPlanPageVisible = false
                 moduleRepositoryPageVisible = false
                 flashDetailPageVisible = false
                 settingsThemePageVisible = false
+                managerPatchPageVisible = false
+            }
+            AbkTab.RuntimeHome -> {
+                buildPlanPageVisible = false
+                moduleRepositoryPageVisible = false
+                flashDetailPageVisible = false
+                settingsThemePageVisible = false
+                rootAuthDetailPageVisible = false
             }
             else -> {
                 buildPlanPageVisible = false
@@ -388,6 +402,7 @@ private fun AbkMainScaffold(
                 flashDetailPageVisible = false
                 settingsThemePageVisible = false
                 rootAuthDetailPageVisible = false
+                managerPatchPageVisible = false
             }
         }
     }
@@ -504,7 +519,8 @@ private fun AbkMainScaffold(
                     )
                     AbkTab.RuntimeHome -> RuntimeHomeScreen(
                         vm = vm,
-                        onSwitchToClassic = { vm.setRuntimeNavigationEnabled(false) }
+                        onSwitchToClassic = { vm.setRuntimeNavigationEnabled(false) },
+                        onManagerPatchPageVisibleChange = { managerPatchPageVisible = it }
                     )
                     AbkTab.InstalledModules -> InstalledModulesScreen(
                         vm = vm,
@@ -519,7 +535,11 @@ private fun AbkMainScaffold(
                     AbkTab.Settings -> SettingsScreen(
                         vm = vm,
                         outerPadding = contentPadding,
-                        onThemePageVisibleChange = { settingsThemePageVisible = it }
+                        onThemePageVisibleChange = { settingsThemePageVisible = it },
+                        onOpenInstalledModules = {
+                            if (!state.runtimeNavigationEnabled) vm.setRuntimeNavigationEnabled(true)
+                            selectedTab = AbkTab.InstalledModules
+                        }
                     )
                 }
             }

@@ -15,6 +15,7 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -22,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.FolderOpen
@@ -67,13 +69,32 @@ import kotlinx.coroutines.withContext
 @Composable
 fun RuntimeHomeScreen(
     vm: MainViewModel,
-    onSwitchToClassic: () -> Unit
+    onSwitchToClassic: () -> Unit,
+    onManagerPatchPageVisibleChange: (Boolean) -> Unit = {}
 ) {
     val state by vm.uiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
+    var showManagerPatchPage by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(state.runtimeNavigationEnabled, state.rootGranted) {
         if (state.runtimeNavigationEnabled) vm.refreshAbkRuntimeStatus()
+    }
+
+    LaunchedEffect(showManagerPatchPage) {
+        onManagerPatchPageVisibleChange(showManagerPatchPage)
+    }
+
+    DisposableEffect(Unit) {
+        onDispose { onManagerPatchPageVisibleChange(false) }
+    }
+
+    if (showManagerPatchPage) {
+        AbkRootPatchScreen(
+            rootGranted = state.rootGranted,
+            runtimeVariant = state.abkRuntimeStatus?.manager?.variant.orEmpty(),
+            onBack = { showManagerPatchPage = false }
+        )
+        return
     }
 
     Scaffold(
@@ -107,7 +128,10 @@ fun RuntimeHomeScreen(
                 runtimeStatus = state.abkRuntimeStatus,
                 loading = state.abkRuntimeLoading,
                 error = state.abkRuntimeError,
-                onRefresh = vm::refreshAbkRuntimeStatus
+                onRefresh = vm::refreshAbkRuntimeStatus,
+                onOpenManagerPatch = {
+                    if (state.abkRuntimeStatus != null) showManagerPatchPage = true
+                }
             )
 
             state.abkRuntimeStatus?.let { runtimeStatus ->
@@ -137,6 +161,7 @@ fun InstalledModulesScreen(
     var installLog by remember { mutableStateOf<List<String>>(emptyList()) }
     var showAllFilesAccessPrompt by remember { mutableStateOf(false) }
     var resumeModulePickerAfterPermission by remember { mutableStateOf(false) }
+    var uninstallTarget by remember { mutableStateOf<AbkRuntimeModule?>(null) }
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val modules = remember(state.abkRuntimeStatus?.modules, query) {
         state.abkRuntimeStatus?.modules.orEmpty()
@@ -322,6 +347,7 @@ fun InstalledModulesScreen(
                         module = module,
                         actionInFlight = state.abkRuntimeModuleActionId == module.id,
                         onSetEnabled = { enabled -> vm.setAbkRuntimeModuleEnabled(module.id, enabled) },
+                        onRequestUninstall = { uninstallTarget = module },
                         onRunAction = { vm.runRuntimeModuleAction(module.id) },
                         onOpenWebUi = {
                             context.startActivity(
@@ -387,6 +413,18 @@ fun InstalledModulesScreen(
         )
     }
 
+    uninstallTarget?.let { module ->
+        RuntimeModuleUninstallConfirmDialog(
+            module = module,
+            pending = !module.remove,
+            onDismiss = { uninstallTarget = null },
+            onConfirm = {
+                vm.setAbkRuntimeModulePendingUninstall(module.id, !module.remove)
+                uninstallTarget = null
+            }
+        )
+    }
+
     if (installDialogVisible) {
         RuntimeModuleInstallDialog(
             running = installRunning,
@@ -407,8 +445,14 @@ private fun RuntimeStatusHeader(
     runtimeStatus: AbkRuntimeStatus?,
     loading: Boolean,
     error: String?,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    onOpenManagerPatch: (() -> Unit)? = null
 ) {
+    val clickableModifier = if (runtimeStatus != null && onOpenManagerPatch != null) {
+        Modifier.clickable(onClick = onOpenManagerPatch)
+    } else {
+        Modifier
+    }
     ExpressiveHeroCard(
         title = if (runtimeStatus != null) "管理器已激活" else "管理器未激活",
         subtitle = runtimeStatus?.let {
@@ -426,6 +470,7 @@ private fun RuntimeStatusHeader(
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant
         },
+        modifier = clickableModifier,
         badge = {
             runtimeStatus?.let {
                 ExpressiveStatusChip(
@@ -627,9 +672,11 @@ private fun InstalledRuntimeModuleCard(
     module: AbkRuntimeModule,
     actionInFlight: Boolean,
     onSetEnabled: (Boolean) -> Unit,
+    onRequestUninstall: () -> Unit,
     onRunAction: () -> Unit,
     onOpenWebUi: () -> Unit
 ) {
+    val canUninstall = module.canUninstallRuntimeModule()
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
@@ -728,7 +775,7 @@ private fun InstalledRuntimeModuleCard(
                 )
             }
 
-            if (module.hasWebUi || module.actionSupported || actionInFlight) {
+            if (module.hasWebUi || module.actionSupported || canUninstall || actionInFlight) {
                 Row(
                     modifier = Modifier.align(Alignment.End),
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -751,6 +798,22 @@ private fun InstalledRuntimeModuleCard(
                             enabled = module.enabled && !actionInFlight
                         ) {
                             Icon(Icons.Default.PlayArrow, contentDescription = "执行 Action")
+                        }
+                    }
+                    if (canUninstall) {
+                        IconButton(
+                            onClick = onRequestUninstall,
+                            enabled = !actionInFlight
+                        ) {
+                            Icon(
+                                if (module.remove) Icons.Default.RestartAlt else Icons.Default.Delete,
+                                contentDescription = if (module.remove) "撤销卸载" else "卸载模块",
+                                tint = if (module.remove) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.error
+                                }
+                            )
                         }
                     }
                 }
@@ -831,6 +894,78 @@ private fun RuntimeModuleInstallConfirmDialog(
                 Icon(Icons.Default.UploadFile, null, modifier = Modifier.size(17.dp))
                 Spacer(Modifier.width(4.dp))
                 Text("确认刷写")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("取消")
+            }
+        }
+    )
+}
+
+@Composable
+private fun RuntimeModuleUninstallConfirmDialog(
+    module: AbkRuntimeModule,
+    pending: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    val title = if (pending) "确认卸载模块" else "撤销卸载模块"
+    val message = if (pending) {
+        "确认后会将该普通模块标记为待卸载，重启后由 KernelSU 完成删除。"
+    } else {
+        "确认后会移除待卸载标记，模块将继续保留。"
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                if (pending) Icons.Default.Delete else Icons.Default.RestartAlt,
+                null,
+                tint = if (pending) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+            )
+        },
+        title = { Text(title) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = module.displayName(),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = module.id,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = if (pending) {
+                    ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                } else {
+                    ButtonDefaults.buttonColors()
+                }
+            ) {
+                Icon(
+                    if (pending) Icons.Default.Delete else Icons.Default.RestartAlt,
+                    null,
+                    modifier = Modifier.size(17.dp)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(if (pending) "卸载" else "撤销")
             }
         },
         dismissButton = {
@@ -1045,6 +1180,9 @@ private fun AbkRuntimeModule.normalizedType(): String =
             else -> "builtin"
         }
     }
+
+private fun AbkRuntimeModule.canUninstallRuntimeModule(): Boolean =
+    normalizedType() == "standard" && controllable && !readonly
 
 private fun AbkRuntimeModule.typeOrder(): Int = when (normalizedType()) {
     "builtin" -> 0
