@@ -157,11 +157,6 @@ private fun AppBackgroundHost(
 ) {
     val hasBackground = backgroundEnabled && !backgroundUri.isNullOrBlank()
     val colorScheme = MaterialTheme.colorScheme
-    val scrimColor = if (colorScheme.surface.luminance() > 0.5f) {
-        colorScheme.surface.copy(alpha = 0.28f)
-    } else {
-        Color.Black.copy(alpha = 0.38f)
-    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -173,11 +168,6 @@ private fun AppBackgroundHost(
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(scrimColor)
             )
         }
         CompositionLocalProvider(
@@ -320,12 +310,12 @@ private fun AbkMainScaffold(
     var rootAuthDetailPageVisible by rememberSaveable { mutableStateOf(false) }
     var managerPatchPageVisible by rememberSaveable { mutableStateOf(false) }
     var lastBackAt by remember { mutableStateOf(0L) }
-    val runtimeNativeManagerActive = state.abkRuntimeStatus?.runtimeBackend?.backend == "native"
-    val visibleTabs = remember(state.runtimeNavigationEnabled, runtimeNativeManagerActive) {
+    val runtimeNativeManagerActive = state.hasNativeManagerPermission
+    val visibleTabs = remember(state.runtimeNavigationEnabled, state.rootGranted, runtimeNativeManagerActive) {
         if (state.runtimeNavigationEnabled) {
             buildList {
                 add(AbkTab.RuntimeHome)
-                add(AbkTab.InstalledModules)
+                if (state.rootGranted) add(AbkTab.InstalledModules)
                 if (runtimeNativeManagerActive) add(AbkTab.RootAuth)
                 add(AbkTab.Settings)
             }
@@ -538,7 +528,11 @@ private fun AbkMainScaffold(
                         onThemePageVisibleChange = { settingsThemePageVisible = it },
                         onOpenInstalledModules = {
                             if (!state.runtimeNavigationEnabled) vm.setRuntimeNavigationEnabled(true)
-                            selectedTab = AbkTab.InstalledModules
+                            selectedTab = if (state.rootGranted) {
+                                AbkTab.InstalledModules
+                            } else {
+                                AbkTab.RuntimeHome
+                            }
                         }
                     )
                 }
