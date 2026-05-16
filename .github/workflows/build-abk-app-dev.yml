@@ -52,7 +52,7 @@ jobs:
       - name: Set up Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android,aarch64-unknown-linux-musl,x86_64-unknown-linux-musl
 
       - name: Build bundled SukiSU-Ultra ksud assets
         env:
@@ -75,6 +75,7 @@ jobs:
             local android_sdk_level="$2"
             local llvm_path="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"
             local llvm_bin="$llvm_path/bin"
+            unset RUSTFLAGS
             local ndk_triple="$triple"
             if [ "$ndk_triple" = "armv7-linux-androideabi" ]; then
               ndk_triple="armv7a-linux-androideabi"
@@ -89,6 +90,30 @@ jobs:
             export "BINDGEN_EXTRA_CLANG_ARGS_${utriple}=--sysroot=$llvm_path/sysroot -I$llvm_path/sysroot/usr/include/$triple"
           }
 
+          setup_ksuinit_build() {
+            local triple="$1"
+            local llvm_path="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64"
+            local llvm_bin="$llvm_path/bin"
+            local linker=""
+            local env_key=""
+            case "$triple" in
+              aarch64-unknown-linux-musl)
+                linker="$llvm_bin/aarch64-linux-android26-clang"
+                env_key="CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER"
+                ;;
+              x86_64-unknown-linux-musl)
+                linker="$llvm_bin/x86_64-linux-android26-clang"
+                env_key="CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_LINKER"
+                ;;
+              *)
+                echo "::error::Unsupported ksuinit target: $triple"
+                return 1
+                ;;
+            esac
+            export "$env_key=$linker"
+            export RUSTFLAGS="-C link-arg=-no-pie"
+          }
+
           triples_for_abi() {
             case "$1" in
               arm64-v8a) printf '%s\n' "aarch64-linux-android" ;;
@@ -101,6 +126,42 @@ jobs:
             esac
           }
 
+          asset_dir_for_abi() {
+            case "$1" in
+              arm64-v8a) printf '%s\n' "aarch64" ;;
+              armeabi-v7a) printf '%s\n' "arm" ;;
+              x86_64) printf '%s\n' "x86_64" ;;
+              *)
+                echo "::error::Unsupported asset ABI: $1"
+                return 1
+                ;;
+            esac
+          }
+
+          ksuinit_target_for_abi() {
+            case "$1" in
+              arm64-v8a) printf '%s\n' "aarch64-unknown-linux-musl" ;;
+              armeabi-v7a) printf '%s\n' "" ;;
+              x86_64) printf '%s\n' "x86_64-unknown-linux-musl" ;;
+              *)
+                echo "::error::Unsupported ksuinit ABI: $1"
+                return 1
+                ;;
+            esac
+          }
+
+          build_ksuinit_binary() {
+            local triple="$1"
+            [ -n "$triple" ] || return 0
+            setup_ksuinit_build "$triple"
+            cargo build \
+              --package ksuinit \
+              --target "$triple" \
+              --release \
+              --target-dir "$cargo_target_dir" \
+              --manifest-path "$source_dir/Cargo.toml"
+          }
+
           {
             echo "source_repo=$repo_url"
             echo "ref=$SUKISU_ULTRA_REF"
@@ -109,11 +170,32 @@ jobs:
             echo "built_by=.github/workflows/build-abk-app-dev.yml"
           } > "$target_dir/source.properties"
 
+          build_ksuinit_binary "aarch64-unknown-linux-musl"
+          build_ksuinit_binary "x86_64-unknown-linux-musl"
+          aarch64_ksuinit="$cargo_target_dir/aarch64-unknown-linux-musl/release/ksuinit"
+          x86_64_ksuinit="$cargo_target_dir/x86_64-unknown-linux-musl/release/ksuinit"
+
           IFS=',' read -ra abi_list <<< "$SUKISU_KSUD_ABIS"
           for abi in "${abi_list[@]}"; do
             abi="$(printf '%s' "$abi" | xargs)"
             [ -n "$abi" ] || continue
             triple="$(triples_for_abi "$abi")"
+            asset_dir="$(asset_dir_for_abi "$abi")"
+            bin_dir="$source_dir/userspace/ksud/bin/$asset_dir"
+            mkdir -p "$bin_dir"
+            ksuinit_target="$(ksuinit_target_for_abi "$abi")"
+            if [ -n "$ksuinit_target" ]; then
+              ksuinit_binary="$cargo_target_dir/$ksuinit_target/release/ksuinit"
+            else
+              ksuinit_binary="$aarch64_ksuinit"
+              echo "warning.$abi=ksuinit_fallback_aarch64" >> "$target_dir/source.properties"
+            fi
+            if [ ! -f "$ksuinit_binary" ]; then
+              echo "::error::ksuinit binary missing for $abi"
+              find "$cargo_target_dir" -maxdepth 4 -type f -name 'ksuinit' | sort || true
+              exit 1
+            fi
+            install -Dm755 "$ksuinit_binary" "$bin_dir/ksuinit"
             setup_rust_build "$triple" 26
             cargo build \
               --target "$triple" \
@@ -156,6 +238,7 @@ jobs:
             echo "- Ref: $SUKISU_ULTRA_REF"
             echo "- Commit: $commit"
             echo "- ABIs: $SUKISU_KSUD_ABIS"
+            echo "- Embedded ksuinit: aarch64-unknown-linux-musl, x86_64-unknown-linux-musl"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Bundle ABK LKM artifacts
