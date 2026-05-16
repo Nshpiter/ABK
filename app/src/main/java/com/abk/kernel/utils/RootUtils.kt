@@ -1298,8 +1298,32 @@ object RootUtils {
 
     private fun embeddedKsudPath(context: Context? = appContext): String? {
         val safeContext = context ?: return null
-        return synchronized(bundledKsudLock) {
-            prepareBundledKsudPath(safeContext)
+        return File(safeContext.applicationInfo.nativeLibraryDir, "libksud.so")
+            .takeIf { it.isFile }
+            ?.absolutePath
+    }
+
+    private fun isEmbeddedKsudPath(path: String): Boolean =
+        File(path).name == "libksud.so"
+
+    private fun resolveAndroidLinkerPath(): String {
+        val embeddedPath = embeddedKsudPath()
+        val prefers64Bit = embeddedPath?.contains("/arm64-v8a/") == true ||
+            embeddedPath?.contains("/x86_64/") == true ||
+            embeddedPath?.contains("64") == true
+        val candidates = if (prefers64Bit) {
+            listOf("/apex/com.android.runtime/bin/linker64", "/system/bin/linker64")
+        } else {
+            listOf("/apex/com.android.runtime/bin/linker", "/system/bin/linker")
+        }
+        return candidates.firstOrNull { File(it).isFile } ?: candidates.first()
+    }
+
+    private fun buildKsudCommand(ksudPath: String, args: List<String>): List<String> {
+        return if (isEmbeddedKsudPath(ksudPath)) {
+            listOf(resolveAndroidLinkerPath(), ksudPath) + args
+        } else {
+            listOf(ksudPath) + args
         }
     }
 
@@ -1390,7 +1414,7 @@ object RootUtils {
                     shell,
                     """
                         set -e
-                        ${shellQuote(rootKsud.path)} $command
+                        abk_exec_ksud ${shellQuote(rootKsud.path)} $command
                     """.trimIndent(),
                     onOutput = onOutput
                 )
@@ -1405,7 +1429,7 @@ object RootUtils {
 
     private fun detectBootPatchOptionSupport(ksudPath: String): BootPatchOptionSupport {
         val result = runLocalCommand(
-            command = listOf(ksudPath, "boot-patch", "--help"),
+            command = buildKsudCommand(ksudPath, listOf("boot-patch", "--help")),
             timeoutSeconds = 15L
         )
         return parseBootPatchOptionSupport(result.output)
@@ -1415,7 +1439,7 @@ object RootUtils {
         val result = execWithShell(
             shell,
             """
-                ${shellQuote(ksudPath)} boot-patch --help 2>&1 || true
+                abk_exec_ksud ${shellQuote(ksudPath)} boot-patch --help 2>&1 || true
             """.trimIndent(),
             normalizeOutput = false
         )
@@ -1598,8 +1622,10 @@ object RootUtils {
 
     private fun withManagerShellHelpers(script: String): String {
         val embedded = embeddedKsudPath()?.let(::shellQuote) ?: "''"
+        val linker = shellQuote(resolveAndroidLinkerPath())
         return """
             abk_embedded_ksud=$embedded
+            abk_embedded_linker=$linker
             abk_find_ksud() {
                 for candidate in "${'$'}abk_embedded_ksud" /data/adb/ksud ${'$'}(command -v ksud 2>/dev/null || true); do
                     [ -n "${'$'}candidate" ] || continue
@@ -1608,6 +1634,15 @@ object RootUtils {
                     return 0
                 done
                 return 1
+            }
+            abk_exec_ksud() {
+                local candidate="$1"
+                shift
+                if [ -n "${'$'}abk_embedded_ksud" ] && [ "${'$'}candidate" = "${'$'}abk_embedded_ksud" ]; then
+                    "${'$'}abk_embedded_linker" "${'$'}candidate" "${'$'}@"
+                else
+                    "${'$'}candidate" "${'$'}@"
+                fi
             }
             abk_ksud_source() {
                 if [ -n "${'$'}abk_embedded_ksud" ] && [ "$1" = "${'$'}abk_embedded_ksud" ]; then
