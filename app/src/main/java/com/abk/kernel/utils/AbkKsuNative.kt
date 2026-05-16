@@ -47,16 +47,17 @@ object AbkKsuNative {
         return runCatching {
             val kernelVersion = getVersion()
             if (kernelVersion <= 0) return null
+            val manager = isManager()
             NativeStatus(
                 version = kernelVersion,
                 fullVersion = getFullVersion().trim(),
                 hookType = getHookType().trim(),
-                isManager = isManager(),
+                isManager = manager,
                 isSafeMode = isSafeMode(),
                 isLkmMode = isLkmMode(),
                 isLateLoadMode = isLateLoadMode(),
                 isPrBuild = isPrBuild(),
-                superuserCount = getSuperuserCount()
+                superuserCount = if (manager) getSuperuserCount() else 0
             )
         }.getOrNull()
     }

@@ -293,75 +293,125 @@ object RootUtils {
 
     fun patchAbkLkmBootImage(
         context: Context,
-        bootImagePath: String,
+        bootImagePath: String?,
         variantId: String,
         kmi: String,
         allowRootFallback: Boolean,
+        flash: Boolean = false,
+        ota: Boolean = false,
+        partition: String? = null,
+        allowShell: Boolean = false,
+        enableAdb: Boolean = false,
+        localModulePath: String? = null,
         onOutput: ((String) -> Unit)? = null
     ): BootPatchResult {
-        val sourceBoot = File(bootImagePath)
-        if (!sourceBoot.isFile) {
+        val sourceBoot = bootImagePath
+            ?.takeIf { it.isNotBlank() }
+            ?.let { File(it) }
+        if (sourceBoot != null && !sourceBoot.isFile) {
             return BootPatchResult(false, listOf("boot 镜像不存在: $bootImagePath"), null)
         }
-        val asset = listBundledAbkLkmAssets(context).firstOrNull {
-            it.variantId == variantId && it.kmi == kmi
-        } ?: return BootPatchResult(false, listOf("未内置 $variantId / $kmi 的 LKM 模块"), null)
+
+        val localModule = localModulePath
+            ?.takeIf { it.isNotBlank() }
+            ?.let { File(it) }
+        if (localModule != null && !localModule.isFile) {
+            return BootPatchResult(false, listOf("LKM 文件不存在: $localModulePath"), null)
+        }
+
+        val asset = if (localModule == null) {
+            listBundledAbkLkmAssets(context).firstOrNull {
+                it.variantId == variantId && it.kmi == kmi
+            } ?: return BootPatchResult(false, listOf("未内置 $variantId / $kmi 的 LKM 模块"), null)
+        } else {
+            null
+        }
 
         val workDir = File(context.filesDir, "abk-lkm-patch").apply { mkdirs() }
-        val moduleFile = File(workDir, "${asset.variantId}_${asset.kmi}_kernelsu.ko")
         return runCatching {
-            context.assets.open(asset.assetPath).use { input ->
-                moduleFile.outputStream().use { output -> input.copyTo(output) }
+            val moduleFile = if (localModule != null) {
+                localModule
+            } else {
+                val bundled = checkNotNull(asset)
+                File(workDir, "${bundled.variantId}_${bundled.kmi}_kernelsu.ko").also { target ->
+                    context.assets.open(bundled.assetPath).use { input ->
+                        target.outputStream().use { output -> input.copyTo(output) }
+                    }
+                    target.setReadable(true, false)
+                }
             }
-            moduleFile.setReadable(true, false)
+
             val outputDir = File(
                 context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: context.filesDir,
                 "abk-patched"
             ).apply { mkdirs() }
-            val outputName = "abk-${asset.variantId}-${asset.kmi}-patched-${System.currentTimeMillis()}.img"
+            val moduleName = (asset?.let { "${it.variantId}-${it.kmi}" } ?: moduleFile.nameWithoutExtension)
+                .replace(Regex("""[^A-Za-z0-9._-]"""), "_")
+            val outputName = "abk-${moduleName}-patched-${System.currentTimeMillis()}.img"
             val outputImage = File(outputDir, outputName)
-            val args = listOf(
-                "boot-patch",
-                "--boot",
-                sourceBoot.absolutePath,
-                "--module",
-                moduleFile.absolutePath,
-                "--out",
-                outputDir.absolutePath,
-                "--out-name",
-                outputName,
-                "--kmi",
-                asset.kmi
-            )
+            val args = buildList {
+                add("boot-patch")
+                if (sourceBoot != null) {
+                    add("--boot")
+                    add(sourceBoot.absolutePath)
+                }
+                add("--module")
+                add(moduleFile.absolutePath)
+                if (flash) add("--flash")
+                if (ota) add("--ota")
+                partition?.takeIf { it.isNotBlank() }?.let {
+                    add("--partition")
+                    add(it)
+                }
+                add("--out")
+                add(outputDir.absolutePath)
+                add("--out-name")
+                add(outputName)
+                kmi.takeIf { it.isNotBlank() }?.let {
+                    add("--kmi")
+                    add(it)
+                }
+                if (allowShell) add("--allow-shell")
+                if (enableAdb) add("--enable-adbd")
+            }
+            val requiresRootShell = flash || sourceBoot == null
             val userlandKsud = resolveUserlandKsudPath(context)
-            val result = if (userlandKsud != null) {
-                onOutput?.invoke("[ABK] 使用用户态 ksud: $userlandKsud")
-                runLocalCommand(listOf(userlandKsud) + args, timeoutSeconds = 300L, onOutput = onOutput)
-            } else if (allowRootFallback) {
-                onOutput?.invoke("[ABK] 未找到用户态 ksud，尝试通过 Root shell 使用系统 ksud")
-                val command = args.joinToString(" ") { shellQuote(it) }
-                execRootScript(
-                    withManagerShellHelpers(
-                        """
-                            set -e
-                            ksud_path=${'$'}(abk_find_ksud)
-                            [ -n "${'$'}ksud_path" ] || { echo "未找到 ksud"; exit 127; }
-                            "${'$'}ksud_path" $command
-                        """.trimIndent()
-                    ),
-                    timeoutSeconds = 300L,
-                    onOutput = onOutput
-                )
-            } else {
-                ShellResult(
+            val result = when {
+                !requiresRootShell && userlandKsud != null -> {
+                    onOutput?.invoke("[ABK] 使用用户态 ksud: $userlandKsud")
+                    runLocalCommand(listOf(userlandKsud) + args, timeoutSeconds = 300L, onOutput = onOutput)
+                }
+                allowRootFallback -> {
+                    if (requiresRootShell) {
+                        onOutput?.invoke("[ABK] 通过 Root shell 执行 ksud boot-patch")
+                    } else {
+                        onOutput?.invoke("[ABK] 未找到用户态 ksud，尝试通过 Root shell 使用系统 ksud")
+                    }
+                    val command = args.joinToString(" ") { shellQuote(it) }
+                    execRootScript(
+                        withManagerShellHelpers(
+                            """
+                                set -e
+                                ksud_path=${'$'}(abk_find_ksud)
+                                [ -n "${'$'}ksud_path" ] || { echo "未找到 ksud"; exit 127; }
+                                "${'$'}ksud_path" $command
+                            """.trimIndent()
+                        ),
+                        timeoutSeconds = 300L,
+                        onOutput = onOutput
+                    )
+                }
+                requiresRootShell -> ShellResult(false, listOf("该安装方式需要 Root 权限。"))
+                else -> ShellResult(
                     false,
                     listOf("未找到可执行 ksud；无 Root 时需要 APK 内置或系统可直接执行的 ksud 才能仅修补 boot。")
                 )
             }
+            val outputPath = outputImage.takeIf { result.success && it.isFile }?.absolutePath
             BootPatchResult(
-                success = result.success && outputImage.isFile,
+                success = result.success && (flash || outputPath != null),
                 output = result.output,
-                patchedImagePath = outputImage.takeIf { result.success && it.isFile }?.absolutePath
+                patchedImagePath = outputPath
             )
         }.getOrElse { error ->
             val line = error.message ?: error::class.java.simpleName
@@ -421,11 +471,15 @@ object RootUtils {
             return ManagerRuntimeSnapshot(manager = manager)
         }
 
-        val control = readAbkControlStatus().takeIf { it.success }
-            ?.output
-            ?.joinToString("\n")
-            ?.trim()
-            ?.takeIf { it.isNotBlank() && it.startsWith("{") }
+        val control = if (manager.workMode == "lkm") {
+            null
+        } else {
+            readAbkControlStatus().takeIf { it.success }
+                ?.output
+                ?.joinToString("\n")
+                ?.trim()
+                ?.takeIf { it.isNotBlank() && it.startsWith("{") }
+        }
 
         val modules = listKsuModules().takeIf { it.success }
             ?.output
@@ -508,19 +562,19 @@ object RootUtils {
 
     fun setSuCompatMode(mode: Int): ShellResult {
         return when (mode) {
-            0 -> setKsuFeatureValue(FEATURE_SU_COMPAT, 1L, persist = true)
+            0 -> setNativeKsuFeatureValue(FEATURE_SU_COMPAT, 1L, persist = true)
             1 -> {
-                val persistedEnabled = setKsuFeatureValue(FEATURE_SU_COMPAT, 1L, persist = true)
+                val persistedEnabled = setNativeKsuFeatureValue(FEATURE_SU_COMPAT, 1L, persist = true)
                 if (!persistedEnabled.success) {
                     persistedEnabled
                 } else {
                     mergeShellResults(
                         persistedEnabled,
-                        setKsuFeatureValue(FEATURE_SU_COMPAT, 0L, persist = false)
+                        setNativeKsuFeatureValue(FEATURE_SU_COMPAT, 0L, persist = false)
                     )
                 }
             }
-            2 -> setKsuFeatureValue(FEATURE_SU_COMPAT, 0L, persist = true)
+            2 -> setNativeKsuFeatureValue(FEATURE_SU_COMPAT, 0L, persist = true)
             else -> ShellResult(false, listOf("未知 su 兼容模式"))
         }
     }
@@ -540,6 +594,8 @@ object RootUtils {
                     saveKsuFeatureConfig()
                 )
             }
+        } else if (feature == FEATURE_SELINUX_HIDE) {
+            setNativeKsuFeatureValue(feature, value, persist = true)
         } else {
             setKsuFeatureValue(feature, value, persist = true)
         }
@@ -801,6 +857,7 @@ object RootUtils {
         val variant: String = "",
         val backend: String = "",
         val version: String = "",
+        val workMode: String = "",
         val capabilities: List<String> = emptyList(),
         val diagnostics: List<String> = emptyList()
     )
@@ -849,6 +906,23 @@ object RootUtils {
             "feature set ${shellQuote(featureName)} $value",
             timeoutSeconds = 30L
         )
+        if (!setResult.success || !persist) return setResult
+        return mergeShellResults(setResult, saveKsuFeatureConfig())
+    }
+
+    private fun setNativeKsuFeatureValue(featureName: String, value: Long, persist: Boolean): ShellResult {
+        val enabled = value != 0L
+        val setResult = when (featureName) {
+            FEATURE_SU_COMPAT -> {
+                val ok = AbkKsuNative.setSuEnabled(enabled)
+                ShellResult(ok, if (ok) emptyList() else listOf("传统 su 命令支持切换失败"))
+            }
+            FEATURE_SELINUX_HIDE -> {
+                val code = AbkKsuNative.setSelinuxHideEnabled(enabled)
+                ShellResult(code == 0, if (code == 0) emptyList() else listOf("隐藏 SELinux 修改切换失败: $code"))
+            }
+            else -> setKsuFeatureValue(featureName, value, persist = false)
+        }
         if (!setResult.success || !persist) return setResult
         return mergeShellResults(setResult, saveKsuFeatureConfig())
     }
@@ -975,8 +1049,24 @@ object RootUtils {
     }
 
     private fun detectManagerRuntime(): ManagerRuntimeProbe {
-        detectNativeManagerRuntime()?.let { return it }
+        val nativeRuntime = detectNativeManagerRuntime()
+        if (nativeRuntime?.active == true) {
+            return nativeRuntime
+        }
 
+        val shellRuntime = detectShellManagerRuntime(nativeRuntime)
+        if (shellRuntime != null) {
+            return shellRuntime
+        }
+
+        return nativeRuntime ?: ManagerRuntimeProbe(
+            diagnostics = listOf("未检测到可用的 KernelSU/ReSukiSU 管理器接口或 Root shell。")
+        )
+    }
+
+    private fun detectShellManagerRuntime(
+        nativeRuntime: ManagerRuntimeProbe?
+    ): ManagerRuntimeProbe? {
         return try {
             createRootShell(timeoutSeconds = 10L).use { shell ->
                 val ksudPath = execWithShell(
@@ -1014,17 +1104,19 @@ object RootUtils {
                         .map { it.trim() }
                         .filter { it.isNotBlank() }
                         .distinct()
-                    val variant = inferManagerVariant(version)
+                    val variant = inferManagerVariant(version).ifBlank { "KernelSU" }
                     ManagerRuntimeProbe(
                         active = true,
-                        displayName = variant.ifBlank { "KernelSU" },
-                        variant = variant.ifBlank { "KernelSU" },
+                        displayName = nativeRuntime?.displayName?.takeIf { it.isNotBlank() } ?: variant,
+                        variant = nativeRuntime?.variant?.takeIf { it.isNotBlank() } ?: variant,
                         backend = "ksud",
-                        version = version,
+                        version = version.ifBlank { nativeRuntime?.version.orEmpty() },
+                        workMode = nativeRuntime?.workMode.orEmpty(),
                         capabilities = capabilities.ifEmpty { listOf("root_shell", "modules") },
-                        diagnostics = listOf(
-                            "当前仅通过 ksud/root shell 兼容层工作，ABK 尚未被内核识别为原生管理器，无法管理 Root 授权策略。"
-                        )
+                        diagnostics = (
+                            nativeRuntime?.diagnostics.orEmpty() +
+                                "当前仅通过 ksud/root shell 兼容层工作，ABK 尚未被内核识别为原生管理器，无法管理 Root 授权策略。"
+                            ).distinct()
                     )
                 } else {
                     ManagerRuntimeProbe(
@@ -1032,17 +1124,17 @@ object RootUtils {
                         displayName = "Root",
                         variant = "Generic",
                         backend = "su",
+                        workMode = nativeRuntime?.workMode.orEmpty(),
                         capabilities = listOf("root_shell"),
-                        diagnostics = listOf(
-                            "当前仅有通用 su shell 可用，未检测到 KernelSU/ReSukiSU 原生管理器接口。"
-                        )
+                        diagnostics = (
+                            nativeRuntime?.diagnostics.orEmpty() +
+                                "当前仅有通用 su shell 可用，未检测到 KernelSU/ReSukiSU 原生管理器接口。"
+                            ).distinct()
                     )
                 }
             }
         } catch (error: Throwable) {
-            ManagerRuntimeProbe(
-                diagnostics = listOf("未检测到可用的 KernelSU/ReSukiSU 管理器接口或 Root shell。")
-            )
+            null
         }
     }
 
@@ -1063,13 +1155,15 @@ object RootUtils {
                 variant = nativeVariant,
                 backend = "native",
                 version = versionText,
+                workMode = if (status.isLkmMode) "lkm" else "built-in",
                 capabilities = listOf("native_kernel"),
                 diagnostics = listOf(
                     "KernelSU/ReSukiSU native 接口可访问，但当前 ABK APK 未被识别为管理器。请确认安装的是与内核构建时 ABK_MANAGER_CERT_SHA256 匹配的 com.abk.kernel 正式签名 APK。"
                 )
             )
         }
-        val controlJson = AbkKsuNative.controlStatus()
+        val workMode = if (status.isLkmMode) "lkm" else "built-in"
+        val controlJson = if (status.isLkmMode) null else AbkKsuNative.controlStatus()
         val controlVariant = controlJson
             ?.let { json ->
                 runCatching {
@@ -1083,7 +1177,7 @@ object RootUtils {
             .orEmpty()
         val displayVariant = controlVariant.ifBlank { nativeVariant }
         val diagnostics = buildList {
-            if (controlJson == null) {
+            if (controlJson == null && !status.isLkmMode) {
                 add("ABK control 未响应；内核可能没有启用 CONFIG_ABK_CONTROL，或 ABK Control 外部模块缺少 before_build 阶段。")
             }
         }
@@ -1102,6 +1196,7 @@ object RootUtils {
             variant = displayVariant,
             backend = "native",
             version = versionText,
+            workMode = workMode,
             capabilities = capabilities,
             diagnostics = diagnostics
         )
