@@ -96,10 +96,12 @@ jobs:
             local llvm_bin="$llvm_path/bin"
             local linker=""
             local env_key=""
+            unset RUSTFLAGS
             case "$triple" in
               aarch64-unknown-linux-musl)
                 linker="$llvm_bin/aarch64-linux-android26-clang"
                 env_key="CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER"
+                export RUSTFLAGS="-C link-arg=-no-pie"
                 ;;
               x86_64-unknown-linux-musl)
                 linker="$llvm_bin/x86_64-linux-android26-clang"
@@ -111,7 +113,6 @@ jobs:
                 ;;
             esac
             export "$env_key=$linker"
-            export RUSTFLAGS="-C link-arg=-no-pie"
           }
 
           triples_for_abi() {
