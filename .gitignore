@@ -73,3 +73,13 @@ web/serve.sh
 web/dist/
 wild_kernel_comparison.md
 action_build_comparison.md
+
+# Gradle
+.gradle/
+build/
+app/.cxx/
+app/build/
+
+# Android Studio
+gradle-daemon-jvm.properties
+local.properties
