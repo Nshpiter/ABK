@@ -1146,16 +1146,114 @@ jobs:
         working-directory: ${{ env.KERNEL_ROOT }}
         run: |
           echo "应用 SUSFS 补丁..."
-          # 读取 SUSFS 上游版本（例如 v2.1.0），用于匹配 wild 修复补丁目录
+          # 读取 SUSFS 上游版本（例如 v2.1.0），用于匹配修复补丁目录
           SUSFS_VERSION=$(grep -E '^#define[[:space:]]+SUSFS_VERSION' "$SUSFS4KSU/kernel_patches/include/linux/susfs.h" | awk '{print $3}' | tr -d '"' | sed 's/^v//')
           if [ -z "$SUSFS_VERSION" ]; then
             SUSFS_VERSION="2.0.0"
           fi
-          if [ ! -d "$KERNEL_PATCHES/wild/susfs_fix_patches/v${SUSFS_VERSION}" ]; then
-            echo "未找到 wild/susfs_fix_patches/v${SUSFS_VERSION}，回退 v2.0.0"
+
+          resolve_susfs_fix_root() {
+            local version="$1"
+            local candidate
+            for candidate in \
+              "$KERNEL_PATCHES/wild/susfs_fix_patches/v${version}" \
+              "$KERNEL_PATCHES/wild/archived/susfs_fix_patches/v${version}" \
+              "$KERNEL_PATCHES/ksu/susfs_fix_patches/v${version}"; do
+              if [ -d "$candidate" ]; then
+                printf '%s\n' "$candidate"
+                return 0
+              fi
+            done
+            return 1
+          }
+
+          SUSFS_FIX_VERSION="$SUSFS_VERSION"
+          SUSFS_FIX_ROOT="$(resolve_susfs_fix_root "$SUSFS_FIX_VERSION" || true)"
+          if [ -z "$SUSFS_FIX_ROOT" ] && [ "$SUSFS_FIX_VERSION" != "2.0.0" ]; then
+            echo "未找到 v${SUSFS_FIX_VERSION} 的 SUSFS 修复补丁，回退 v2.0.0"
             SUSFS_VERSION="2.0.0"
+            SUSFS_FIX_VERSION="$SUSFS_VERSION"
+            SUSFS_FIX_ROOT="$(resolve_susfs_fix_root "$SUSFS_FIX_VERSION" || true)"
           fi
-          echo "SUSFS 修复补丁版本: v${SUSFS_VERSION}"
+
+          SUSFS_KSU_FIX_ROOT=""
+          if [ -d "$KERNEL_PATCHES/ksu/susfs_fix_patches/v${SUSFS_FIX_VERSION}" ]; then
+            SUSFS_KSU_FIX_ROOT="$KERNEL_PATCHES/ksu/susfs_fix_patches/v${SUSFS_FIX_VERSION}"
+          fi
+
+          if [ -n "$SUSFS_FIX_ROOT" ]; then
+            echo "SUSFS 修复补丁版本: v${SUSFS_FIX_VERSION}"
+            echo "SUSFS 修复补丁目录: ${SUSFS_FIX_ROOT#$KERNEL_PATCHES/}"
+          else
+            echo "::warning::未找到可用的 SUSFS 修复补丁目录，将仅依赖源码兜底修复"
+          fi
+
+          apply_susfs_patch_file() {
+            local rel_path="$1"
+            local patch_source=""
+
+            if [ -n "$SUSFS_FIX_ROOT" ] && [ -f "$SUSFS_FIX_ROOT/$rel_path" ]; then
+              patch_source="$SUSFS_FIX_ROOT/$rel_path"
+            elif [ -n "$SUSFS_KSU_FIX_ROOT" ] && [ -f "$SUSFS_KSU_FIX_ROOT/$rel_path" ]; then
+              patch_source="$SUSFS_KSU_FIX_ROOT/$rel_path"
+            elif [ -n "$SUSFS_KSU_FIX_ROOT" ]; then
+              case "$rel_path" in
+                */fdinfo.c.patch)
+                  [ -f "$SUSFS_KSU_FIX_ROOT/fix_fdinfo.c.patch" ] && patch_source="$SUSFS_KSU_FIX_ROOT/fix_fdinfo.c.patch"
+                  ;;
+                */namespace.c.patch)
+                  [ -f "$SUSFS_KSU_FIX_ROOT/fix_namespace.c.patch" ] && patch_source="$SUSFS_KSU_FIX_ROOT/fix_namespace.c.patch"
+                  ;;
+                */open.c.patch)
+                  [ -f "$SUSFS_KSU_FIX_ROOT/fix_open.c.patch" ] && patch_source="$SUSFS_KSU_FIX_ROOT/fix_open.c.patch"
+                  ;;
+                */task_mmu.c.patch)
+                  [ -f "$SUSFS_KSU_FIX_ROOT/fix_task_mmu.c.patch" ] && patch_source="$SUSFS_KSU_FIX_ROOT/fix_task_mmu.c.patch"
+                  ;;
+              esac
+            fi
+
+            if [ -z "$patch_source" ]; then
+              return 1
+            fi
+
+            patch -p1 < "$patch_source" || true
+            return 0
+          }
+
+          apply_susfs_optional_patch() {
+            local description="$1"
+            local rel_path="$2"
+
+            if ! apply_susfs_patch_file "$rel_path"; then
+              echo "::warning::$description 对应的 SUSFS 修复补丁不存在，已跳过"
+            fi
+            return 0
+          }
+
+          apply_susfs_base_patch() {
+            local description="$1"
+            local rel_path="$2"
+
+            if apply_susfs_patch_file "$rel_path"; then
+              return 0
+            fi
+
+            local applied=0 fallback_patch
+            if [ -n "$SUSFS_KSU_FIX_ROOT" ]; then
+              for fallback_patch in 1_fix_base.c.patch 2_fix_base.c.patch; do
+                if [ -f "$SUSFS_KSU_FIX_ROOT/$fallback_patch" ]; then
+                  patch -p1 < "$SUSFS_KSU_FIX_ROOT/$fallback_patch" || true
+                  applied=1
+                fi
+              done
+            fi
+
+            if [ "$applied" -eq 0 ]; then
+              echo "::warning::$description 对应的 SUSFS base 修复补丁不存在，已跳过"
+            fi
+            return 0
+          }
 
           cp $SUSFS4KSU/kernel_patches/50_add_susfs_in_gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}.patch ./common/
           cp $SUSFS4KSU/kernel_patches/fs/* ./common/fs/
@@ -1198,6 +1296,14 @@ jobs:
             if [[ ! "$CURRENT_SUB" =~ ^[0-9]+$ ]]; then
               CURRENT_SUB=99999
             fi
+
+            sub_in_range() {
+              local value="$1"
+              local min="$2"
+              local max="$3"
+              [[ "$value" =~ ^[0-9]+$ ]] || return 1
+              (( value >= min && value <= max ))
+            }
 
             fix_task_mmu_show_pad() {
               local file="./fs/proc/task_mmu.c"
@@ -1400,24 +1506,18 @@ jobs:
 
             # Android 12 - 5.10 修复
             if [[ "${{ inputs.android_version }}" == "android12" && "${{ inputs.kernel_version }}" == "5.10" ]]; then
-              if [[ "$CURRENT_SUB" -le 209 ]]; then
+              if sub_in_range "$CURRENT_SUB" 43 117; then
                 fix_task_mmu_show_pad
-              fi
-              if [[ "$CURRENT_SUB" -le 117 ]]; then
-                cp $KERNEL_PATCHES/wild/susfs_fix_patches/v${SUSFS_VERSION}/a12-5.10/fdinfo.c.patch ./
-                patch -p1 < fdinfo.c.patch || true
+                apply_susfs_optional_patch "Android 12 - 5.10 fdinfo.c" "a12-5.10/fdinfo.c.patch"
                 fix_sukisu_fdinfo_mask_decl
-              fi
-              if [[ "$CURRENT_SUB" -le 43 ]]; then
-                cp $KERNEL_PATCHES/wild/susfs_fix_patches/v${SUSFS_VERSION}/a12-5.10/base.c.patch ./
-                patch -p1 < base.c.patch || true
+                apply_susfs_base_patch "Android 12 - 5.10 base.c" "a12-5.10/base.c.patch"
                 if [[ "${{ inputs.ksu_variant }}" == "SukiSU" && "${{ inputs.use_bbg }}" == "true" ]]; then
                   fix_proc_base_missing_vma_decl
                 fi
-                if [[ "${{ inputs.ksu_variant }}" == "Official" && "${{ inputs.use_bbg }}" == "true" && "$CURRENT_SUB" -eq 43 ]]; then
+                if [[ "${{ inputs.ksu_variant }}" == "Official" && "${{ inputs.use_bbg }}" == "true" ]]; then
                   fix_proc_base_missing_vma_decl
                 fi
-                if [[ "${{ inputs.ksu_variant }}" == "ReSukiSU" && "$CURRENT_SUB" -eq 43 ]]; then
+                if [[ "${{ inputs.ksu_variant }}" == "ReSukiSU" ]]; then
                   fix_proc_base_missing_vma_decl
                 fi
               fi
@@ -1425,9 +1525,8 @@ jobs:
 
             # Android 13 - 5.15 修复
             if [[ "${{ inputs.android_version }}" == "android13" && "${{ inputs.kernel_version }}" == "5.15" ]]; then
-              if [[ "$CURRENT_SUB" -le 41 ]]; then
-                cp $KERNEL_PATCHES/wild/susfs_fix_patches/v${SUSFS_VERSION}/a13-5.15/namespace.c.patch ./
-                patch -p1 < namespace.c.patch || true
+              if sub_in_range "$CURRENT_SUB" 41 137; then
+                apply_susfs_optional_patch "Android 13 - 5.15 namespace.c" "a13-5.15/namespace.c.patch"
                 if [[ "$CURRENT_SUB" -eq 41 ]] && grep -qF 'static_branch_unlikely(&susfs_is_sdcard_android_data_not_decrypted)' ./fs/namespace.c; then
                   if grep -qF 'extern bool susfs_is_sdcard_android_data_decrypted __read_mostly;' ./fs/namespace.c \
                     && ! grep -qF 'extern struct static_key_true susfs_is_sdcard_android_data_not_decrypted;' ./fs/namespace.c; then
@@ -1454,65 +1553,60 @@ jobs:
                     echo "已移除 android13-5.15.41 namespace.c 未使用的 susfs_mnt_group_ida"
                   fi
                 fi
-                cp $KERNEL_PATCHES/wild/susfs_fix_patches/v${SUSFS_VERSION}/a13-5.15/fdinfo.c.patch ./
-                patch -p1 < fdinfo.c.patch || true
+                apply_susfs_optional_patch "Android 13 - 5.15 fdinfo.c" "a13-5.15/fdinfo.c.patch"
                 fix_sukisu_fdinfo_mask_decl
-                cp $KERNEL_PATCHES/wild/susfs_fix_patches/v${SUSFS_VERSION}/a13-5.15/open.c.patch ./
-                patch -p1 < open.c.patch || true
-              fi
-              if [[ "$CURRENT_SUB" -le 148 && "${{ inputs.os_patch_level }}" != "2024-05" ]]; then
-                fix_task_mmu_show_pad
+                apply_susfs_optional_patch "Android 13 - 5.15 open.c" "a13-5.15/open.c.patch"
+                if [[ "${{ inputs.os_patch_level }}" != "2024-05" ]]; then
+                  fix_task_mmu_show_pad
+                fi
               fi
             fi
 
             # Android 14 - 6.1 修复
             if [[ "${{ inputs.android_version }}" == "android14" && "${{ inputs.kernel_version }}" == "6.1" ]]; then
-              if [[ "$CURRENT_SUB" -le 141 || "$CURRENT_SUB" -ge 145 ]]; then
-                cp $KERNEL_PATCHES/wild/susfs_fix_patches/v${SUSFS_VERSION}/a14-6.1/base.c.patch ./
-                patch -p1 < base.c.patch || true
-              fi
-              if grep -q 'susfs_is_current_proc_umounted\|SUSFS_IS_INODE_SUS_MAP\|SUSFS_IS_INODE_OPEN_REDIRECT' ./fs/proc/base.c && ! grep -qF '#include <linux/susfs_def.h>' ./fs/proc/base.c; then
-                if grep -qF '#include <linux/dma-buf.h>' ./fs/proc/base.c; then
-                  sed -i '/#include <linux\/dma-buf.h>/a #if defined(CONFIG_KSU_SUSFS_SUS_MAP) || defined(CONFIG_KSU_SUSFS_OPEN_REDIRECT)\n#include <linux\/susfs_def.h>\n#endif' ./fs/proc/base.c
-                else
-                  sed -i '/#include <linux\/cpufreq_times.h>/a #if defined(CONFIG_KSU_SUSFS_SUS_MAP) || defined(CONFIG_KSU_SUSFS_OPEN_REDIRECT)\n#include <linux\/susfs_def.h>\n#endif' ./fs/proc/base.c
+              if sub_in_range "$CURRENT_SUB" 25 162; then
+                apply_susfs_base_patch "Android 14 - 6.1 base.c" "a14-6.1/base.c.patch"
+                if grep -q 'susfs_is_current_proc_umounted\|SUSFS_IS_INODE_SUS_MAP\|SUSFS_IS_INODE_OPEN_REDIRECT' ./fs/proc/base.c && ! grep -qF '#include <linux/susfs_def.h>' ./fs/proc/base.c; then
+                  if grep -qF '#include <linux/dma-buf.h>' ./fs/proc/base.c; then
+                    sed -i '/#include <linux\/dma-buf.h>/a #if defined(CONFIG_KSU_SUSFS_SUS_MAP) || defined(CONFIG_KSU_SUSFS_OPEN_REDIRECT)\n#include <linux\/susfs_def.h>\n#endif' ./fs/proc/base.c
+                  else
+                    sed -i '/#include <linux\/cpufreq_times.h>/a #if defined(CONFIG_KSU_SUSFS_SUS_MAP) || defined(CONFIG_KSU_SUSFS_OPEN_REDIRECT)\n#include <linux\/susfs_def.h>\n#endif' ./fs/proc/base.c
+                  fi
                 fi
-              fi
-              if [[ "$CURRENT_SUB" -le 75 && "${{ inputs.os_patch_level }}" != "2024-05" ]]; then
-                fix_task_mmu_show_pad
-              fi
-              # 修复 6.1 LTS: SUSFS 补丁在 namespace.c 头部 hunk 因上下文不匹配而失败，
-              # 导致函数体中的 SUSFS 符号（DEFAULT_KSU_MNT_ID 等）未声明
-              if grep -q 'DEFAULT_KSU_MNT_ID\|susfs_mnt_id_ida' ./fs/namespace.c && ! grep -qF '#include <linux/susfs_def.h>' ./fs/namespace.c; then
-                echo "检测到 namespace.c 缺少 susfs_def.h，注入声明..."
-                sed -i '/#include <linux\/mnt_idmapping.h>/a #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT\n#include <linux\/susfs_def.h>\n#endif' ./fs/namespace.c
-                if ! grep -q 'extern bool susfs_is_current_ksu_domain' ./fs/namespace.c; then
-                  sed -i '/#include "internal.h"/a \\n#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT\nextern bool susfs_is_current_ksu_domain(void);\nextern struct static_key_true susfs_is_sdcard_android_data_not_decrypted;\n\n#define CL_COPY_MNT_NS BIT(25)\n\n#endif' ./fs/namespace.c
+                if [[ "${{ inputs.os_patch_level }}" != "2024-05" ]]; then
+                  fix_task_mmu_show_pad
+                fi
+                # 修复 6.1 LTS: SUSFS 补丁在 namespace.c 头部 hunk 因上下文不匹配而失败，
+                # 导致函数体中的 SUSFS 符号（DEFAULT_KSU_MNT_ID 等）未声明
+                if grep -q 'DEFAULT_KSU_MNT_ID\|susfs_mnt_id_ida' ./fs/namespace.c && ! grep -qF '#include <linux/susfs_def.h>' ./fs/namespace.c; then
+                  echo "检测到 namespace.c 缺少 susfs_def.h，注入声明..."
+                  sed -i '/#include <linux\/mnt_idmapping.h>/a #ifdef CONFIG_KSU_SUSFS_SUS_MOUNT\n#include <linux\/susfs_def.h>\n#endif' ./fs/namespace.c
+                  if ! grep -q 'extern bool susfs_is_current_ksu_domain' ./fs/namespace.c; then
+                    sed -i '/#include "internal.h"/a \\n#ifdef CONFIG_KSU_SUSFS_SUS_MOUNT\nextern bool susfs_is_current_ksu_domain(void);\nextern struct static_key_true susfs_is_sdcard_android_data_not_decrypted;\n\n#define CL_COPY_MNT_NS BIT(25)\n\n#endif' ./fs/namespace.c
+                  fi
                 fi
               fi
             fi
 
             # Android 15 - 6.6 修复
             if [[ "${{ inputs.android_version }}" == "android15" && "${{ inputs.kernel_version }}" == "6.6" ]]; then
-              if [[ "${{ inputs.ksu_variant }}" == "Official" ]]; then
+              if [[ "${{ inputs.ksu_variant }}" == "Official" ]] && { sub_in_range "$CURRENT_SUB" 50 58 || sub_in_range "$CURRENT_SUB" 98 127; }; then
                 fix_selinux_extern_static
               fi
-              if [[ "$CURRENT_SUB" -ge 98 ]]; then
-                cp $KERNEL_PATCHES/wild/susfs_fix_patches/v${SUSFS_VERSION}/a15-6.6/base.c.patch ./
-                patch -p1 < base.c.patch || true
-              fi
-              # 修复 6.6.50~6.6.97: fs/proc/base.c 头部 hunk 失配，导致 susfs_def.h 漏打
-              if grep -q 'AS_FLAGS_SUS_MAP\|susfs_is_current_proc_umounted\|SUSFS_IS_INODE_SUS_MAP\|SUSFS_IS_INODE_OPEN_REDIRECT' ./fs/proc/base.c && ! grep -qF 'susfs_def.h' ./fs/proc/base.c; then
-                if ! grep -qF '#include <linux/dma-buf.h>' ./fs/proc/base.c; then
-                  sed -i '/#include <linux\/cpufreq_times.h>/a #include <linux\/dma-buf.h>' ./fs/proc/base.c
+              if sub_in_range "$CURRENT_SUB" 98 127; then
+                apply_susfs_base_patch "Android 15 - 6.6 base.c" "a15-6.6/base.c.patch"
+                # 修复 6.6.98~6.6.127: fs/proc/base.c 头部 hunk 失配，导致 susfs_def.h 漏打
+                if grep -q 'AS_FLAGS_SUS_MAP\|susfs_is_current_proc_umounted\|SUSFS_IS_INODE_SUS_MAP\|SUSFS_IS_INODE_OPEN_REDIRECT' ./fs/proc/base.c && ! grep -qF 'susfs_def.h' ./fs/proc/base.c; then
+                  if ! grep -qF '#include <linux/dma-buf.h>' ./fs/proc/base.c; then
+                    sed -i '/#include <linux\/cpufreq_times.h>/a #include <linux\/dma-buf.h>' ./fs/proc/base.c
+                  fi
+                  sed -i '/#include <linux\/dma-buf.h>/a #endif' ./fs/proc/base.c
+                  sed -i '/#include <linux\/dma-buf.h>/a #include <linux\/susfs_def.h>' ./fs/proc/base.c
+                  sed -i '/#include <linux\/dma-buf.h>/a #if defined(CONFIG_KSU_SUSFS_SUS_MAP) || defined(CONFIG_KSU_SUSFS_OPEN_REDIRECT)' ./fs/proc/base.c
                 fi
-                sed -i '/#include <linux\/dma-buf.h>/a #endif' ./fs/proc/base.c
-                sed -i '/#include <linux\/dma-buf.h>/a #include <linux\/susfs_def.h>' ./fs/proc/base.c
-                sed -i '/#include <linux\/dma-buf.h>/a #if defined(CONFIG_KSU_SUSFS_SUS_MAP) || defined(CONFIG_KSU_SUSFS_OPEN_REDIRECT)' ./fs/proc/base.c
               fi
-              if [[ "$CURRENT_SUB" -le 58 ]]; then
-                cp $KERNEL_PATCHES/wild/susfs_fix_patches/v${SUSFS_VERSION}/a15-6.6/task_mmu.c.patch ./
-                patch -p1 < task_mmu.c.patch || true
+              if sub_in_range "$CURRENT_SUB" 50 58; then
+                apply_susfs_optional_patch "Android 15 - 6.6 task_mmu.c" "a15-6.6/task_mmu.c.patch"
                 fix_task_mmu_unused_vma_decl
                 fix_memory_missing_susfs_def
               fi
