@@ -17,7 +17,7 @@
 
 ## 项目定位
 
-ABK 的目标是把手动 fork、启用 Actions、填写 GKI 参数、触发构建、下载产物和刷写安装这些步骤收敛到一个更顺手的流程里。
+ABK 的目标是把手动 fork、启用 Actions、填写 GKI 或 OnePlus/Oplus 参数、触发构建、下载产物和刷写安装这些步骤收敛到一个更顺手的流程里。
 
 仓库侧提供 GitHub Actions 构建工作流；App 侧提供 Root 检查、GitHub 授权、fork 检查/同步、构建提交、进度通知、产物下载和刷写/安装入口。
 
@@ -31,9 +31,9 @@ ABK 的目标是把手动 fork、启用 Actions、填写 GKI 参数、触发构�
 
 ## 支持范围
 
-- Android 12 / 13 / 14 / 15 / 16 GKI 构建流程。
+- Android 12 / 13 / 14 / 15 / 16 GKI 构建流程，以及 OnePlus/Oplus 机型构建流程。
 - KernelSU Official、KernelSU Next、SukiSU、ReSukiSU 构建分支。
-- SUSFS、ZRAM、BBG、KPM、Re-Kernel、一加 8E 支持等可选功能。
+- SUSFS、ZRAM、BBG、KPM、Re-Kernel、lz4kd、BBR、代理优化、Unicode 绕过和一加 8E 支持等可选功能。
 - AnyKernel3 包、kernel img、KernelSU 管理器和 SUSFS 模块产物整理。
 
 实际可用性取决于目标设备、内核版本、上游分支状态和当前补丁兼容性。
@@ -49,6 +49,16 @@ ABK 的目标是把手动 fork、启用 Actions、填写 GKI 参数、触发构�
 7. 在确认风险后按需刷写 boot 镜像或安装模块/APK。
 
 也可以直接在 GitHub Actions 中手动运行对应工作流。
+
+## OnePlus/Oplus 机型构建
+
+App 的“构建内核”页可在 `GKI` 和 `OnePlus` 两种目标间切换。选择 `OnePlus` 后，App 会派发 [`oneplus-custom.yml`](.github/workflows/oneplus-custom.yml)，并通过 OnePlus/Oplus manifest 拉取对应 CPU 分支和机型 XML。
+ABK 不再把 `_b/_v/_u/_t` 当作用户选择规则；App、工作流摘要和矩阵任务名会直接显示机型、ColorOS/OxygenOS 系统线、Android KMI 和 CPU，上游 XML 名称只保留为仓库初始化参数。
+
+首版 OnePlus 构建支持 `android12/5.10`、`android13/5.15`、`android14/6.1`、`android15/6.6`，可选 KernelSU Official、KernelSU Next、SukiSU、ReSukiSU 或无 Root 内核。OnePlus 专用开关包括 SUSFS、KPM、lz4kd、BBG、BBR、代理优化和 Unicode 零宽绕过修复；SUSFS 仅在 `android14/6.1` 与 `android15/6.6` 生效，`android12/5.10` 和 `android13/5.15` 会自动关闭；MTK CPU 分支会强制关闭代理优化。
+
+需要批量构建当前支持的全部 OnePlus/Oplus 机型时，可在 GitHub Actions 手动触发 [`oneplus-full-feature-matrix.yml`](.github/workflows/oneplus-full-feature-matrix.yml)。矩阵会读取上游 manifest，按 CPU 分支和 KMI 线生成构建任务。
+如果要一次性触发 GKI 与 OnePlus 的全部管理器类型全矩阵编译，可使用 [`all-managers-full-feature-matrix.yml`](.github/workflows/all-managers-full-feature-matrix.yml)，并通过输入项控制是否包含某个变体、是否跑 GKI 或 OnePlus，以及常用构建自定义项。
 
 ## 风险提示
 
@@ -76,7 +86,7 @@ ABK 的目标是把手动 fork、启用 Actions、填写 GKI 参数、触发构�
 **如果构建失败或刷入后 bootloop：** 可尝试切换到其他槽位补丁（如 678 → 123 或 345），不同内核子版本可能适用不同的补丁。
 - 刷写内核属于高风险操作，可能导致无法开机、数据损坏或需要恢复出厂 boot 镜像。
 - 不建议在不确定设备分区、内核版本、Android 版本和安全补丁级别时强行构建或刷写。
-- 一加 ColorOS 14 / 15 等设备兼容性仍需自行验证，异常情况下可能需要清除数据。
+- 一加 ColorOS/OxygenOS 13 / 14 / 15 / 16 等设备兼容性仍需自行验证，异常情况下可能需要清除数据。
 - 如果构建失败，优先检查 SukiSU / SUSFS / ReSukiSU 等上游分支是否刚更新且尚未互相适配。
 - 自定义外部模块会执行第三方仓库根目录的 `setup.sh`。启用前请审查脚本内容和来源可信度，避免执行未知或恶意代码。
 - ABK 仅面向合法授权设备和合法研究/自用场景。禁止用于灰黑产、未授权访问、绕过风控、作弊、窃取数据、破坏服务或其他违法违规用途。
@@ -238,6 +248,10 @@ App 编译由 [`Build ABK App`](.github/workflows/build-abk-app.yml) 工作流�
 | --- | --- | --- |
 | zzh20188/GKI_KernelSU_SUSFS | <https://github.com/zzh20188/GKI_KernelSU_SUSFS> | 上游仓库许可证 |
 | WildKernels/GKI_KernelSU_SUSFS | <https://github.com/WildKernels/GKI_KernelSU_SUSFS> | 上游仓库许可证 |
+| CodeLinaro CLO LA | <https://git.codelinaro.org/clo/la> | 顶层上游各项目许可证 |
+| OnePlusOSS/kernel_manifest | <https://github.com/OnePlusOSS/kernel_manifest> | 上游仓库许可证 / 未检测到 SPDX |
+| Xiaomichael/kernel_manifest | <https://github.com/Xiaomichael/kernel_manifest> | 上游仓库许可证 / 未检测到 SPDX |
+| Xiaomichael/kernel_patches | <https://github.com/Xiaomichael/kernel_patches> | 上游仓库许可证 / 未检测到 SPDX |
 | KernelSU | <https://github.com/tiann/KernelSU> | GPL-3.0 |
 | KernelSU Next | <https://github.com/KernelSU-Next/KernelSU-Next> | GPL-3.0 |
 | SukiSU Ultra | <https://github.com/SukiSU-Ultra/SukiSU-Ultra> | GPL-3.0 |
@@ -246,7 +260,10 @@ App 编译由 [`Build ABK App`](.github/workflows/build-abk-app.yml) 工作流�
 | ShirkNeko/susfs4ksu | <https://github.com/ShirkNeko/susfs4ksu> | GPL-2.0 |
 | SukiSU_patch | <https://github.com/ShirkNeko/SukiSU_patch> | GPL-2.0 |
 | AnyKernel3 | <https://github.com/WildKernels/AnyKernel3> | GPL-2.0 |
+| Xiaomichael/AnyKernel3 | <https://github.com/Xiaomichael/AnyKernel3> | 上游仓库许可证 / NOASSERTION |
 | WildKernels/kernel_patches | <https://github.com/WildKernels/kernel_patches> | GPL-2.0 |
+| cctv18/susfs4oki | <https://github.com/cctv18/susfs4oki> | GPL-3.0 |
+| SukiSU_KernelPatch_patch | <https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch> | 上游仓库许可证 |
 | Action-Build | <https://github.com/Numbersf/Action-Build> | 上游仓库许可证 |
 | SUSFS 模块构建来源 | <https://github.com/sidex15/susfs4ksu-module> | 上游仓库许可证 |
 | GCC prebuilts | <https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1> | GPL-family toolchain notices |

@@ -6,6 +6,9 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
+import android.provider.Settings
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -49,6 +52,7 @@ import androidx.core.graphics.ColorUtils
 import coil.compose.AsyncImage
 import com.abk.kernel.BuildConfig
 import com.abk.kernel.R
+import com.abk.kernel.utils.DownloadDirectoryUtils
 import com.abk.kernel.utils.LocaleHelper
 import com.abk.kernel.ui.components.AbkScreenHorizontalPadding
 import com.abk.kernel.ui.components.ExpressiveHeroCard
@@ -640,6 +644,11 @@ private fun SettingsMainContent(
                 subtitle = stringResource(R.string.settings_prebuilt_gki_desc),
                 checked = state.prebuiltGkiEnabled,
                 onCheckedChange = { vm.setPrebuiltGkiEnabled(it) }
+            )
+            Spacer(Modifier.height(10.dp))
+            DownloadDirectorySettingsItem(
+                value = state.downloadDirectory,
+                onValueChange = { vm.setDownloadDirectory(it) }
             )
             Spacer(Modifier.height(10.dp))
             MirrorSettingsItem(
@@ -1510,7 +1519,6 @@ private fun AboutRepositoryScreen(
                 val profileUrl = "https://github.com/${contributor.username}"
                 ExpressiveListItem(
                     title = "@${contributor.username}",
-                    subtitle = stringResource(R.string.settings_contributor_commits, contributor.commits),
                     leadingIcon = Icons.Default.Person,
                     trailingContent = { Icon(Icons.Default.OpenInBrowser, null) },
                     onClick = { onOpenUrl(profileUrl) }
@@ -1593,8 +1601,7 @@ private data class AboutLink(
 )
 
 private data class AboutContributor(
-    val username: String,
-    val commits: Int
+    val username: String
 )
 
 private data class OpenSourceNotice(
@@ -1620,31 +1627,31 @@ private fun repositoryLinks(): List<AboutLink> = listOf(
 )
 
 private fun contributors(): List<AboutContributor> = listOf(
-    AboutContributor("TheWildJames", 1893),
-    AboutContributor("zzh20188", 449),
-    AboutContributor("xingguangcuican6666", 344),
-    AboutContributor("ShirkNeko", 56),
-    AboutContributor("huime180", 19),
-    AboutContributor("MiRinChan", 13),
-    AboutContributor("FunLay123", 5),
-    AboutContributor("guruji-byte", 4),
-    AboutContributor("Xiaomichael", 4),
-    AboutContributor("DreamFerry", 3),
-    AboutContributor("liqideqq", 3),
-    AboutContributor("elysias123", 2),
-    AboutContributor("Fede2782", 2),
-    AboutContributor("ReeViiS69", 2),
-    AboutContributor("TheSillyOk", 2),
-    AboutContributor("prpjzz", 2),
-    AboutContributor("ukriu", 2),
-    AboutContributor("wrnxr233", 2),
-    AboutContributor("Tools-cx-app", 2),
-    AboutContributor("Akuma-Noko", 1),
-    AboutContributor("DebugBoard", 1),
-    AboutContributor("FixeQyt", 1),
-    AboutContributor("LX200944", 1),
-    AboutContributor("Starsun", 1),
-    AboutContributor("yx1234587", 1)
+    AboutContributor("Akuma-Noko"),
+    AboutContributor("DebugBoard"),
+    AboutContributor("DreamFerry"),
+    AboutContributor("elysias123"),
+    AboutContributor("Fede2782"),
+    AboutContributor("FixeQyt"),
+    AboutContributor("FunLay123"),
+    AboutContributor("guruji-byte"),
+    AboutContributor("huime180"),
+    AboutContributor("liqideqq"),
+    AboutContributor("LX200944"),
+    AboutContributor("MiRinChan"),
+    AboutContributor("prpjzz"),
+    AboutContributor("ReeViiS69"),
+    AboutContributor("ShirkNeko"),
+    AboutContributor("Starsun"),
+    AboutContributor("TheSillyOk"),
+    AboutContributor("TheWildJames"),
+    AboutContributor("Tools-cx-app"),
+    AboutContributor("ukriu"),
+    AboutContributor("wrnxr233"),
+    AboutContributor("Xiaomichael"),
+    AboutContributor("xingguangcuican6666"),
+    AboutContributor("yx1234587"),
+    AboutContributor("zzh20188")
 )
 
 private fun openSourceNoticeGroups(): List<OpenSourceNoticeGroup> = listOf(
@@ -1663,15 +1670,21 @@ private fun openSourceNoticeGroups(): List<OpenSourceNoticeGroup> = listOf(
         listOf(
             OpenSourceNotice("zzh20188/GKI_KernelSU_SUSFS", "Upstream repository license", "BuildConfig.UPSTREAM_REPO_URL", BuildConfig.UPSTREAM_REPO_URL),
             OpenSourceNotice("WildKernels/GKI_KernelSU_SUSFS", "Upstream repository license", "BuildConfig.TOP_LEVEL_REPO_URL", BuildConfig.TOP_LEVEL_REPO_URL),
+            OpenSourceNotice("CodeLinaro CLO LA", "Top-level upstream project licenses", "OnePlus manifest upstream", "https://git.codelinaro.org/clo/la"),
+            OpenSourceNotice("OnePlusOSS/kernel_manifest", "Upstream repository license / no SPDX detected", "OnePlus manifest parent", "https://github.com/OnePlusOSS/kernel_manifest"),
+            OpenSourceNotice("Xiaomichael/kernel_manifest", "Upstream repository license / no SPDX detected", "OnePlus manifest branch source", "https://github.com/Xiaomichael/kernel_manifest"),
+            OpenSourceNotice("Xiaomichael/kernel_patches", "Upstream repository license / no SPDX detected", "OnePlus patch source", "https://github.com/Xiaomichael/kernel_patches"),
             OpenSourceNotice("KernelSU", "GPL-3.0", "workflow setup.sh source", "https://github.com/tiann/KernelSU"),
-            OpenSourceNotice("KernelSU Next", "GPL-3.0", "workflow setup.sh source", "https://github.com/KernelSU-Next/KernelSU-Next"),
             OpenSourceNotice("SukiSU Ultra", "GPL-3.0", "kernel setup, ksud, libmagiskboot source", "https://github.com/SukiSU-Ultra/SukiSU-Ultra"),
             OpenSourceNotice("ReSukiSU", "GPL-3.0", "workflow setup.sh source", "https://github.com/ReSukiSU/ReSukiSU"),
             OpenSourceNotice("SUSFS", "GPL-2.0", "kernel patches and module integration", "https://gitlab.com/simonpunk/susfs4ksu"),
             OpenSourceNotice("ShirkNeko/susfs4ksu", "GPL-2.0", "GitHub mirror / patch source", "https://github.com/ShirkNeko/susfs4ksu"),
             OpenSourceNotice("SukiSU_patch", "GPL-2.0", "workflow patch source", "https://github.com/ShirkNeko/SukiSU_patch"),
             OpenSourceNotice("AnyKernel3", "GPL-2.0", "flashable kernel packaging", "https://github.com/WildKernels/AnyKernel3"),
+            OpenSourceNotice("Xiaomichael/AnyKernel3", "Upstream repository license / NOASSERTION", "OnePlus flashable packaging source", "https://github.com/Xiaomichael/AnyKernel3"),
             OpenSourceNotice("WildKernels/kernel_patches", "GPL-2.0", "NTsync, IPSet, BBR and related patches", "https://github.com/WildKernels/kernel_patches"),
+            OpenSourceNotice("cctv18/susfs4oki", "GPL-3.0", "OnePlus/OPPO/Realme SUSFS patch source", "https://github.com/cctv18/susfs4oki"),
+            OpenSourceNotice("SukiSU_KernelPatch_patch", "Upstream repository license", "KPM patch source", "https://github.com/SukiSU-Ultra/SukiSU_KernelPatch_patch"),
             OpenSourceNotice("Action-Build", "Repository license", "workflow integration", "https://github.com/Numbersf/Action-Build"),
             OpenSourceNotice("sidex15/susfs4ksu-module", "Repository license", "SUSFS module build source", "https://github.com/sidex15/susfs4ksu-module"),
             OpenSourceNotice("LineageOS GCC prebuilts", "GPL-family toolchain notices", "workflow toolchain source", "https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-gnu-6.4.1"),
@@ -1968,6 +1981,98 @@ private fun SwitchSettingsItem(
         enabled = enabled,
         onCheckedChange = onCheckedChange
     )
+}
+
+@Composable
+private fun DownloadDirectorySettingsItem(
+    value: String,
+    onValueChange: (String) -> Unit
+) {
+    val context = LocalContext.current
+    val defaultDirectory = remember { DownloadDirectoryUtils.defaultDirectoryPath() }
+    val needsAllFilesAccess = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && !Environment.isExternalStorageManager()
+    val unsupportedTreeMessage = stringResource(R.string.settings_download_directory_tree_unsupported)
+    val restoredMessage = stringResource(R.string.settings_download_directory_default_restored)
+    val folderPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        if (uri != null) {
+            runCatching {
+                context.contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+            }
+            val selectedPath = DownloadDirectoryUtils.directoryPathFromTreeUri(uri)
+            if (selectedPath == null) {
+                Toast.makeText(context, unsupportedTreeMessage, Toast.LENGTH_SHORT).show()
+            } else {
+                onValueChange(selectedPath)
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        ExpressiveListItem(
+            title = stringResource(R.string.settings_download_directory),
+            subtitle = stringResource(R.string.settings_download_directory_desc),
+            leadingIcon = Icons.Default.FolderOpen
+        )
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = true,
+            placeholder = { Text(defaultDirectory) },
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            OutlinedButton(
+                onClick = { folderPicker.launch(null) },
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(Icons.Default.FolderOpen, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.settings_download_directory_choose))
+            }
+            TextButton(
+                onClick = {
+                    onValueChange(defaultDirectory)
+                    Toast.makeText(context, restoredMessage, Toast.LENGTH_SHORT).show()
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(Icons.Default.RestartAlt, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.settings_download_directory_reset))
+            }
+        }
+        AnimatedVisibility(visible = needsAllFilesAccess) {
+            OutlinedButton(
+                onClick = { openAllFilesAccessSettings(context) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.FolderSpecial, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.settings_download_directory_storage_permission))
+            }
+        }
+    }
+}
+
+private fun openAllFilesAccessSettings(context: android.content.Context) {
+    val packageUri = Uri.parse("package:${context.packageName}")
+    val appSettings = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION, packageUri)
+    runCatching {
+        context.startActivity(appSettings)
+    }.getOrElse {
+        context.startActivity(Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION))
+    }
 }
 
 @Composable

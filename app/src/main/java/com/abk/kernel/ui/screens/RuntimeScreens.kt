@@ -430,6 +430,7 @@ fun InstalledModulesScreen(
                 onClick = {
                     launchModulePickerWithPermissionCheck()
                 },
+                modifier = Modifier.padding(bottom = outerPadding.calculateBottomPadding()),
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             ) {

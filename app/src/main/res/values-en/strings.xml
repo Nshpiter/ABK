@@ -94,6 +94,11 @@
 
     <!-- Build -->
     <string name="build_title">Build Kernel</string>
+    <string name="build_target_title">Build target</string>
+    <string name="build_target_desc">Choose the standard GKI build or a OnePlus/Oplus device build.</string>
+    <string name="build_target_gki">GKI</string>
+    <string name="build_target_oneplus">OnePlus</string>
+    <string name="build_target_line">Build target: %1$s</string>
     <string name="build_submit">Submit build</string>
     <string name="build_running">Build running</string>
     <string name="build_success">Build succeeded</string>
@@ -111,6 +116,10 @@
     <string name="build_virtualization_line">Virtualization support: %1$s</string>
     <string name="build_external_modules_line">External modules: %1$s</string>
     <string name="build_external_modules_count">%1$d</string>
+    <string name="build_oneplus_device_line">OnePlus device: %1$s</string>
+    <string name="build_oneplus_kernel_line">OnePlus KMI: %1$s · Kernel %2$s</string>
+    <string name="build_oneplus_feature_line">SUSFS: %1$s · lz4kd: %2$s · KPM: %3$s</string>
+    <string name="build_oneplus_network_line">BBR: %1$s · Proxy optimization: %2$s · Unicode bypass: %3$s</string>
     <string name="build_active_queue_notice">A build is active, so this configuration will be added to the local queue and dispatched in order.</string>
     <string name="build_plan_saved">Plan saved</string>
     <string name="build_plan_parse_failed">Failed to parse plan code</string>
@@ -131,6 +140,9 @@
     <string name="build_open_actions_page">Open Actions page</string>
     <string name="build_handle_later">Handle later</string>
     <string name="build_kernel_version_config">Kernel version config</string>
+    <string name="build_oneplus_cpu">OnePlus CPU branch</string>
+    <string name="build_oneplus_device_manifest">OnePlus device profile</string>
+    <string name="build_oneplus_profile_desc">ABK shows the system version, KMI, and CPU directly; manifest suffixes are only upstream XML names, not selection rules.</string>
     <string name="build_android_version">Android version</string>
     <string name="build_kernel_version">Kernel version</string>
     <string name="build_sub_level">Sub level</string>
@@ -144,6 +156,8 @@
     <string name="build_custom_ksu_ref">Custom KSU commit/ref</string>
     <string name="build_custom_ksu_ref_placeholder">e.g. abc123, branch:5, or tag</string>
     <string name="build_no_root_scheme_desc">Do not inject any root authorization scheme. KSU branch, SUSFS, and KPM will be disabled automatically.</string>
+    <string name="build_oneplus_no_root_scheme_desc">Build a rootless OnePlus kernel. SUSFS and KPM will be disabled automatically.</string>
+    <string name="build_oneplus_ksu_branch_desc">OnePlus builds use the upstream default branch for the selected KernelSU variant.</string>
     <string name="build_ksu_none">None (no root scheme)</string>
     <string name="build_standard">stable</string>
     <string name="build_development">development</string>
@@ -158,6 +172,14 @@
     <string name="build_enable_rekernel">Enable Re-Kernel driver (test)</string>
     <string name="build_virtualization_support">Virtualization support</string>
     <string name="build_enable_oneplus_8e">Enable OnePlus 8E support</string>
+    <string name="build_oneplus_lz4kd">Enable lz4kd</string>
+    <string name="build_oneplus_bbr">Enable BBR</string>
+    <string name="build_oneplus_proxy_optimization">Enable proxy optimization</string>
+    <string name="build_oneplus_proxy_mtk_disabled">Proxy optimization is forced off for MTK branches.</string>
+    <string name="build_oneplus_susfs_unsupported">The current OnePlus KMI has no available SUSFS upstream branch. Only android14/6.1 and android15/6.6 are supported; android12/5.10 and android13/5.15 are disabled automatically.</string>
+    <string name="build_oneplus_unicode_bypass">Enable Unicode zero-width bypass fix</string>
+    <string name="build_oneplus_proxy_short">Proxy optimization</string>
+    <string name="build_oneplus_unicode_short">Unicode bypass</string>
     <string name="build_zram_options">ZRAM options</string>
     <string name="build_zram_full_algo">Enable full algorithm support (LZO/LZ4/ZSTD, etc.)</string>
     <string name="build_zram_custom_algo">Custom ZRAM algorithms</string>
@@ -234,6 +256,7 @@
     <string name="build_base_config">Base config</string>
     <string name="build_summary_external_modules">External modules %1$d</string>
     <string name="build_hero_desc">Triggers GitHub Actions and automatically organizes img, AK3, manager, and SUSFS modules.</string>
+    <string name="build_oneplus_hero_desc">Builds a device-specific AnyKernel3 package from the OnePlus/Oplus manifest.</string>
     <string name="build_susfs_on">SUSFS on</string>
     <string name="build_susfs_off">SUSFS off</string>
     <string name="build_virtualization_chip">Virtualization support %1$s</string>
@@ -260,7 +283,7 @@
     <string name="build_external_module_default">External module</string>
     <string name="build_stage_none">No stage selected</string>
     <string name="build_source_list">Source %1$s</string>
-    <string name="build_section_kernel_desc">Prefer device-detected recommended parameters to avoid choosing the wrong version line.</string>
+    <string name="build_section_kernel_desc">Match the Android version, KMI, and security patch date to the current system; use the device recommendation when unsure.</string>
     <string name="build_section_ksu_desc">Choose the kernel permission solution and matching branch.</string>
     <string name="build_section_features_desc">Enable only the module capabilities you need to keep debugging simpler.</string>
     <string name="build_section_zram_desc">Add extra kernel support for memory compression algorithms.</string>
@@ -518,8 +541,7 @@
     <string name="settings_about_version">Current version: %1$s</string>
     <string name="settings_repository_info">Repository information</string>
     <string name="settings_contributors">Contributors</string>
-    <string name="settings_contributors_desc">Generated from the current git history, showing only identifiable GitHub usernames/links and filtering automation accounts.</string>
-    <string name="settings_contributor_commits">%1$d commits</string>
+    <string name="settings_contributors_desc">Sorted alphabetically by GitHub username. Only identifiable contributor accounts are shown, with automation accounts filtered out.</string>
     <string name="settings_open_source_licenses_intro">This list is derived from repository files, workflows, the Gradle version catalog, and the npm lockfile. Upstream project licenses remain authoritative.</string>
     <string name="settings_license_group_repository">Repository and bundled code</string>
     <string name="settings_license_group_upstream">Upstream projects and workflow references</string>
@@ -562,6 +584,16 @@
     <string name="settings_group_local_templates_desc">Manage templates saved in ReSukiSU profile storage.</string>
     <string name="settings_group_status_desc">Result of the most recent template operation.</string>
     <string name="settings_group_edit_template_desc">Edit App Profile template JSON directly.</string>
+    <string name="settings_download_directory">Default download directory</string>
+    <string name="settings_download_directory_desc">Build artifacts, prebuilt GKI files, and modules are saved to this filesystem folder.</string>
+    <string name="settings_download_directory_choose">Choose folder</string>
+    <string name="settings_download_directory_reset">Reset default</string>
+    <string name="settings_download_directory_storage_permission">Open all files access permission</string>
+    <string name="settings_download_directory_tree_unsupported">The selected folder cannot be converted to a filesystem path. Enter an absolute path or choose the local Download folder.</string>
+    <string name="settings_download_directory_default_restored">Default download directory restored</string>
+    <string name="download_directory_not_directory">Download directory is not a folder: %1$s</string>
+    <string name="download_directory_not_writable">Download directory is not writable: %1$s</string>
+    <string name="download_directory_create_failed">Could not create download directory: %1$s</string>
     <string name="settings_download_mirror">Download mirror</string>
     <string name="settings_download_mirror_desc">Leave empty to connect directly to GitHub. If set, artifacts mirror to releases before download.</string>
 

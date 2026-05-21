@@ -76,4 +76,58 @@ class KernelSupportTest {
         assertEquals(listOf("off", "on"), KernelSupport.virtualizationSupportOptions("6.12"))
         assertEquals(listOf("off", "678", "123", "345"), KernelSupport.virtualizationSupportOptions("6.1"))
     }
+
+    @Test
+    fun normalizeOnePlusConfigUsesOnePlusDefaultsAndDisablesMtkProxy() {
+        val normalized = KernelSupport.normalize(
+            KernelBuildConfig(
+                buildTarget = BUILD_TARGET_ONEPLUS,
+                androidVersion = "android16",
+                kernelVersion = "6.12",
+                kernelsuVariant = KSU_VARIANT_SUKISU,
+                onePlusCpu = "mt6991",
+                onePlusDeviceManifest = "oneplus_ace5_ultra_b",
+                onePlusUseProxyOptimization = true,
+                useKpm = true,
+                useDdk = true,
+                useCustomExternalModules = true,
+                customExternalModules = listOf(CustomExternalModule("https://github.com/example/module"))
+            )
+        )
+
+        assertEquals(BUILD_TARGET_ONEPLUS, normalized.buildTarget)
+        assertEquals("android15", normalized.androidVersion)
+        assertEquals("6.6", normalized.kernelVersion)
+        assertEquals(KSU_VARIANT_SUKISU, normalized.kernelsuVariant)
+        assertEquals("mt6991", normalized.onePlusCpu)
+        assertEquals("oneplus_ace5_ultra_b", normalized.onePlusDeviceManifest)
+        assertFalse(normalized.onePlusUseProxyOptimization)
+        assertFalse(normalized.useKpm)
+        assertFalse(normalized.useDdk)
+        assertTrue(normalized.customExternalModules.isEmpty())
+    }
+
+    @Test
+    fun onePlusDeviceLabelUsesAbkProfileInsteadOfManifestSuffixRule() {
+        assertEquals(
+            "OnePlus Turbo 6V · ColorOS/OxygenOS 16 · android14/6.1 · sm7635",
+            KernelSupport.onePlusDeviceLabel("oneplus_turbo_6v")
+        )
+    }
+
+    @Test
+    fun normalizeOnePlusDisablesSusfsWhenNoUpstreamBranchExists() {
+        val normalized = KernelSupport.normalize(
+            KernelBuildConfig(
+                buildTarget = BUILD_TARGET_ONEPLUS,
+                kernelsuVariant = KSU_VARIANT_SUKISU,
+                cancelSusfs = false,
+                onePlusDeviceManifest = "oneplus_10t_v"
+            )
+        )
+
+        assertEquals("android12", normalized.androidVersion)
+        assertEquals("5.10", normalized.kernelVersion)
+        assertTrue(normalized.cancelSusfs)
+    }
 }

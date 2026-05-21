@@ -94,6 +94,11 @@
 
     <!-- Build -->
     <string name="build_title">构建内核</string>
+    <string name="build_target_title">构建目标</string>
+    <string name="build_target_desc">选择标准 GKI 构建或 OnePlus/Oplus 机型构建。</string>
+    <string name="build_target_gki">GKI</string>
+    <string name="build_target_oneplus">OnePlus</string>
+    <string name="build_target_line">构建目标: %1$s</string>
     <string name="build_submit">提交构建</string>
     <string name="build_running">构建进行中</string>
     <string name="build_success">构建成功</string>
@@ -111,6 +116,10 @@
     <string name="build_virtualization_line">虚拟化支持: %1$s</string>
     <string name="build_external_modules_line">外部模块: %1$s</string>
     <string name="build_external_modules_count">%1$d 个</string>
+    <string name="build_oneplus_device_line">OnePlus 机型: %1$s</string>
+    <string name="build_oneplus_kernel_line">OnePlus KMI: %1$s · 内核 %2$s</string>
+    <string name="build_oneplus_feature_line">SUSFS: %1$s · lz4kd: %2$s · KPM: %3$s</string>
+    <string name="build_oneplus_network_line">BBR: %1$s · 代理优化: %2$s · Unicode 绕过: %3$s</string>
     <string name="build_active_queue_notice">当前有构建活动，此配置会加入本地队列并按顺序派发。</string>
     <string name="build_plan_saved">方案已保存</string>
     <string name="build_plan_parse_failed">方案码解析失败</string>
@@ -131,6 +140,9 @@
     <string name="build_open_actions_page">打开 Actions 页面</string>
     <string name="build_handle_later">稍后处理</string>
     <string name="build_kernel_version_config">内核版本配置</string>
+    <string name="build_oneplus_cpu">OnePlus CPU 分支</string>
+    <string name="build_oneplus_device_manifest">OnePlus 机型配置</string>
+    <string name="build_oneplus_profile_desc">ABK 直接标明系统版本、KMI 和 CPU；manifest 后缀仅作为上游 XML 名称，不作为选择规则。</string>
     <string name="build_android_version">Android 版本</string>
     <string name="build_kernel_version">内核版本</string>
     <string name="build_sub_level">子版本号</string>
@@ -144,6 +156,8 @@
     <string name="build_custom_ksu_ref">自定义 KSU commit/ref</string>
     <string name="build_custom_ksu_ref_placeholder">例如: abc123, branch:5, 或 tag</string>
     <string name="build_no_root_scheme_desc">不注入任何 Root 授权方案；KSU 分支、SUSFS 和 KPM 会自动关闭。</string>
+    <string name="build_oneplus_no_root_scheme_desc">构建无 Root 的 OnePlus 内核；SUSFS 和 KPM 会自动关闭。</string>
+    <string name="build_oneplus_ksu_branch_desc">OnePlus 构建使用对应 KernelSU 上游默认分支。</string>
     <string name="build_ksu_none">None（无 Root 方案）</string>
     <string name="build_standard">标准</string>
     <string name="build_development">开发</string>
@@ -158,6 +172,14 @@
     <string name="build_enable_rekernel">启用 Re-Kernel 驱动 (测试)</string>
     <string name="build_virtualization_support">虚拟化支持</string>
     <string name="build_enable_oneplus_8e">启用一加 8E 支持</string>
+    <string name="build_oneplus_lz4kd">启用 lz4kd</string>
+    <string name="build_oneplus_bbr">启用 BBR</string>
+    <string name="build_oneplus_proxy_optimization">启用代理优化</string>
+    <string name="build_oneplus_proxy_mtk_disabled">MTK 分支已强制关闭代理优化。</string>
+    <string name="build_oneplus_susfs_unsupported">当前 OnePlus KMI 没有可用的 SUSFS 上游分支；仅 android14/6.1 与 android15/6.6 支持，android12/5.10 和 android13/5.15 会自动关闭。</string>
+    <string name="build_oneplus_unicode_bypass">启用 Unicode 零宽绕过修复</string>
+    <string name="build_oneplus_proxy_short">代理优化</string>
+    <string name="build_oneplus_unicode_short">Unicode 绕过</string>
     <string name="build_zram_options">ZRAM 扩展选项</string>
     <string name="build_zram_full_algo">启用完整算法支持 (LZO/LZ4/ZSTD 等)</string>
     <string name="build_zram_custom_algo">自定义 ZRAM 算法</string>
@@ -234,6 +256,7 @@
     <string name="build_base_config">基础配置</string>
     <string name="build_summary_external_modules">外部模块 %1$d</string>
     <string name="build_hero_desc">触发 GitHub Actions 并自动整理 img、AK3、管理器和 SUSFS 模块。</string>
+    <string name="build_oneplus_hero_desc">使用 OnePlus/Oplus manifest 构建机型专用 AnyKernel3 包。</string>
     <string name="build_susfs_on">SUSFS 开启</string>
     <string name="build_susfs_off">SUSFS 关闭</string>
     <string name="build_virtualization_chip">虚拟化支持 %1$s</string>
@@ -260,7 +283,7 @@
     <string name="build_external_module_default">外部模块</string>
     <string name="build_stage_none">未选择阶段</string>
     <string name="build_source_list">来源 %1$s</string>
-    <string name="build_section_kernel_desc">优先使用设备识别出的推荐参数，避免手动填错版本线。</string>
+    <string name="build_section_kernel_desc">选择与当前系统匹配的 Android、KMI 和安全补丁日期；不确定时使用设备推荐。</string>
     <string name="build_section_ksu_desc">选择内核权限方案和对应分支。</string>
     <string name="build_section_features_desc">按需开启模块能力，越少改动越利于排查问题。</string>
     <string name="build_section_zram_desc">为内存压缩算法加入额外内核支持。</string>
@@ -518,8 +541,7 @@
     <string name="settings_about_version">当前版本：%1$s</string>
     <string name="settings_repository_info">仓库信息</string>
     <string name="settings_contributors">贡献者</string>
-    <string name="settings_contributors_desc">按当前 git 历史统计，仅展示可识别的 GitHub 用户名/链接，并过滤自动化账号。</string>
-    <string name="settings_contributor_commits">%1$d 个提交</string>
+    <string name="settings_contributors_desc">名单按 GitHub 用户名首字母排序；仅展示可识别的贡献者账号，并过滤自动化账号。</string>
     <string name="settings_open_source_licenses_intro">以下清单来自仓库文件、工作流、Gradle 版本目录和 npm lockfile；上游许可证以对应项目为准。</string>
     <string name="settings_license_group_repository">本仓库和内置代码</string>
     <string name="settings_license_group_upstream">上游项目与工作流引用</string>
@@ -562,6 +584,16 @@
     <string name="settings_group_local_templates_desc">管理保存在 ReSukiSU profile 存储中的模板。</string>
     <string name="settings_group_status_desc">最近一次模板操作的执行结果。</string>
     <string name="settings_group_edit_template_desc">直接编辑 App Profile 模板 JSON。</string>
+    <string name="settings_download_directory">默认下载目录</string>
+    <string name="settings_download_directory_desc">构建产物、预编译 GKI 和模块会保存到此文件系统目录。</string>
+    <string name="settings_download_directory_choose">选择文件夹</string>
+    <string name="settings_download_directory_reset">恢复默认</string>
+    <string name="settings_download_directory_storage_permission">打开所有文件访问权限</string>
+    <string name="settings_download_directory_tree_unsupported">所选文件夹无法转换为文件系统路径，请输入绝对路径或选择本机下载目录。</string>
+    <string name="settings_download_directory_default_restored">已恢复默认下载目录</string>
+    <string name="download_directory_not_directory">下载目录不是文件夹：%1$s</string>
+    <string name="download_directory_not_writable">下载目录不可写：%1$s</string>
+    <string name="download_directory_create_failed">无法创建下载目录：%1$s</string>
     <string name="settings_download_mirror">下载镜像站</string>
     <string name="settings_download_mirror_desc">留空直连 GitHub；填写后会先镜像到 Release 再下载</string>
 

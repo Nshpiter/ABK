@@ -14,7 +14,6 @@ on:
         options:
           - None
           - Official
-          #- Next
           - SukiSU
           - ReSukiSU
         default: ReSukiSU

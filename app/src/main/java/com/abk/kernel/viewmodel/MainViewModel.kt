@@ -19,6 +19,7 @@ import com.abk.kernel.data.repository.PreferencesRepository
 import com.abk.kernel.data.repository.Result
 import com.abk.kernel.utils.BuildMonitorService
 import com.abk.kernel.utils.BuildProgressUtils
+import com.abk.kernel.utils.DownloadDirectoryUtils
 import com.abk.kernel.utils.DownloadUtils
 import com.abk.kernel.utils.NotificationUtils
 import com.abk.kernel.utils.RootUtils
@@ -119,6 +120,7 @@ data class MainUiState(
     val customBackgroundUri: String? = null,
     val backgroundImageEnabled: Boolean = false,
     val uiSurfaceAlpha: Float = 1f,
+    val downloadDirectory: String = DownloadDirectoryUtils.defaultDirectoryPath(),
     val downloadMirrorBaseUrl: String = "",
     val prebuiltGkiEnabled: Boolean = true,
     val predictiveBackEnabled: Boolean = true,
@@ -316,6 +318,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         customAccentColorArgb = themePrefs.customAccentColorArgb
                     )
                 }
+            }
+        }
+        viewModelScope.launch {
+            prefs.downloadDirectory.collect { path ->
+                _uiState.update { it.copy(downloadDirectory = path) }
             }
         }
         viewModelScope.launch {
@@ -1205,6 +1212,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     customBackgroundUri = it.customBackgroundUri,
                     backgroundImageEnabled = it.backgroundImageEnabled,
                     uiSurfaceAlpha = it.uiSurfaceAlpha,
+                    downloadDirectory = it.downloadDirectory,
                     downloadMirrorBaseUrl = it.downloadMirrorBaseUrl,
                     prebuiltGkiEnabled = it.prebuiltGkiEnabled,
                     predictiveBackEnabled = it.predictiveBackEnabled,
@@ -1308,23 +1316,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val repo = state.forkRepo ?: return
         hasCheckedWorkflowEnablementThisLaunch = true
         viewModelScope.launch {
-            ensureBuildWorkflowEnabled(owner, repo.name, reportError = false)
+            ensureBuildWorkflowEnabled(owner, repo.name, KERNEL_WORKFLOW_FILE, reportError = false)
         }
     }
 
     private suspend fun ensureBuildWorkflowEnabled(
         owner: String,
         repoName: String,
+        workflowFile: String,
         reportError: Boolean
     ): Long? {
-        val actionUrl = workflowActionsUrl(owner, repoName)
-        return when (val workflow = github.getWorkflow(owner, repoName, KERNEL_WORKFLOW_FILE)) {
+        val actionUrl = workflowActionsUrl(owner, repoName, workflowFile)
+        return when (val workflow = github.getWorkflow(owner, repoName, workflowFile)) {
             is Result.Success -> {
                 if (workflow.data.state != "active") {
                     when (val enabled = github.enableWorkflow(owner, repoName, workflow.data.id)) {
                         is Result.Success -> {
                             delay(1000)
-                            when (val refreshed = github.getWorkflow(owner, repoName, KERNEL_WORKFLOW_FILE)) {
+                            when (val refreshed = github.getWorkflow(owner, repoName, workflowFile)) {
                                 is Result.Success -> {
                                     if (refreshed.data.state == "active") {
                                         return refreshed.data.id
@@ -1414,11 +1423,12 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         val username = snapshot.user?.login ?: return
         val repoName = snapshot.forkRepo?.name ?: BuildConfig.SOURCE_REPO_NAME
         val ref = snapshot.forkRepo?.defaultBranch ?: "main"
+        val workflowFile = workflowFileFor(next.config)
 
         buildQueueJob = viewModelScope.launch {
             try {
                 _uiState.update { it.copy(buildQueueProcessing = true, isLoading = true, error = null) }
-                val wfId = ensureBuildWorkflowEnabled(username, repoName, reportError = true)
+                val wfId = ensureBuildWorkflowEnabled(username, repoName, workflowFile, reportError = true)
                 if (wfId == null) {
                     markBuildQueueItemFailed(next.id, text(R.string.build_workflow_required))
                     return@launch
@@ -1451,7 +1461,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     is Result.Error -> {
                         markBuildQueueItemFailed(next.id, r.message)
                         if (r.code == 403 || r.code == 404) {
-                            showWorkflowEnablementPrompt(text(R.string.vm_workflow_dispatch_failed, r.message), workflowActionsUrl(username, repoName))
+                            showWorkflowEnablementPrompt(
+                                text(R.string.vm_workflow_dispatch_failed, r.message),
+                                workflowActionsUrl(username, repoName, workflowFile)
+                            )
                         } else {
                             _uiState.update { it.copy(error = r.message, buildStatus = BuildStatus.FAILURE) }
                         }
@@ -1562,23 +1575,25 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         repoName: String,
         recentRuns: List<WorkflowRun>
     ) {
-        val workflowId = when (val wf = github.getWorkflowId(owner, repoName, KERNEL_WORKFLOW_FILE)) {
-            is Result.Success -> wf.data
-            else -> return
-        }
-        val workflowRuns = recentRuns.filter { it.workflowId == workflowId }.ifEmpty {
-            when (val customRuns = github.listRecentRuns(owner, repoName, perPage = 10, workflowId = workflowId)) {
-                is Result.Success -> customRuns.data
-                else -> emptyList()
+        buildWorkflowFiles.forEach { workflowFile ->
+            val workflowId = when (val wf = github.getWorkflowId(owner, repoName, workflowFile)) {
+                is Result.Success -> wf.data
+                else -> return@forEach
             }
-        }
-        workflowRuns
-            .filter { it.isActiveBuildRun() }
-            .forEach { run ->
-                if (run.id !in monitoredRunIds || _uiState.value.activeBuildRuns.none { it.id == run.id }) {
-                    monitorExistingBuildRun(owner, repoName, run)
+            val workflowRuns = recentRuns.filter { it.workflowId == workflowId }.ifEmpty {
+                when (val customRuns = github.listRecentRuns(owner, repoName, perPage = 10, workflowId = workflowId)) {
+                    is Result.Success -> customRuns.data
+                    else -> emptyList()
                 }
             }
+            workflowRuns
+                .filter { it.isActiveBuildRun() }
+                .forEach { run ->
+                    if (run.id !in monitoredRunIds || _uiState.value.activeBuildRuns.none { it.id == run.id }) {
+                        monitorExistingBuildRun(owner, repoName, run)
+                    }
+                }
+        }
     }
 
     private suspend fun monitorExistingBuildRun(owner: String, repoName: String, run: WorkflowRun) {
@@ -1947,6 +1962,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private suspend fun downloadPrebuiltGkiNow(asset: PrebuiltGkiAsset, progressKey: Long) {
         if (!_uiState.value.prebuiltGkiEnabled) return
         val token = prefs.accessToken.first()
+        val downloadDirectory = prefs.downloadDirectory.first()
         _uiState.update {
             it.copy(
                 isDownloading = true,
@@ -1962,7 +1978,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             asset.name,
             asset.sizeBytes,
             PREBUILT_GKI_RUN_ID,
-            text(R.string.vm_prebuilt_gki_label)
+            text(R.string.vm_prebuilt_gki_label),
+            downloadDirectory
         ) { pct ->
             NotificationUtils.notifyDownloadProgress(getApplication(), pct, asset.name)
             _uiState.update { s ->
@@ -1973,9 +1990,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             _uiState.update { it.copy(isDownloading = false, downloadProgress = it.downloadProgress - progressKey) }
             return
         }
-        if (results.isNotEmpty()) {
+        if (results.artifacts.isNotEmpty()) {
             NotificationUtils.notifyDownloadDone(getApplication(), asset.name)
-            val updated = (_uiState.value.downloadedArtifacts + results)
+            val updated = (_uiState.value.downloadedArtifacts + results.artifacts)
                 .distinctBy { it.filePath }
                 .sortedDownloadedForDisplay()
             _uiState.update { s ->
@@ -1988,12 +2005,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             prefs.saveDownloadedArtifactsJson(gson.toJson(updated))
         } else {
-            finishArtifactDownloadWithError(progressKey, text(R.string.vm_prebuilt_gki_download_failed, asset.name))
+            finishArtifactDownloadWithError(
+                progressKey,
+                results.errorMessage ?: text(R.string.vm_prebuilt_gki_download_failed, asset.name)
+            )
         }
     }
 
     private suspend fun downloadArtifactNow(artifact: BuildArtifact) {
         val token = prefs.accessToken.first()
+        val downloadDirectory = prefs.downloadDirectory.first()
         if (token.isNullOrBlank()) {
             _uiState.update { it.copy(isDownloading = false, error = text(R.string.vm_artifact_download_login_required)) }
             return
@@ -2021,7 +2042,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             if (downloadUrl == null) token else null,
             artifact.toArtifact(),
             artifact.toWorkflowRun(),
-            downloadUrl
+            downloadUrl,
+            downloadDirectory
         ) { pct ->
             val displayProgress = if (mirrorEnabled) {
                 (50 + pct / 2).coerceIn(50, 100)
@@ -2033,9 +2055,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 s.copy(downloadProgress = s.downloadProgress + (artifact.id to displayProgress))
             }
         }
-        if (results.isNotEmpty()) {
+        if (results.artifacts.isNotEmpty()) {
             NotificationUtils.notifyDownloadDone(getApplication(), artifact.name)
-            val updated = (_uiState.value.downloadedArtifacts + results)
+            val updated = (_uiState.value.downloadedArtifacts + results.artifacts)
                 .distinctBy { it.filePath }
                 .sortedDownloadedForDisplay()
             _uiState.update { s ->
@@ -2048,7 +2070,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             prefs.saveDownloadedArtifactsJson(gson.toJson(updated))
         } else {
-            finishArtifactDownloadWithError(artifact.id, text(R.string.vm_artifact_download_failed, artifact.name))
+            finishArtifactDownloadWithError(
+                artifact.id,
+                results.errorMessage ?: text(R.string.vm_artifact_download_failed, artifact.name)
+            )
         }
     }
 
@@ -2320,6 +2345,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     fun setBackgroundImageEnabled(v: Boolean) = viewModelScope.launch { prefs.setBackgroundImageEnabled(v) }
     fun setUiSurfaceAlpha(alpha: Float) = viewModelScope.launch { prefs.setUiSurfaceAlpha(alpha) }
     fun acceptTerms() = viewModelScope.launch { prefs.acceptCurrentTerms() }
+    fun setDownloadDirectory(path: String) = viewModelScope.launch {
+        prefs.setDownloadDirectory(path)
+    }
     fun setDownloadMirrorBaseUrl(url: String) = viewModelScope.launch {
         prefs.setDownloadMirrorBaseUrl(url.trim())
     }
@@ -3880,6 +3908,11 @@ internal fun sanitizeBuildPlanName(name: String, config: KernelBuildConfig): Str
     name.trim().ifBlank { defaultBuildPlanName(config) }.take(BUILD_PLAN_NAME_LIMIT)
 
 internal fun defaultBuildPlanName(config: KernelBuildConfig): String {
+    if (config.buildTarget == BUILD_TARGET_ONEPLUS) {
+        return listOf(KernelSupport.onePlusDeviceLabel(config.onePlusDeviceManifest), config.kernelsuVariant)
+            .filter { it.isNotBlank() }
+            .joinToString(" · ")
+    }
     val android = config.androidVersion.removePrefix("android").ifBlank { config.androidVersion }
     return listOf("${config.kernelVersion}.${config.subLevel}", "Android $android", config.kernelsuVariant)
         .filter { it.isNotBlank() }
@@ -3931,6 +3964,9 @@ internal fun encodeBuildPlanPayload(
         writer.writeString(config.subLevel)
         writer.writeString(config.osPatchLevel)
         writer.writeString(config.revision)
+        writer.writeString(config.buildTarget)
+        writer.writeString(config.onePlusCpu)
+        writer.writeString(config.onePlusDeviceManifest)
     }
     writer.writeByte(BUILD_PLAN_KSU_VARIANTS.indexOrZero(config.kernelsuVariant))
     writer.writeByte(BUILD_PLAN_KSU_BRANCHES.indexOrZero(config.kernelsuBranch))
@@ -3977,13 +4013,31 @@ internal fun decodeBuildPlanPayload(
     val scope = buildPlanShareScopeFromWireValue(reader.readByte(), messages)
     val name = reader.readString()
     val versionBase = if (scope == BuildPlanShareScope.FULL) {
-        baseConfig.copy(
-            androidVersion = reader.readString(),
-            kernelVersion = reader.readString(),
-            subLevel = reader.readString(),
-            osPatchLevel = reader.readString(),
-            revision = reader.readString()
-        )
+        val androidVersion = reader.readString()
+        val kernelVersion = reader.readString()
+        val subLevel = reader.readString()
+        val osPatchLevel = reader.readString()
+        val revision = reader.readString()
+        if (version >= BUILD_PLAN_ONEPLUS_FIELDS_VERSION) {
+            baseConfig.copy(
+                androidVersion = androidVersion,
+                kernelVersion = kernelVersion,
+                subLevel = subLevel,
+                osPatchLevel = osPatchLevel,
+                revision = revision,
+                buildTarget = reader.readString(),
+                onePlusCpu = reader.readString(),
+                onePlusDeviceManifest = reader.readString()
+            )
+        } else {
+            baseConfig.copy(
+                androidVersion = androidVersion,
+                kernelVersion = kernelVersion,
+                subLevel = subLevel,
+                osPatchLevel = osPatchLevel,
+                revision = revision
+            )
+        }
     } else {
         baseConfig
     }
@@ -3998,7 +4052,7 @@ internal fun decodeBuildPlanPayload(
     val buildTime = reader.readString()
     val zramExtraAlgos = reader.readString()
     val kpmPassword = reader.readString()
-    val customRef = if (version >= BUILD_PLAN_CODE_VERSION) {
+    val customRef = if (version >= BUILD_PLAN_CUSTOM_REF_VERSION) {
         reader.readString()
     } else {
         ""
@@ -4035,7 +4089,11 @@ internal fun decodeBuildPlanPayload(
         customRef = customRef,
         virtualizationSupport = virtualizationSupport,
         useCustomExternalModules = featureMask.hasBuildPlanFlag(10),
-        customExternalModules = modules
+        customExternalModules = modules,
+        onePlusUseLz4kd = featureMask.hasBuildPlanFlag(11),
+        onePlusUseBbr = featureMask.hasBuildPlanFlag(12),
+        onePlusUseProxyOptimization = featureMask.hasBuildPlanFlag(13),
+        onePlusUseUnicodeBypass = featureMask.hasBuildPlanFlag(14)
     )
     return DecodedBuildPlanCode(
         name = name,
@@ -4132,6 +4190,10 @@ private fun KernelBuildConfig.toBuildPlanFeatureMask(): Int {
     set(8, suppOp)
     set(9, zramFullAlgo)
     set(10, useCustomExternalModules)
+    set(11, onePlusUseLz4kd)
+    set(12, onePlusUseBbr)
+    set(13, onePlusUseProxyOptimization)
+    set(14, onePlusUseUnicodeBypass)
     return mask
 }
 
@@ -4154,8 +4216,10 @@ private fun buildPlanShareScopeFromWireValue(
 
 private const val BUILD_PLAN_CODE_PREFIX = "ABKP2:"
 private const val BUILD_PLAN_LEGACY_CODE_PREFIX = "ABKP1:"
-private const val BUILD_PLAN_CODE_VERSION = 3
+private const val BUILD_PLAN_CODE_VERSION = 4
 private const val BUILD_PLAN_MIN_SUPPORTED_VERSION = 2
+private const val BUILD_PLAN_CUSTOM_REF_VERSION = 3
+private const val BUILD_PLAN_ONEPLUS_FIELDS_VERSION = 4
 private const val BUILD_PLAN_NAME_LIMIT = 80
 private const val BUILD_PLAN_MAX_STRING_BYTES = 4096
 private const val BUILD_PLAN_MAX_MODULES = 32
@@ -4210,6 +4274,7 @@ internal fun parseBuildParameterSummary(
     setValue: String = SUMMARY_VALUE_SET_ZH
 ): BuildParameterSummary? {
     val values = mutableMapOf<String, String>()
+    val extraRows = linkedMapOf<String, String>()
     var summarySeen = false
     logs.lineSequence()
         .map(::cleanBuildSummaryLogLine)
@@ -4226,10 +4291,14 @@ internal fun parseBuildParameterSummary(
                 .minOrNull() ?: return@forEach
             val label = line.substring(0, separator).trim()
             val value = line.substring(separator + 1).trim()
-            val key = normalizeBuildSummaryLabel(label) ?: return@forEach
-            values[key] = sanitizeBuildSummaryValue(key, value, emptyValue, defaultValue, setValue)
+            val key = normalizeBuildSummaryLabel(label)
+            if (key != null) {
+                values[key] = sanitizeBuildSummaryValue(key, value, emptyValue, defaultValue, setValue)
+            } else if (isBuildSummaryExtraLabel(label)) {
+                extraRows[label] = value.ifBlank { emptyValue }
+            }
         }
-    if (values.isEmpty()) return null
+    if (values.isEmpty() && extraRows.isEmpty()) return null
 
     return BuildParameterSummary(
         runId = runId,
@@ -4257,7 +4326,8 @@ internal fun parseBuildParameterSummary(
         reKernelEnabled = values["reKernelEnabled"].orEmpty(),
         virtualizationSupport = values["virtualizationSupport"].orEmpty(),
         customInjection = values["customInjection"].orEmpty(),
-        stockConfig = values["stockConfig"].orEmpty()
+        stockConfig = values["stockConfig"].orEmpty(),
+        extraRows = extraRows
     )
 }
 
@@ -4294,6 +4364,18 @@ private fun normalizeBuildSummaryLabel(label: String): String? {
         compact.contains("stockconfig") -> "stockConfig"
         else -> null
     }
+}
+
+private fun isBuildSummaryExtraLabel(label: String): Boolean {
+    val compact = label.replace(Regex("\\s+"), "").lowercase()
+    return compact in setOf(
+        "构建目标",
+        "机型配置",
+        "cpu分支",
+        "手机型号",
+        "上游xml",
+        "unicode绕过"
+    )
 }
 
 private fun sanitizeBuildSummaryValue(
@@ -4533,6 +4615,22 @@ private fun WorkflowRun.toBuildStatus(): BuildStatus = when (status) {
 // Helper to convert KernelBuildConfig to workflow dispatch inputs map
 internal fun KernelBuildConfig.toInputMap(): Map<String, String> {
     val config = KernelSupport.normalize(this)
+    if (config.buildTarget == BUILD_TARGET_ONEPLUS) {
+        return mapOf(
+            "cpu" to config.onePlusCpu,
+            "device_manifest" to config.onePlusDeviceManifest,
+            "android_version" to config.androidVersion,
+            "kernel_version" to config.kernelVersion,
+            "ksu_variant" to config.kernelsuVariant,
+            "enable_susfs" to (!config.cancelSusfs && config.kernelsuVariant != KSU_VARIANT_NONE).toString(),
+            "use_kpm" to config.useKpm.toString(),
+            "use_lz4kd" to config.onePlusUseLz4kd.toString(),
+            "use_bbg" to config.useBbg.toString(),
+            "use_bbr" to config.onePlusUseBbr.toString(),
+            "use_proxy_optimization" to config.onePlusUseProxyOptimization.toString(),
+            "use_unicode_bypass" to config.onePlusUseUnicodeBypass.toString()
+        )
+    }
     return mapOf(
         "android_version" to config.androidVersion,
         "kernel_version" to config.kernelVersion,
@@ -4584,6 +4682,8 @@ private fun List<CustomExternalModule>?.toWorkflowInput(): String = this.orEmpty
 private const val MAX_REMOTE_ARTIFACT_RUNS = 30
 private const val MAX_PERSISTED_REMOTE_ARTIFACTS = 240
 private const val KERNEL_WORKFLOW_FILE = "kernel-custom.yml"
+private const val ONEPLUS_WORKFLOW_FILE = "oneplus-custom.yml"
+private val buildWorkflowFiles = listOf(KERNEL_WORKFLOW_FILE, ONEPLUS_WORKFLOW_FILE)
 private const val MIRROR_WORKFLOW_FILE = "mirror-custom-artifacts.yml"
 private val ACTIVE_BUILD_STATUSES = setOf(BuildStatus.QUEUED, BuildStatus.IN_PROGRESS)
 private const val MANAGER_SETTING_APP_PROFILE_TEMPLATES = "app_profile_templates"
@@ -4609,8 +4709,15 @@ private data class ManagerSettingsLoad(
 
 private data class Quadruple<A, B, C, D>(val a: A, val b: B, val c: C, val d: D)
 
-private fun workflowActionsUrl(owner: String, repoName: String): String =
-    "https://github.com/$owner/$repoName/actions/workflows/$KERNEL_WORKFLOW_FILE"
+private fun workflowFileFor(config: KernelBuildConfig): String =
+    if (KernelSupport.normalizeBuildTarget(config.buildTarget) == BUILD_TARGET_ONEPLUS) {
+        ONEPLUS_WORKFLOW_FILE
+    } else {
+        KERNEL_WORKFLOW_FILE
+    }
+
+private fun workflowActionsUrl(owner: String, repoName: String, workflowFile: String = KERNEL_WORKFLOW_FILE): String =
+    "https://github.com/$owner/$repoName/actions/workflows/$workflowFile"
 private const val MIRROR_WORKFLOW_MAX_POLLS = 40
 private const val MIRROR_RELEASE_ASSET_MAX_POLLS = 6
 

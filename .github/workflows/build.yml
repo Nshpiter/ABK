@@ -453,19 +453,16 @@ jobs:
               OFFICIAL_REF="$OFFICIAL_STABLE_REF"
               SUKISU_REF="$SUKISU_STABLE_REF"
               RESUKISU_REF="$RESUKISU_STABLE_REF"
-              NEXT_BRANCH="main"
               ;;
             "Dev(开发)")
               OFFICIAL_REF="$OFFICIAL_DEV_REF"
               SUKISU_REF="$SUKISU_DEV_REF"
               RESUKISU_REF="$RESUKISU_DEV_REF"
-              NEXT_BRANCH="dev"
               ;;
             "Custom(自定义)")
               OFFICIAL_REF="$OFFICIAL_CUSTOM_REF"
               SUKISU_REF="$SUKISU_CUSTOM_REF"
               RESUKISU_REF="$RESUKISU_CUSTOM_REF"
-              NEXT_BRANCH="$custom_ref_input"
               ;;
             *)
               echo "未知分支: $branch_input" >&2
@@ -477,7 +474,6 @@ jobs:
             "Official") BRANCH="-s $OFFICIAL_REF" ;;
             "SukiSU") BRANCH="-s $SUKISU_REF" ;;
             "ReSukiSU") BRANCH="$RESUKISU_REF" ;;
-            "Next") BRANCH="$NEXT_BRANCH" ;;
             *) echo "未知变体: $variant_input" >&2; exit 1 ;;
           esac
 
@@ -915,10 +911,6 @@ jobs:
               fi
               cd ..
               ;;
-            "Next")
-              echo "添加 KernelSU-Next..."
-              curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/refs/heads/dev/kernel/setup.sh" | bash -s "$BRANCH"
-              ;;
             "SukiSU")
               echo "添加 SukiSU..."
               curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash $BRANCH
@@ -1299,8 +1291,8 @@ jobs:
 
               cd ..
               ;;
-            "Next"|"ReSukiSU")
-              echo "Next/ReSukiSU 使用内置 SUSFS 支持"
+            "ReSukiSU")
+              echo "ReSukiSU 使用内置 SUSFS 支持"
               ;;
             "SukiSU")
               echo "SukiSU 跳过 SUSFS Kconfig，仅保留按版本收窄的源码兼容处理"
@@ -1318,7 +1310,7 @@ jobs:
             fi
           fi
 
-          if [ "${{ inputs.ksu_variant }}" == "Official" ] || [ "${{ inputs.ksu_variant }}" == "Next" ] || [ "${{ inputs.ksu_variant }}" == "SukiSU" ] || [ "${{ inputs.ksu_variant }}" == "ReSukiSU" ]; then
+          if [ "${{ inputs.ksu_variant }}" == "Official" ] || [ "${{ inputs.ksu_variant }}" == "SukiSU" ] || [ "${{ inputs.ksu_variant }}" == "ReSukiSU" ]; then
             CURRENT_SUB="${{ inputs.sub_level }}"
             if [[ ! "$CURRENT_SUB" =~ ^[0-9]+$ ]]; then
               CURRENT_SUB=99999
@@ -2464,13 +2456,13 @@ jobs:
           EOF
           fi
 
-          if [ "${{ inputs.use_kpm }}" == "true" ] && { [ "${{ inputs.ksu_variant }}" == "SukiSU" ] || [ "${{ inputs.ksu_variant }}" == "ReSukiSU" ] || [ "${{ inputs.ksu_variant }}" == "Next" ]; }; then
+          if [ "${{ inputs.use_kpm }}" == "true" ] && { [ "${{ inputs.ksu_variant }}" == "SukiSU" ] || [ "${{ inputs.ksu_variant }}" == "ReSukiSU" ]; }; then
             echo "CONFIG_KPM=y" >> "$DEFCONFIG"
-          elif [ "${{ inputs.ksu_variant }}" == "SukiSU" ] || [ "${{ inputs.ksu_variant }}" == "ReSukiSU" ] || [ "${{ inputs.ksu_variant }}" == "Next" ]; then
+          elif [ "${{ inputs.ksu_variant }}" == "SukiSU" ] || [ "${{ inputs.ksu_variant }}" == "ReSukiSU" ]; then
             echo "# CONFIG_KPM is not set" >> "$DEFCONFIG"
           fi
 
-          if [ "${{ inputs.enable_susfs }}" != "true" ] && { [ "${{ inputs.ksu_variant }}" == "SukiSU" ] || [ "${{ inputs.ksu_variant }}" == "ReSukiSU" ] || [ "${{ inputs.ksu_variant }}" == "Next" ]; }; then
+          if [ "${{ inputs.enable_susfs }}" != "true" ] && { [ "${{ inputs.ksu_variant }}" == "SukiSU" ] || [ "${{ inputs.ksu_variant }}" == "ReSukiSU" ]; }; then
             cat >> "$DEFCONFIG" << 'EOF'
           # CONFIG_KSU_SUSFS is not set
           # CONFIG_KSU_SUSFS_SUS_PATH is not set
@@ -2499,7 +2491,7 @@ jobs:
           sed -i 's/check_defconfig//' ./common/build.config.gki
 
       - name: 配置 KPM 超级密码
-        if: inputs.use_kpm && inputs.kpm_password != '' && (inputs.ksu_variant == 'SukiSU' || inputs.ksu_variant == 'ReSukiSU' || inputs.ksu_variant == 'Next')
+        if: inputs.use_kpm && inputs.kpm_password != '' && (inputs.ksu_variant == 'SukiSU' || inputs.ksu_variant == 'ReSukiSU')
         run: |
           echo "KPM 超级密码将在 Image KPM patch 阶段写入。"
           echo "CONFIG_KPM_SUPER_KEY 不是当前 KSU Kconfig 符号，不能写入 defconfig fragment。"
@@ -2535,6 +2527,43 @@ jobs:
             sed -i '/kmi_symbol_list_strict_mode/d' ./common/BUILD.bazel
             rm -rf ./common/android/abi_gki_protected_exports_*
             sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
+            python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          path = Path("./common/BUILD.bazel")
+          if not path.exists():
+              sys.exit(0)
+
+          marker = '"net/ipv4/tcp_bic.ko"'
+          text = path.read_text()
+          if marker in text:
+              sys.exit(0)
+
+          pattern = re.compile(
+              r'(name\s*=\s*"kernel_aarch64"[\s\S]*?module_outs\s*=\s*\[)([\s\S]*?)(^\s*\])',
+              re.M,
+          )
+          match = pattern.search(text)
+          if not match:
+              print("::warning::未找到 kernel_aarch64 的 module_outs，跳过 tcp_bic.ko 注入")
+              sys.exit(0)
+
+          body = match.group(2)
+          indent = "        "
+          for line in body.splitlines():
+              if line.strip():
+                  indent = re.match(r'^\s*', line).group(0)
+                  break
+
+          if body.endswith("\n"):
+              body_new = body + f"{indent}{marker},\n"
+          else:
+              body_new = body + f"\n{indent}{marker},\n"
+
+          path.write_text(text[:match.start(2)] + body_new + text[match.end(2):])
+          PY
           fi
 
           VERSION_INPUT=$(echo "${{ inputs.version }}" | tr -d '[:space:]')
@@ -3826,8 +3855,8 @@ jobs:
             echo "当前 SUSFS 最新提交日期: ${SUSFS_LATEST_COMMIT_DATE}"
             echo "如果日期不同或相差过远则补丁失效、编译失败"
 
-      - name: 应用 KPM 补丁 (SukiSU/ReSukiSU/Next)
-        if: inputs.use_kpm && (inputs.ksu_variant == 'SukiSU' || inputs.ksu_variant == 'ReSukiSU' || inputs.ksu_variant == 'Next')
+      - name: 应用 KPM 补丁 (SukiSU/ReSukiSU)
+        if: inputs.use_kpm && (inputs.ksu_variant == 'SukiSU' || inputs.ksu_variant == 'ReSukiSU')
         env:
           KPM_PASSWORD: ${{ inputs.kpm_password }}
         run: |

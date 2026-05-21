@@ -50,6 +50,8 @@ import com.abk.kernel.data.model.BuildQueueItemStatus
 import com.abk.kernel.data.model.BuildProgress
 import com.abk.kernel.data.model.BuildStepProgress
 import com.abk.kernel.data.model.BuildStatus
+import com.abk.kernel.data.model.BUILD_TARGET_GKI
+import com.abk.kernel.data.model.BUILD_TARGET_ONEPLUS
 import com.abk.kernel.data.model.CustomExternalModule
 import com.abk.kernel.data.model.CustomExternalModuleStage
 import com.abk.kernel.data.model.ExternalModuleMetadata
@@ -57,6 +59,8 @@ import com.abk.kernel.data.model.KernelSupport
 import com.abk.kernel.data.model.KernelBuildConfig
 import com.abk.kernel.data.model.KSU_BRANCH_CUSTOM
 import com.abk.kernel.data.model.KSU_VARIANT_NONE
+import com.abk.kernel.data.model.KSU_VARIANT_RESUKISU
+import com.abk.kernel.data.model.KSU_VARIANT_SUKISU
 import com.abk.kernel.data.model.ModuleCatalogItem
 import com.abk.kernel.data.model.ModuleCatalogRepository
 import com.abk.kernel.ui.components.AbkScreenHorizontalPadding
@@ -101,11 +105,18 @@ fun BuildScreen(
     val uriHandler = LocalUriHandler.current
     val rawConfig = state.buildConfig
     val config = remember(rawConfig) { KernelSupport.normalize(rawConfig) }
+    val isOnePlusBuild = config.buildTarget == BUILD_TARGET_ONEPLUS
     val recommended = state.recommendedBuildConfig
     val motionScheme = MaterialTheme.motionScheme
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(rememberTopAppBarState())
     val suggestedPlanName = remember(config) { vm.suggestedBuildPlanName(config) }
-    val ksuVariantOptions = remember { KernelSupport.ksuVariantOptions() }
+    val ksuVariantOptions = remember(config.buildTarget) {
+        if (config.buildTarget == BUILD_TARGET_ONEPLUS) {
+            KernelSupport.onePlusKsuVariantOptions()
+        } else {
+            KernelSupport.ksuVariantOptions()
+        }
+    }
     val ksuBranchOptions = remember { KernelSupport.ksuBranchOptions() }
     val virtualizationSupportOptions = remember(config.kernelVersion) {
         KernelSupport.virtualizationSupportOptions(config.kernelVersion)
@@ -239,48 +250,78 @@ fun BuildScreen(
                 val disabledLabel = stringResource(R.string.build_feature_disabled)
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(stringResource(R.string.build_config_overview), fontWeight = FontWeight.SemiBold)
-                    Text(stringResource(R.string.build_kernel_line, config.androidVersion, config.kernelVersion, config.subLevel))
-                    Text(
-                        if (noRootScheme) {
-                            "KSU: ${ksuVariantDisplayName(config.kernelsuVariant)}"
-                        } else {
-                            "KSU: ${config.kernelsuVariant} (${config.kernelsuBranch})"
-                        }
-                    )
-                    Text(stringResource(R.string.build_patch_level_line, config.osPatchLevel))
-                    Text(
-                        stringResource(
-                            R.string.build_feature_line,
-                            if (!config.cancelSusfs) enabledLabel else disabledLabel,
-                            if (config.useZram) enabledLabel else disabledLabel,
-                            if (config.useKpm) enabledLabel else disabledLabel
+                    if (isOnePlusBuild) {
+                        Text(stringResource(R.string.build_target_line, buildTargetLabel(config.buildTarget)))
+                        Text(stringResource(R.string.build_oneplus_device_line, KernelSupport.onePlusDeviceLabel(config.onePlusDeviceManifest)))
+                        Text(stringResource(R.string.build_oneplus_kernel_line, config.androidVersion, config.kernelVersion))
+                        Text("KSU: ${ksuVariantDisplayName(config.kernelsuVariant)}")
+                        Text(
+                            stringResource(
+                                R.string.build_oneplus_feature_line,
+                                if (!config.cancelSusfs) enabledLabel else disabledLabel,
+                                if (config.onePlusUseLz4kd) enabledLabel else disabledLabel,
+                                if (config.useKpm) enabledLabel else disabledLabel
+                            )
                         )
-                    )
-                    Text(
-                        stringResource(
-                            R.string.build_protection_line,
-                            if (config.useBbg) enabledLabel else disabledLabel,
-                            if (config.useDdk) enabledLabel else disabledLabel
+                        Text(
+                            stringResource(
+                                R.string.build_oneplus_network_line,
+                                if (config.onePlusUseBbr) enabledLabel else disabledLabel,
+                                if (config.onePlusUseProxyOptimization) enabledLabel else disabledLabel,
+                                if (config.onePlusUseUnicodeBypass) enabledLabel else disabledLabel
+                            )
                         )
-                    )
-                    Text(
-                        stringResource(
-                            R.string.build_sync_network_line,
-                            if (config.useNtsync) enabledLabel else disabledLabel,
-                            if (config.useNetworking) enabledLabel else disabledLabel
-                        )
-                    )
-                    Text(stringResource(R.string.build_virtualization_line, virtualizationSupportLabel(config.virtualizationSupport)))
-                    Text(
-                        stringResource(
-                            R.string.build_external_modules_line,
-                            if (config.useCustomExternalModules) {
-                                stringResource(R.string.build_external_modules_count, config.customExternalModules.size)
-                            } else {
+                        Text(
+                            stringResource(
+                                R.string.build_protection_line,
+                                if (config.useBbg) enabledLabel else disabledLabel,
                                 disabledLabel
+                            )
+                        )
+                    } else {
+                        Text(stringResource(R.string.build_kernel_line, config.androidVersion, config.kernelVersion, config.subLevel))
+                        Text(
+                            if (noRootScheme) {
+                                "KSU: ${ksuVariantDisplayName(config.kernelsuVariant)}"
+                            } else {
+                                "KSU: ${config.kernelsuVariant} (${config.kernelsuBranch})"
                             }
                         )
-                    )
+                        Text(stringResource(R.string.build_patch_level_line, config.osPatchLevel))
+                        Text(
+                            stringResource(
+                                R.string.build_feature_line,
+                                if (!config.cancelSusfs) enabledLabel else disabledLabel,
+                                if (config.useZram) enabledLabel else disabledLabel,
+                                if (config.useKpm) enabledLabel else disabledLabel
+                            )
+                        )
+                        Text(
+                            stringResource(
+                                R.string.build_protection_line,
+                                if (config.useBbg) enabledLabel else disabledLabel,
+                                if (config.useDdk) enabledLabel else disabledLabel
+                            )
+                        )
+                        Text(
+                            stringResource(
+                                R.string.build_sync_network_line,
+                                if (config.useNtsync) enabledLabel else disabledLabel,
+                                if (config.useNetworking) enabledLabel else disabledLabel
+                            )
+                        )
+                        Text(stringResource(R.string.build_virtualization_line, virtualizationSupportLabel(config.virtualizationSupport)))
+                        Text(
+                            stringResource(
+                                R.string.build_external_modules_line,
+                                if (config.useCustomExternalModules) {
+                                    stringResource(R.string.build_external_modules_count, config.customExternalModules.size)
+                                } else {
+                                    disabledLabel
+                                }
+                            )
+                        )
+                    }
                     if (activeBuild || activeQueueCount > 0) {
                         Text(
                             text = stringResource(R.string.build_active_queue_notice),
@@ -656,6 +697,35 @@ fun BuildScreen(
                 }
             )
 
+            BuildTargetSelector(
+                selected = config.buildTarget,
+                onSelect = { target ->
+                    val next = if (target == BUILD_TARGET_ONEPLUS) {
+                        config.copy(
+                            buildTarget = BUILD_TARGET_ONEPLUS,
+                            androidVersion = "android14",
+                            kernelVersion = "6.1",
+                            kernelsuVariant = KSU_VARIANT_SUKISU,
+                            cancelSusfs = true,
+                            useKpm = false,
+                            useBbg = true,
+                            onePlusCpu = "sm8650",
+                            onePlusDeviceManifest = "oneplus_12_b",
+                            onePlusUseLz4kd = false,
+                            onePlusUseBbr = false,
+                            onePlusUseProxyOptimization = true,
+                            onePlusUseUnicodeBypass = false
+                        )
+                    } else {
+                        config.copy(
+                            buildTarget = BUILD_TARGET_GKI,
+                            kernelsuVariant = KSU_VARIANT_RESUKISU
+                        )
+                    }
+                    vm.updateBuildConfig(KernelSupport.normalize(next))
+                }
+            )
+
             AnimatedVisibility(
                 visible = state.buildStatus != BuildStatus.IDLE,
                 enter = fadeIn() + slideInVertically { -it / 3 } + expandVertically(),
@@ -675,81 +745,120 @@ fun BuildScreen(
             }
 
             SectionCard(section = BuildSection.KernelVersion) {
-                DropdownField(
-                    label = stringResource(R.string.build_android_version),
-                    value = config.androidVersion,
-                    options = KernelSupport.androidVersions(),
-                    recommendedValue = recommended?.androidVersion,
-                    onSelect = {
-                        vm.updateBuildConfig(
-                            KernelSupport.normalize(
-                                config.copy(
-                                    androidVersion = it,
-                                    kernelVersion = KernelSupport.kernelForAndroid(it)
+                if (isOnePlusBuild) {
+                    DropdownField(
+                        label = stringResource(R.string.build_oneplus_device_manifest),
+                        value = config.onePlusDeviceManifest,
+                        options = KernelSupport.onePlusDeviceManifestOptions,
+                        optionLabel = KernelSupport::onePlusDeviceLabel,
+                        onSelect = { manifest ->
+                            val profile = KernelSupport.onePlusDeviceProfile(manifest)
+                            vm.updateBuildConfig(
+                                KernelSupport.normalize(
+                                    config.copy(
+                                        onePlusDeviceManifest = manifest,
+                                        onePlusCpu = profile?.cpu ?: config.onePlusCpu,
+                                        androidVersion = profile?.androidVersion ?: config.androidVersion,
+                                        kernelVersion = profile?.kernelVersion ?: config.kernelVersion
+                                    )
                                 )
                             )
-                        )
-                    }
-                )
-                DropdownField(
-                    label = stringResource(R.string.build_kernel_version),
-                    value = config.kernelVersion,
-                    options = KernelSupport.kernelVersions(),
-                    recommendedValue = recommended?.kernelVersion,
-                    onSelect = {
-                        vm.updateBuildConfig(
-                            KernelSupport.normalize(
-                                config.copy(
-                                    androidVersion = KernelSupport.androidForKernel(it),
-                                    kernelVersion = it
-                                )
-                            )
-                        )
-                    }
-                )
-                DropdownField(
-                    label = stringResource(R.string.build_sub_level),
-                    value = config.subLevel,
-                    options = subLevelOptions,
-                    recommendedValue = recommended
-                        ?.takeIf {
-                            it.androidVersion == config.androidVersion && it.kernelVersion == config.kernelVersion
                         }
-                        ?.subLevel,
-                    onSelect = {
-                        vm.updateBuildConfig(KernelSupport.normalize(config.copy(subLevel = it)))
-                    }
-                )
-                DropdownField(
-                    label = stringResource(R.string.build_security_patch_level),
-                    value = config.osPatchLevel,
-                    options = osPatchOptions,
-                    recommendedValue = recommended
-                        ?.takeIf {
-                            it.androidVersion == config.androidVersion &&
-                                it.kernelVersion == config.kernelVersion &&
-                                it.subLevel == config.subLevel
-                        }
-                        ?.osPatchLevel,
-                    onSelect = {
-                        vm.updateBuildConfig(config.copy(osPatchLevel = it))
-                    }
-                )
-                if (config.kernelVersion == "5.10") {
-                    OutlinedTextField(
-                        value = config.revision,
-                        onValueChange = { vm.updateBuildConfig(config.copy(revision = it)) },
-                        label = {
-                            Text(
-                                recommended?.revision?.let {
-                                    stringResource(R.string.build_revision_recommended, it)
-                                } ?: stringResource(R.string.build_revision_510)
-                            )
-                        },
-                        placeholder = { Text(stringResource(R.string.build_revision_placeholder)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
                     )
+                    Text(
+                        text = stringResource(R.string.build_oneplus_profile_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    ReadOnlyField(
+                        label = stringResource(R.string.build_oneplus_cpu),
+                        value = config.onePlusCpu
+                    )
+                    ReadOnlyField(
+                        label = stringResource(R.string.build_android_version),
+                        value = config.androidVersion
+                    )
+                    ReadOnlyField(
+                        label = stringResource(R.string.build_kernel_version),
+                        value = config.kernelVersion
+                    )
+                } else {
+                    DropdownField(
+                        label = stringResource(R.string.build_android_version),
+                        value = config.androidVersion,
+                        options = KernelSupport.androidVersions(),
+                        recommendedValue = recommended?.androidVersion,
+                        onSelect = {
+                            vm.updateBuildConfig(
+                                KernelSupport.normalize(
+                                    config.copy(
+                                        androidVersion = it,
+                                        kernelVersion = KernelSupport.kernelForAndroid(it)
+                                    )
+                                )
+                            )
+                        }
+                    )
+                    DropdownField(
+                        label = stringResource(R.string.build_kernel_version),
+                        value = config.kernelVersion,
+                        options = KernelSupport.kernelVersions(),
+                        recommendedValue = recommended?.kernelVersion,
+                        onSelect = {
+                            vm.updateBuildConfig(
+                                KernelSupport.normalize(
+                                    config.copy(
+                                        androidVersion = KernelSupport.androidForKernel(it),
+                                        kernelVersion = it
+                                    )
+                                )
+                            )
+                        }
+                    )
+                    DropdownField(
+                        label = stringResource(R.string.build_sub_level),
+                        value = config.subLevel,
+                        options = subLevelOptions,
+                        recommendedValue = recommended
+                            ?.takeIf {
+                                it.androidVersion == config.androidVersion && it.kernelVersion == config.kernelVersion
+                            }
+                            ?.subLevel,
+                        onSelect = {
+                            vm.updateBuildConfig(KernelSupport.normalize(config.copy(subLevel = it)))
+                        }
+                    )
+                    DropdownField(
+                        label = stringResource(R.string.build_security_patch_level),
+                        value = config.osPatchLevel,
+                        options = osPatchOptions,
+                        recommendedValue = recommended
+                            ?.takeIf {
+                                it.androidVersion == config.androidVersion &&
+                                    it.kernelVersion == config.kernelVersion &&
+                                    it.subLevel == config.subLevel
+                            }
+                            ?.osPatchLevel,
+                        onSelect = {
+                            vm.updateBuildConfig(config.copy(osPatchLevel = it))
+                        }
+                    )
+                    if (config.kernelVersion == "5.10") {
+                        OutlinedTextField(
+                            value = config.revision,
+                            onValueChange = { vm.updateBuildConfig(config.copy(revision = it)) },
+                            label = {
+                                Text(
+                                    recommended?.revision?.let {
+                                        stringResource(R.string.build_revision_recommended, it)
+                                    } ?: stringResource(R.string.build_revision_510)
+                                )
+                            },
+                            placeholder = { Text(stringResource(R.string.build_revision_placeholder)) },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                    }
                 }
             }
 
@@ -765,11 +874,15 @@ fun BuildScreen(
                 )
                 if (noRootScheme) {
                     Text(
-                        text = stringResource(R.string.build_no_root_scheme_desc),
+                        text = if (isOnePlusBuild) {
+                            stringResource(R.string.build_oneplus_no_root_scheme_desc)
+                        } else {
+                            stringResource(R.string.build_no_root_scheme_desc)
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                } else {
+                } else if (!isOnePlusBuild) {
                     DropdownField(
                         label = stringResource(R.string.build_ksu_branch),
                         value = KernelSupport.normalizeKsuBranch(config.kernelsuBranch),
@@ -790,47 +903,102 @@ fun BuildScreen(
                             singleLine = true
                         )
                     }
+                } else {
+                    Text(
+                        text = stringResource(R.string.build_oneplus_ksu_branch_desc),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
             SectionCard(section = BuildSection.Features) {
                 val noRootScheme = config.kernelsuVariant == KSU_VARIANT_NONE
-                SwitchRow(stringResource(R.string.build_enable_susfs), !config.cancelSusfs, enabled = !noRootScheme) {
-                    vm.updateBuildConfig(KernelSupport.normalize(config.copy(cancelSusfs = !it)))
-                }
-                SwitchRow(stringResource(R.string.build_enable_zram), config.useZram) {
-                    vm.updateBuildConfig(config.copy(useZram = it))
-                }
-                SwitchRow(stringResource(R.string.build_enable_bbg), config.useBbg) {
-                    vm.updateBuildConfig(config.copy(useBbg = it))
-                }
-                SwitchRow(stringResource(R.string.build_enable_ddk), config.useDdk) {
-                    vm.updateBuildConfig(config.copy(useDdk = it))
-                }
-                SwitchRow(stringResource(R.string.build_enable_ntsync), config.useNtsync) {
-                    vm.updateBuildConfig(config.copy(useNtsync = it))
-                }
-                SwitchRow(stringResource(R.string.build_enable_networking), config.useNetworking) {
-                    vm.updateBuildConfig(config.copy(useNetworking = it))
-                }
-                SwitchRow(stringResource(R.string.build_enable_kpm), config.useKpm, enabled = !noRootScheme) {
-                    vm.updateBuildConfig(config.copy(useKpm = it))
-                }
-                SwitchRow(stringResource(R.string.build_enable_rekernel), config.useRekernel) {
-                    vm.updateBuildConfig(config.copy(useRekernel = it))
-                }
-                DropdownField(
-                    label = stringResource(R.string.build_virtualization_support),
-                    value = config.virtualizationSupport,
-                    options = virtualizationSupportOptions,
-                    onSelect = { vm.updateBuildConfig(config.copy(virtualizationSupport = it)) }
-                )
-                SwitchRow(stringResource(R.string.build_enable_oneplus_8e), config.suppOp) {
-                    vm.updateBuildConfig(config.copy(suppOp = it))
+                if (isOnePlusBuild) {
+                    val kpmSupported = config.kernelsuVariant in setOf(KSU_VARIANT_SUKISU, KSU_VARIANT_RESUKISU)
+                    val proxyAllowed = !config.onePlusCpu.startsWith("mt")
+                    val onePlusSusfsSupported = KernelSupport.onePlusSusfsSupported(config.androidVersion, config.kernelVersion)
+                    SwitchRow(
+                        stringResource(R.string.build_enable_susfs),
+                        !config.cancelSusfs && onePlusSusfsSupported,
+                        enabled = !noRootScheme && onePlusSusfsSupported
+                    ) {
+                        vm.updateBuildConfig(KernelSupport.normalize(config.copy(cancelSusfs = !it)))
+                    }
+                    if (!onePlusSusfsSupported) {
+                        Text(
+                            text = stringResource(R.string.build_oneplus_susfs_unsupported),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    SwitchRow(stringResource(R.string.build_enable_kpm), config.useKpm, enabled = kpmSupported && !noRootScheme) {
+                        vm.updateBuildConfig(KernelSupport.normalize(config.copy(useKpm = it)))
+                    }
+                    SwitchRow(stringResource(R.string.build_oneplus_lz4kd), config.onePlusUseLz4kd) {
+                        vm.updateBuildConfig(config.copy(onePlusUseLz4kd = it))
+                    }
+                    SwitchRow(stringResource(R.string.build_enable_bbg), config.useBbg) {
+                        vm.updateBuildConfig(config.copy(useBbg = it))
+                    }
+                    SwitchRow(stringResource(R.string.build_oneplus_bbr), config.onePlusUseBbr) {
+                        vm.updateBuildConfig(config.copy(onePlusUseBbr = it))
+                    }
+                    SwitchRow(
+                        stringResource(R.string.build_oneplus_proxy_optimization),
+                        config.onePlusUseProxyOptimization,
+                        enabled = proxyAllowed
+                    ) {
+                        vm.updateBuildConfig(KernelSupport.normalize(config.copy(onePlusUseProxyOptimization = it)))
+                    }
+                    if (!proxyAllowed) {
+                        Text(
+                            text = stringResource(R.string.build_oneplus_proxy_mtk_disabled),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    SwitchRow(stringResource(R.string.build_oneplus_unicode_bypass), config.onePlusUseUnicodeBypass) {
+                        vm.updateBuildConfig(config.copy(onePlusUseUnicodeBypass = it))
+                    }
+                } else {
+                    SwitchRow(stringResource(R.string.build_enable_susfs), !config.cancelSusfs, enabled = !noRootScheme) {
+                        vm.updateBuildConfig(KernelSupport.normalize(config.copy(cancelSusfs = !it)))
+                    }
+                    SwitchRow(stringResource(R.string.build_enable_zram), config.useZram) {
+                        vm.updateBuildConfig(config.copy(useZram = it))
+                    }
+                    SwitchRow(stringResource(R.string.build_enable_bbg), config.useBbg) {
+                        vm.updateBuildConfig(config.copy(useBbg = it))
+                    }
+                    SwitchRow(stringResource(R.string.build_enable_ddk), config.useDdk) {
+                        vm.updateBuildConfig(config.copy(useDdk = it))
+                    }
+                    SwitchRow(stringResource(R.string.build_enable_ntsync), config.useNtsync) {
+                        vm.updateBuildConfig(config.copy(useNtsync = it))
+                    }
+                    SwitchRow(stringResource(R.string.build_enable_networking), config.useNetworking) {
+                        vm.updateBuildConfig(config.copy(useNetworking = it))
+                    }
+                    SwitchRow(stringResource(R.string.build_enable_kpm), config.useKpm, enabled = !noRootScheme) {
+                        vm.updateBuildConfig(config.copy(useKpm = it))
+                    }
+                    SwitchRow(stringResource(R.string.build_enable_rekernel), config.useRekernel) {
+                        vm.updateBuildConfig(config.copy(useRekernel = it))
+                    }
+                    DropdownField(
+                        label = stringResource(R.string.build_virtualization_support),
+                        value = config.virtualizationSupport,
+                        options = virtualizationSupportOptions,
+                        onSelect = { vm.updateBuildConfig(config.copy(virtualizationSupport = it)) }
+                    )
+                    SwitchRow(stringResource(R.string.build_enable_oneplus_8e), config.suppOp) {
+                        vm.updateBuildConfig(config.copy(suppOp = it))
+                    }
                 }
             }
 
-            AnimatedVisibility(config.useZram) {
+            AnimatedVisibility(!isOnePlusBuild && config.useZram) {
                 SectionCard(section = BuildSection.ZramOptions) {
                     SwitchRow(stringResource(R.string.build_zram_full_algo), config.zramFullAlgo) {
                         vm.updateBuildConfig(config.copy(zramFullAlgo = it))
@@ -848,7 +1016,7 @@ fun BuildScreen(
                 }
             }
 
-            AnimatedVisibility(config.useKpm) {
+            AnimatedVisibility(!isOnePlusBuild && config.useKpm) {
                 SectionCard(section = BuildSection.KpmOptions) {
                     OutlinedTextField(
                         value = config.kpmPassword,
@@ -861,6 +1029,7 @@ fun BuildScreen(
                 }
             }
 
+            if (!isOnePlusBuild) {
             SectionCard(section = BuildSection.CustomModules) {
                 SwitchRow(stringResource(R.string.build_enable_custom_modules), config.useCustomExternalModules) {
                     vm.updateBuildConfig(config.copy(useCustomExternalModules = it))
@@ -1082,6 +1251,7 @@ fun BuildScreen(
                     singleLine = true
                 )
                 ConfigPreviewText(buildTimePreview)
+            }
             }
 
             // Submit button
@@ -1888,6 +2058,45 @@ private fun ConfigPreviewText(preview: String) {
     )
 }
 
+@Composable
+private fun BuildTargetSelector(
+    selected: String,
+    onSelect: (String) -> Unit
+) {
+    ExpressiveSectionCard(
+        title = stringResource(R.string.build_target_title),
+        subtitle = stringResource(R.string.build_target_desc),
+        icon = Icons.Default.AccountTree
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            listOf(BUILD_TARGET_GKI, BUILD_TARGET_ONEPLUS).forEach { target ->
+                FilterChip(
+                    selected = selected == target,
+                    onClick = { onSelect(target) },
+                    label = { Text(buildTargetLabel(target), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = if (target == BUILD_TARGET_ONEPLUS) Icons.Default.PhoneAndroid else Icons.Default.Memory,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun buildTargetLabel(target: String): String = when (target) {
+    BUILD_TARGET_ONEPLUS -> stringResource(R.string.build_target_oneplus)
+    else -> stringResource(R.string.build_target_gki)
+}
+
 private fun copyTextToClipboard(context: Context, label: String, text: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     clipboard.setPrimaryClip(ClipData.newPlainText(label, text))
@@ -1895,6 +2104,19 @@ private fun copyTextToClipboard(context: Context, label: String, text: String) {
 
 @Composable
 private fun buildPlanSummary(config: KernelBuildConfig): String {
+    if (config.buildTarget == BUILD_TARGET_ONEPLUS) {
+        val enabled = mutableListOf<String>()
+        if (!config.cancelSusfs) enabled += "SUSFS"
+        if (config.onePlusUseLz4kd) enabled += "lz4kd"
+        if (config.useBbg) enabled += "BBG"
+        if (config.useKpm) enabled += "KPM"
+        if (config.onePlusUseBbr) enabled += "BBR"
+        if (config.onePlusUseProxyOptimization) enabled += stringResource(R.string.build_oneplus_proxy_short)
+        if (config.onePlusUseUnicodeBypass) enabled += stringResource(R.string.build_oneplus_unicode_short)
+        val featureSummary = enabled.ifEmpty { listOf(stringResource(R.string.build_base_config)) }.joinToString("、")
+        return "${buildTargetLabel(config.buildTarget)} · ${KernelSupport.onePlusDeviceLabel(config.onePlusDeviceManifest)}\n" +
+            "${config.kernelVersion} · ${config.androidVersion} · ${ksuVariantDisplayName(config.kernelsuVariant)} · $featureSummary"
+    }
     val android = config.androidVersion.removePrefix("android").ifBlank { config.androidVersion }
     val enabled = mutableListOf<String>()
     if (!config.cancelSusfs) enabled += "SUSFS"
@@ -1932,6 +2154,45 @@ private fun BuildPlanHero(
     recommended: KernelBuildConfig?,
     status: BuildStatus
 ) {
+    if (config.buildTarget == BUILD_TARGET_ONEPLUS) {
+        ExpressiveHeroCard(
+            title = KernelSupport.onePlusDeviceLabel(config.onePlusDeviceManifest),
+            subtitle = stringResource(R.string.build_oneplus_hero_desc),
+            icon = Icons.Default.PhoneAndroid,
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            badge = {
+                ExpressiveStatusChip(
+                    label = ksuVariantDisplayName(config.kernelsuVariant),
+                    icon = Icons.Default.Shield,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                ExpressiveStatusChip(
+                    label = "${config.kernelVersion} · ${config.androidVersion}",
+                    icon = Icons.Default.Memory,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                ExpressiveStatusChip(
+                    label = if (!config.cancelSusfs) stringResource(R.string.build_susfs_on) else stringResource(R.string.build_susfs_off),
+                    icon = Icons.Default.Extension,
+                    color = if (!config.cancelSusfs) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.outline
+                )
+                if (config.onePlusUseLz4kd) {
+                    ExpressiveStatusChip(
+                        label = "lz4kd",
+                        icon = Icons.Default.Compress,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+                ExpressiveStatusChip(
+                    label = buildStatusLabel(status),
+                    icon = Icons.Default.RunCircle,
+                    color = buildStatusColor(status)
+                )
+            }
+        )
+        return
+    }
     val isRecommended = recommended != null &&
         config.androidVersion == recommended.androidVersion &&
         config.kernelVersion == recommended.kernelVersion &&
@@ -2340,6 +2601,20 @@ private fun ksuVariantDisplayName(variant: String): String =
         variant
     }
 
+@Composable
+fun ReadOnlyField(
+    label: String,
+    value: String
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = {},
+        readOnly = true,
+        label = { Text(label) },
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DropdownField(
@@ -2347,12 +2622,13 @@ fun DropdownField(
     value: String,
     options: List<String>,
     recommendedValue: String? = null,
+    optionLabel: (String) -> String = { it },
     onSelect: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
         OutlinedTextField(
-            value = value,
+            value = optionLabel(value),
             onValueChange = {},
             readOnly = true,
             label = { Text(label) },
@@ -2363,7 +2639,12 @@ fun DropdownField(
         )
         ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { opt ->
-                val text = if (opt == recommendedValue) "$opt${stringResource(R.string.build_recommended_suffix)}" else opt
+                val labelText = optionLabel(opt)
+                val text = if (opt == recommendedValue) {
+                    "$labelText${stringResource(R.string.build_recommended_suffix)}"
+                } else {
+                    labelText
+                }
                 DropdownMenuItem(
                     text = { Text(text) },
                     onClick = { onSelect(opt); expanded = false },

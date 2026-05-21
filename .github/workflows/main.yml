@@ -40,7 +40,6 @@ on:
           - SukiSU
           - ReSukiSU
           - Official
-          #- Next
         default: ReSukiSU
       kernelsu_branch:
         description: "KSU 分支"
@@ -349,7 +348,6 @@ jobs:
         run: |
           # KSU 显示名称
           case "${{ inputs.kernelsu_variant }}" in
-            "Next")      KSU_NAME="KernelSU-Next" ;;
             "Official")  KSU_NAME="KernelSU" ;;
             "SukiSU")    KSU_NAME="SukiSU" ;;
             "ReSukiSU")  KSU_NAME="ReSukiSU" ;;
@@ -426,7 +424,6 @@ jobs:
           case "${{ inputs.kernelsu_variant }}" in
             "Official") BRANCH="main" ;;
             "SukiSU"|"ReSukiSU") BRANCH="main" ;;
-            "Next") BRANCH="dev" ;;
             *) echo "错误: 未知变体" >&2; exit 1 ;;
           esac
           echo "KSU_BRANCH=$BRANCH" >> $GITHUB_ENV
@@ -437,7 +434,6 @@ jobs:
         run: |
           case "${{ inputs.kernelsu_variant }}" in
             "Official") REPO_URL="https://github.com/tiann/KernelSU.git"; REPO_URL2="tiann/KernelSU" ;;
-            "Next") REPO_URL="https://github.com/KernelSU-Next/KernelSU-Next.git"; REPO_URL2="KernelSU-Next/KernelSU-Next" ;;
             "SukiSU") REPO_URL="https://github.com/SukiSU-Ultra/SukiSU-Ultra.git"; REPO_URL2="SukiSU-Ultra/SukiSU-Ultra" ;;
             "ReSukiSU") REPO_URL="https://github.com/ReSukiSU/ReSukiSU.git"; REPO_URL2="ReSukiSU/ReSukiSU" ;;
           esac
@@ -460,13 +456,11 @@ jobs:
               OFFICIAL_REF="$OFFICIAL_STABLE_REF"
               SUKISU_REF="$SUKISU_STABLE_REF"
               RESUKISU_REF="$RESUKISU_STABLE_REF"
-              NEXT_REF="main"
               ;;
             "Dev(开发)")
               OFFICIAL_REF="$OFFICIAL_DEV_REF"
               SUKISU_REF="$SUKISU_DEV_REF"
               RESUKISU_REF="$RESUKISU_DEV_REF"
-              NEXT_REF="dev"
               ;;
             *) echo "错误: 未知 KSU 分支 $branch_input" >&2; exit 1 ;;
           esac
@@ -475,7 +469,6 @@ jobs:
             "Official") KSU_REF="$OFFICIAL_REF"; KSU_URL="https://github.com/$REPO_URL2/commit/$KSU_REF" ;;
             "SukiSU") KSU_REF="$SUKISU_REF"; KSU_URL="https://github.com/$REPO_URL2/commit/$KSU_REF" ;;
             "ReSukiSU") KSU_REF="$RESUKISU_REF"; KSU_URL="https://github.com/$REPO_URL2/commit/$KSU_REF" ;;
-            "Next") KSU_REF="$NEXT_REF"; KSU_URL="https://github.com/$REPO_URL2/tree/$KSU_REF" ;;
             *) echo "错误: 未知变体" >&2; exit 1 ;;
           esac
 

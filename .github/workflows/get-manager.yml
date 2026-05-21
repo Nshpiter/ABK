@@ -66,10 +66,7 @@ jobs:
         id: get_version
         run: |
 
-          if [ "${{ inputs.kernelsu_variant }}" == "Next" ]; then
-            echo "This is the Next variant"
-            git clone https://github.com/KernelSU-Next/KernelSU-Next.git KernelSU
-          elif [ "${{ inputs.kernelsu_variant }}" == "SukiSU" ]; then
+          if [ "${{ inputs.kernelsu_variant }}" == "SukiSU" ]; then
             echo "This is the SukiSU variant"
             git clone https://github.com/SukiSU-Ultra/SukiSU-Ultra.git KernelSU
           elif [ "${{ inputs.kernelsu_variant }}" == "ReSukiSU" ]; then
@@ -80,6 +77,7 @@ jobs:
             git clone https://github.com/tiann/KernelSU.git KernelSU
           else
             echo "Unknown variant"
+            exit 1
           fi
 
           VAR=$([[ "${{ inputs.kernelsu_variant }}" == "SukiSU" ]] && echo 700 || echo 200)
@@ -95,8 +93,6 @@ jobs:
             KSU_VERSION=$((30700 + KSU_GIT_VERSION))
           elif [ "${{ inputs.kernelsu_variant }}" == "Official" ]; then
             KSU_VERSION=$((20000 + KSU_GIT_VERSION))
-          elif [ "${{ inputs.kernelsu_variant }}" == "Next" ]; then
-            KSU_VERSION=$((30000 + KSU_GIT_VERSION))
           fi
           echo $KSU_VERSION
           echo "KSU_VERSION=$KSU_VERSION" >> $GITHUB_ENV
@@ -259,8 +255,8 @@ jobs:
           cat > "$PROP" << EOF
           id=abk_extension
           name=ABK-Extension
-          version=1.1.0
-          versionCode=10010
+          version=1.2.0
+          versionCode=10020
           EOF
 
           AUTHORS=""
