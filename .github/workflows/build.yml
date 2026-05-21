@@ -384,6 +384,7 @@ jobs:
           OFFICIAL_STABLE_REF="3f388ef137c78e1ca0c92c0ada3b8717cdcc4302"
           SUKISU_STABLE_REF="a992f224f5ea5a69b56ba20e925379c9a226f2b2"
           RESUKISU_STABLE_REF="b6706363b95525acd4007da19edadb1d41b2ea27"
+          SUKISU_REPO="SukiSU-Ultra/SukiSU-Ultra"
 
           # Dev 固定引用先完整复制 Stable 配置，后续只改这里的 *_DEV_REF 即可。
           OFFICIAL_DEV_REF="290609c945728fc93d85735918793567588103c1"
@@ -427,7 +428,7 @@ jobs:
                 OFFICIAL_CUSTOM_REF="$(get_success_action_sha "tiann/KernelSU" "$BRANCH" "$NABE")"
               fi
               if [ "$variant_input" = "SukiSU" ]; then
-                SUKISU_CUSTOM_REF="$(get_success_action_sha "ShirkNeko/susfs4ksu" "$BRANCH" "$NABE")"
+                SUKISU_CUSTOM_REF="$(get_success_action_sha "$SUKISU_REPO" "$BRANCH" "$NABE")"
               fi
               if [ "$variant_input" = "ReSukiSU" ]; then
                 RESUKISU_CUSTOM_REF="$(get_success_action_sha "ReSukiSU/ReSukiSU" "$BRANCH" "$NABE")"
@@ -437,7 +438,7 @@ jobs:
                 check_ref "tiann/KernelSU"
               fi
               if [ "$variant_input" = "SukiSU" ]; then
-                check_ref "ShirkNeko/susfs4ksu"
+                check_ref "$SUKISU_REPO"
               fi
               if [ "$variant_input" = "ReSukiSU" ]; then
                 check_ref "ReSukiSU/ReSukiSU"
@@ -662,16 +663,7 @@ jobs:
 
           if [ "${{ inputs.enable_susfs }}" == "true" ]; then
             echo "克隆 SUSFS (分支: $SUSFS_BRANCH)..."
-            if [ "${{ inputs.ksu_variant }}" == "SukiSU" ]; then
-              if ! git clone https://github.com/ShirkNeko/susfs4ksu.git -b "$SUSFS_BRANCH" 2>/dev/null; then
-                echo "ShirkNeko 仓库未找到分支 $SUSFS_BRANCH，回退到 simonpunk 原版..."
-                git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
-              fi
-            elif [ "${{ inputs.ksu_variant }}" == "ReSukiSU" ]; then
-              git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
-            else
-              git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
-            fi
+            git clone https://gitlab.com/simonpunk/susfs4ksu.git -b "$SUSFS_BRANCH"
 
             CONFIG_FILE="config/config"
             if [ -f "$CONFIG_FILE" ]; then
