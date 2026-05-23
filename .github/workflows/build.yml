@@ -1856,6 +1856,9 @@ jobs:
           fi
 
           ensure_defconfig_value CONFIG_TCP_CONG_ADVANCED y
+          if [ -f net/ipv4/Kconfig ] && grep -q '^config TCP_CONG_BIC$' net/ipv4/Kconfig; then
+            ensure_defconfig_value CONFIG_TCP_CONG_BIC y
+          fi
           ensure_defconfig_value CONFIG_TCP_CONG_BBR y
           ensure_defconfig_value CONFIG_TCP_CONG_CUBIC y
           ensure_defconfig_value CONFIG_TCP_CONG_WESTWOOD y
@@ -2590,43 +2593,6 @@ jobs:
             sed -i '/kmi_symbol_list_strict_mode/d' ./common/BUILD.bazel
             rm -rf ./common/android/abi_gki_protected_exports_*
             sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
-            python3 - <<'PY'
-          from pathlib import Path
-          import re
-          import sys
-
-          path = Path("./common/BUILD.bazel")
-          if not path.exists():
-              sys.exit(0)
-
-          marker = '"net/ipv4/tcp_bic.ko"'
-          text = path.read_text()
-          if marker in text:
-              sys.exit(0)
-
-          pattern = re.compile(
-              r'(name\s*=\s*"kernel_aarch64"[\s\S]*?module_outs\s*=\s*\[)([\s\S]*?)(^\s*\])',
-              re.M,
-          )
-          match = pattern.search(text)
-          if not match:
-              print("::warning::未找到 kernel_aarch64 的 module_outs，跳过 tcp_bic.ko 注入")
-              sys.exit(0)
-
-          body = match.group(2)
-          indent = "        "
-          for line in body.splitlines():
-              if line.strip():
-                  indent = re.match(r'^\s*', line).group(0)
-                  break
-
-          if body.endswith("\n"):
-              body_new = body + f"{indent}{marker},\n"
-          else:
-              body_new = body + f"\n{indent}{marker},\n"
-
-          path.write_text(text[:match.start(2)] + body_new + text[match.end(2):])
-          PY
           fi
 
           VERSION_INPUT=$(echo "${{ inputs.version }}" | tr -d '[:space:]')
