@@ -35,11 +35,6 @@ class AbkExtensionBootstrapActivity : ComponentActivity() {
                 return@launch
             }
 
-            if (pending.isCompanionInstalled && abkLaunchExtensionOobe(this@AbkExtensionBootstrapActivity, pending)) {
-                finish()
-                return@launch
-            }
-
             startActivity(
                 abkOpenExtensionManager(
                     context = this@AbkExtensionBootstrapActivity,
