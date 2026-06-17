@@ -740,6 +740,8 @@
     <string name="download_http_failed">Download request failed (HTTP %1$d)</string>
     <string name="download_empty_response">Download response was empty</string>
     <string name="download_unknown_error">Download failed</string>
+    <string name="flash_bundle_legacy_requires_confirmation">This is a legacy flash bundle. Continuing enters the high-risk flow.</string>
+    <string name="flash_bundle_unverified_requires_confirmation">This flash bundle has not passed signature verification. Continuing enters the high-risk flow.</string>
     <string name="settings_download_mirror">Download mirror</string>
     <string name="settings_download_mirror_desc">Leave empty to connect directly to GitHub. If set, artifacts mirror to releases before download.</string>
 
