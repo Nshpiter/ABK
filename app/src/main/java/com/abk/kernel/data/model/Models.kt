@@ -530,6 +530,20 @@ data class RuntimeModuleCatalogItem(
     val maxApi: Int? = null
 )
 
+internal fun runtimeModuleDownloadFileName(id: String, name: String): String {
+    val base = id.ifBlank { name }
+        .replace(Regex("""[^A-Za-z0-9._-]"""), "_")
+        .trim('_')
+        .ifBlank { "module" }
+    return if (base.endsWith(".zip", ignoreCase = true)) base else "${base}-module.zip"
+}
+
+internal fun RuntimeModuleCatalogItem.downloadFileName(): String =
+    runtimeModuleDownloadFileName(id, name)
+
+internal fun AbkRuntimeModule.downloadFileName(): String =
+    runtimeModuleDownloadFileName(id, name.ifBlank { "module" })
+
 data class ModuleCatalogRepository(
     val id: String = "",
     val url: String = "",
@@ -683,6 +697,7 @@ data class AbkRuntimeModule(
     val stage: String = "",
     @SerializedName("entry_kind") val entryKind: String = "",
     val source: String = "",
+    @SerializedName("update_json") val updateJson: String = "",
     @SerializedName("extension_id") val extensionId: String = "",
     @SerializedName("companion_package") val companionPackage: String = "",
     @SerializedName("companion_display_name") val companionDisplayName: String = "",
@@ -696,6 +711,7 @@ data class AbkRuntimeModule(
     val enabled: Boolean = true,
     val update: Boolean = false,
     val remove: Boolean = false,
+    val metamodule: Boolean = false,
     @SerializedName("has_web_ui") val hasWebUi: Boolean = false,
     @SerializedName("has_action_script") val hasActionScript: Boolean = false,
     @SerializedName("action_supported") val actionSupported: Boolean = false,
@@ -750,6 +766,8 @@ data class RootGrantApp(
     val profileLoaded: Boolean = false
 )
 
+const val ROOT_PROFILE_FLAG_NO_NEW_PRIVS: Long = 1L
+
 data class RootGrantProfile(
     val name: String = "",
     val currentUid: Int = 0,
@@ -762,6 +780,7 @@ data class RootGrantProfile(
     val capabilities: List<Int> = emptyList(),
     val context: String = "u:r:ksu:s0",
     val namespace: Int = 0,
+    val flags: Long = ROOT_PROFILE_FLAG_NO_NEW_PRIVS,
     val nonRootUseDefault: Boolean = true,
     val umountModules: Boolean = true,
     val rules: String = ""
