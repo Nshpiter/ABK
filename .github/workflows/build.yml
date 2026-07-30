@@ -1721,29 +1721,142 @@ jobs:
               [ -f "$file" ] || return 0
               grep -qF 'vma = find_vma(mm, addr);' "$file" || return 0
 
-              local assign_line start_line relative_mm_line mm_line
-              assign_line="$(awk '/vma = find_vma\(mm, addr\);/ { print NR; exit }' "$file")"
-              [ -n "$assign_line" ] || return 0
-              start_line=$(( assign_line > 80 ? assign_line - 80 : 1 ))
+              python3 - <<'PY'
+          from pathlib import Path
+          import re
 
-              if sed -n "${start_line},$((assign_line - 1))p" "$file" | grep -qF 'struct vm_area_struct *vma;'; then
-                return 0
-              fi
+          path = Path("./fs/proc/base.c")
+          lines = path.read_text().splitlines(keepends=True)
 
-              relative_mm_line="$(sed -n "${start_line},$((assign_line - 1))p" "$file" | awk '/struct mm_struct \*mm([[:space:]=;]|$)/ { line = NR } END { if (line) print line }')"
-              [ -n "$relative_mm_line" ] || return 0
-              mm_line=$(( start_line + relative_mm_line - 1 ))
+          assign_re = re.compile(r"^\s*vma\s*=\s*find_vma\s*\(\s*mm\s*,\s*addr\s*\)\s*;")
+          vma_decl_re = re.compile(r"\bstruct\s+vm_area_struct\s*\*\s*vma\s*;")
+          mm_decl_re = re.compile(r"\bstruct\s+mm_struct\s*\*\s*mm(?:\b|[\s=;])")
 
-              awk -v target="$mm_line" '
-                NR == target {
-                  print
-                  match($0, /^[ \t]*/)
-                  print substr($0, RSTART, RLENGTH) "struct vm_area_struct *vma;"
-                  next
-                }
-                { print }
-              ' "$file" > "$file.tmp" && mv "$file.tmp" "$file"
-              echo "已修复 proc/base.c 缺少 vma 声明"
+          def sanitize_line(line, in_block_comment):
+              result = []
+              index = 0
+              in_string = None
+
+              while index < len(line):
+                  if in_block_comment:
+                      end = line.find("*/", index)
+                      if end == -1:
+                          return "".join(result), True
+                      index = end + 2
+                      in_block_comment = False
+                      continue
+
+                  char = line[index]
+                  next_char = line[index + 1] if index + 1 < len(line) else ""
+
+                  if in_string is not None:
+                      if char == "\\" and index + 1 < len(line):
+                          index += 2
+                          continue
+                      if char == in_string:
+                          in_string = None
+                      index += 1
+                      continue
+
+                  if char == "/" and next_char == "*":
+                      in_block_comment = True
+                      index += 2
+                      continue
+                  if char == "/" and next_char == "/":
+                      break
+                  if char in ("'", '"'):
+                      in_string = char
+                      index += 1
+                      continue
+
+                  result.append(char)
+                  index += 1
+
+              return "".join(result), in_block_comment
+
+          def find_function_ranges(source_lines):
+              depth = 0
+              in_block_comment = False
+              function_start = None
+              ranges = []
+
+              for index, line in enumerate(source_lines):
+                  sanitized, in_block_comment = sanitize_line(line, in_block_comment)
+                  opens = sanitized.count("{")
+                  closes = sanitized.count("}")
+                  previous_depth = depth
+                  depth += opens - closes
+
+                  if previous_depth == 0 and depth > 0 and opens:
+                      function_start = index
+                  if function_start is not None and previous_depth > 0 and depth == 0:
+                      ranges.append((function_start, index))
+                      function_start = None
+
+              return ranges
+
+          function_ranges = find_function_ranges(lines)
+          changed = False
+
+          for start, end in reversed(function_ranges):
+              body = lines[start:end + 1]
+              if not any(assign_re.search(line) for line in body):
+                  continue
+              if any(vma_decl_re.search(line) for line in body):
+                  continue
+
+              mm_offsets = [offset for offset, line in enumerate(body) if mm_decl_re.search(line)]
+              if not mm_offsets:
+                  raise SystemExit(f"{path} 命中 vma 赋值但未找到同函数 mm 声明")
+
+              mm_index = start + mm_offsets[-1]
+              indent = re.match(r"^\s*", lines[mm_index]).group(0)
+              lines.insert(mm_index + 1, f"{indent}struct vm_area_struct *vma;\n")
+              changed = True
+
+          if changed:
+              path.write_text("".join(lines))
+              print("已修复 proc/base.c 缺少 vma 声明")
+
+          final_lines = path.read_text().splitlines()
+          final_ranges = find_function_ranges([line + "\n" for line in final_lines])
+          for start, end in final_ranges:
+              body = final_lines[start:end + 1]
+              if any(assign_re.search(line) for line in body) and not any(vma_decl_re.search(line) for line in body):
+                  raise SystemExit(f"{path} 仍存在未声明 vma 的 find_vma 调用")
+          PY
+            }
+
+            fix_namei_set_nameidata_arity() {
+              local file="./fs/namei.c"
+              [ -f "$file" ] || return 0
+
+              python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("./fs/namei.c")
+          text = path.read_text()
+
+          call_re = re.compile(r"set_nameidata\s*\(\s*nd\s*,\s*old_dfd\s*,\s*fake_filename\s*,\s*NULL\s*\)")
+          if not call_re.search(text):
+              raise SystemExit(0)
+
+          definition = re.search(r"static\s+void\s+set_nameidata\s*\((.*?)\)\s*\{", text, re.S)
+          if definition is None:
+              raise SystemExit(f"{path} 存在四参 set_nameidata 调用，但未找到定义")
+
+          params = [part.strip() for part in definition.group(1).split(",") if part.strip()]
+          if len(params) == 3:
+              updated, count = call_re.subn("set_nameidata(nd, old_dfd, fake_filename)", text)
+              if count:
+                  path.write_text(updated)
+                  print("已修复 namei.c 中 set_nameidata 参数个数")
+              if call_re.search(path.read_text()):
+                  raise SystemExit(f"{path} 仍残留四参 set_nameidata 调用")
+          elif len(params) != 4:
+              raise SystemExit(f"{path} 的 set_nameidata 定义参数个数异常: {len(params)}")
+          PY
             }
 
             fix_task_mmu_unused_vma_decl() {
@@ -1903,16 +2016,9 @@ jobs:
                 apply_susfs_optional_patch "Android 12 - 5.10 fdinfo.c" "a12-5.10/fdinfo.c.patch"
                 fix_fdinfo_mask_decl
                 apply_susfs_base_patch "Android 12 - 5.10 base.c" "a12-5.10/base.c.patch"
-                if [[ "$ABK_KSU_VARIANT" == "SukiSU" && "$ABK_USE_BBG" == "true" ]]; then
-                  fix_proc_base_missing_vma_decl
-                fi
-                if [[ "$ABK_KSU_VARIANT" == "Official" && "$ABK_USE_BBG" == "true" ]]; then
-                  fix_proc_base_missing_vma_decl
-                fi
-                if [[ "$ABK_KSU_VARIANT" == "ReSukiSU" ]]; then
-                  fix_proc_base_missing_vma_decl
-                fi
               fi
+              fix_proc_base_missing_vma_decl
+              fix_namei_set_nameidata_arity
             fi
 
             # Android 13 - 5.15 修复
